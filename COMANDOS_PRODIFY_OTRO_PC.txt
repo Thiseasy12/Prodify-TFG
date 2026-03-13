@@ -1,0 +1,78 @@
+﻿PRODIFY - COMANDOS PARA OTRO PC (WINDOWS)
+=========================================
+
+1) Instalar Python
+------------------
+winget install -e --id Python.Python.3.12
+
+2) Verificar Python y pip
+-------------------------
+python --version
+python -m pip --version
+
+Si `python` no funciona, prueba:
+py --version
+py -m pip --version
+
+3) Ir al proyecto
+-----------------
+cd C:\ruta\a\Prodify
+
+4) Instalar dependencias
+------------------------
+python -m pip install -r requirements.txt
+
+Si usas `py`:
+py -m pip install -r requirements.txt
+
+5) Instalar y arrancar XAMPP (solo MySQL es obligatorio)
+--------------------------------------------------------
+- Instala XAMPP: https://www.apachefriends.org/es/index.html
+- Abre XAMPP Control Panel
+- Inicia MySQL
+
+6) Crear base de datos e importar SQL
+-------------------------------------
+- Abre: http://localhost/phpmyadmin
+- Importa el archivo: "prodify database.sql"
+
+(Alternativa por SQL)
+CREATE DATABASE prodify_db;
+USE prodify_db;
+SOURCE "C:/ruta/a/Prodify/prodify database.sql";
+
+7) Ejecutar la app
+------------------
+cd C:\ruta\a\Prodify
+python app.py
+
+Si usas `py`:
+py app.py
+
+8) Abrir en navegador
+---------------------
+http://127.0.0.1:5000/login
+
+9) Credenciales de prueba
+-------------------------
+Email: test@prodify.com
+Password: 1234
+
+Si no existe el usuario, crear manualmente en phpMyAdmin:
+USE prodify_db;
+INSERT INTO users (email, password) VALUES ('test@prodify.com', '1234');
+
+10) Si PowerShell no reconoce python/pip
+----------------------------------------
+- Desactiva alias de Microsoft Store:
+  Configuracion > Aplicaciones > Configuracion avanzada de aplicaciones > Alias de ejecucion de aplicaciones
+  Desactivar: python.exe y python3.exe
+- Cierra y abre terminal
+
+11) (Opcional) Crear entorno virtual
+------------------------------------
+cd C:\ruta\a\Prodify
+python -m venv .venv
+.\.venv\Scripts\activate
+python -m pip install -r requirements.txt
+python app.py
