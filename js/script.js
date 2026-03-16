@@ -277,6 +277,34 @@
         }
     }
 
+    var deleteCardButtons = document.querySelectorAll('.js-delete-card');
+    if (deleteCardButtons.length) {
+        for (var dc = 0; dc < deleteCardButtons.length; dc += 1) {
+            deleteCardButtons[dc].addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                var form = this.closest('form');
+                if (!form || !window.Swal) return;
+
+                Swal.fire({
+                    title: 'Eliminar tarea?',
+                    text: 'Esta accion no se puede deshacer.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Si, eliminar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#c0264f',
+                    background: root.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
+                    color: root.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
+                }).then(function (result) {
+                    if (!result.isConfirmed) return;
+                    window.sessionStorage.setItem('prodify-toast', 'Tarea eliminada');
+                    form.submit();
+                });
+            });
+        }
+    }
+
     var kanbanCards = document.querySelectorAll('.kanban-card[draggable="true"]');
     var kanbanColumns = document.querySelectorAll('.kanban-cards[data-column-id]');
 

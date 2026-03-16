@@ -42,10 +42,10 @@
                     <a class="side-link {{ 'active' if active_page == 'home' else '' }}" href="{{ url_for('landing') }}">Inicio</a>
                 </nav>
                 <div class="workspace-title">Tablero actual</div>
-                <div class="workspace-item">
+                <a class="workspace-item" href="{{ url_for('home') }}">
                     <span class="workspace-avatar">{{ board.name[0]|upper }}</span>
-                    <span>{{ board.name }}</span>
-                </div>
+                    <span>Tablero principal</span>
+                </a>
             </aside>
 
             <section class="content col-12 col-lg-9 col-xl-10">
@@ -71,7 +71,12 @@
                         </div>
                         <div class="kanban-cards" data-column-id="{{ column.id }}">
                             {% for card in cards_by_column.get(column.id, []) %}
-                            <div class="kanban-card" draggable="true" data-card-id="{{ card.id }}">{{ card.title }}</div>
+                            <div class="kanban-card" draggable="true" data-card-id="{{ card.id }}">
+                                <span class="card-title">{{ card.title }}</span>
+                                <form action="{{ url_for('delete_card', card_id=card.id) }}" method="POST" class="card-delete-form">
+                                    <button type="submit" class="card-delete-btn js-delete-card" title="Eliminar tarea" draggable="false">×</button>
+                                </form>
+                            </div>
                             {% else %}
                             <div class="kanban-card ghost">Sin tareas aun</div>
                             {% endfor %}

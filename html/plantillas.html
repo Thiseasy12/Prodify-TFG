@@ -34,19 +34,41 @@
                 </button>
 
                 <div class="account-menu" id="accountMenu" hidden>
-                    <div class="account-head">
-                        <strong>{{ profile.display_name if profile else user.email.split('@')[0] }}</strong>
-                        <span>{{ user.email }}</span>
+                    <div class="account-section-title">Cuenta</div>
+                    <div class="account-hero">
+                        <div class="account-avatar">
+                            {{ (profile.display_name[0] if profile and profile.display_name else user.email[0])|upper }}
+                        </div>
+                        <div class="account-meta">
+                            <strong>{{ profile.display_name if profile else user.email.split('@')[0] }}</strong>
+                            <span>{{ user.email }}</span>
+                            <small>Cuenta activa</small>
+                        </div>
+                    </div>
+                    <div class="account-links">
+                        <a class="account-link" href="{{ url_for('login') }}">Cambiar cuentas</a>
+                        <a class="account-link account-link-ext" href="{{ url_for('account_page') }}">Gestionar cuenta</a>
                     </div>
 
-                    <form action="{{ url_for('update_account') }}" method="POST" class="account-form">
-                        <label for="display_name">Nombre visible</label>
-                        <input id="display_name" type="text" name="display_name" maxlength="80"
-                            value="{{ profile.display_name if profile else user.email.split('@')[0] }}" required>
-                        <button type="submit">Guardar nombre</button>
-                    </form>
+                    <div class="account-divider"></div>
 
-                    <form action="{{ url_for('logout') }}" method="POST">
+                    <div class="account-section-title">Prodify</div>
+                    <div class="account-links">
+                        <a class="account-link" href="{{ url_for('profile_page') }}">Perfil y visibilidad</a>
+                        <a class="account-link" href="{{ url_for('activity_page') }}">Actividad</a>
+                        <a class="account-link" href="{{ url_for('cards_page') }}">Tarjetas</a>
+                        <a class="account-link" href="{{ url_for('settings_page') }}">Ajustes</a>
+                    </div>
+
+                    <div class="account-divider"></div>
+
+                    <div class="account-links">
+                        <a class="account-link" href="{{ url_for('help_page') }}">Ayuda</a>
+                    </div>
+
+                    <div class="account-divider"></div>
+
+                    <form action="{{ url_for('logout') }}" method="POST" class="account-logout">
                         <button type="submit" class="logout-btn">Cerrar sesion</button>
                     </form>
                 </div>
@@ -66,13 +88,27 @@
                 <div class="workspace-title">Espacios de trabajo</div>
 
                 {% for workspace in workspaces %}
-                <div class="workspace-item">
+                <a class="workspace-item" href="{{ url_for('open_workspace', workspace_id=workspace.id) }}">
                     <span class="workspace-avatar">{{ workspace.name[0]|upper }}</span>
                     <span>{{ workspace.name }}</span>
-                </div>
+                </a>
                 {% else %}
                 <div class="workspace-item empty-note">Aun no tienes espacios de trabajo.</div>
                 {% endfor %}
+
+                <div class="workspace-title">Plantillas</div>
+                <div class="template-sidebar">
+                    {% for category in template_categories %}
+                    <details class="template-group" open>
+                        <summary>{{ category }}</summary>
+                        <div class="template-group-links">
+                            {% for template in grouped_templates[category] %}
+                            <a href="#template-{{ template.id }}">{{ template.name }}</a>
+                            {% endfor %}
+                        </div>
+                    </details>
+                    {% endfor %}
+                </div>
             </aside>
 
             <section class="content col-12 col-lg-9 col-xl-10">
@@ -109,7 +145,7 @@
 
                 <div class="templates-grid">
                     {% for template in templates %}
-                    <article class="template-card {{ template.accent }}">
+                    <article class="template-card {{ template.accent }}" id="template-{{ template.id }}">
                         <div class="template-head">
                             <div>
                                 <h3>{{ template.name }}</h3>
