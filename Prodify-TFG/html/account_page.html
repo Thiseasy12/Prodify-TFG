@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ current_language|default('es') }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Prodify | {{ page_title }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('send_favicon_svg') }}">
+    <link rel="alternate icon" type="image/x-icon" href="{{ url_for('send_favicon') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -24,13 +27,14 @@
             </div>
 
             <div class="topbar-center d-flex align-items-center">
-                <input class="search-input form-control" type="text" placeholder="Buscar ajustes o secciones">
-                <a class="create-btn btn" href="{{ url_for('home') }}">Volver</a>
+                <input class="search-input form-control" type="text" placeholder="{{ t('topbar.search_settings') }}">
+                <a class="create-btn btn" href="{{ url_for('home') }}">{{ t('topbar.back') }}</a>
             </div>
 
             <div class="topbar-right">
-                <button class="theme-toggle btn" id="themeToggle" type="button" aria-label="Cambiar tema">Modo claro</button>
-                <button class="user-badge" id="accountToggle" type="button">{{ user_initial }}</button>
+                <button class="theme-toggle btn" id="themeToggle" type="button" aria-label="{{ t('theme.toggle') }}">{{ t('theme.light') }}</button>
+                {{ language_switcher_html }}
+                {{ account_toggle_html }}
                 {{ account_menu_html }}
             </div>
         </div>
@@ -43,17 +47,24 @@
                 <!-- Navegacion lateral del proyecto. -->
                 {{ side_nav_html }}
 
-                <div class="workspace-title">Espacios de trabajo</div>
+                <div class="workspace-title">{{ t('workspace.title') }}</div>
 
                 <!-- Lista simple de espacios disponibles. -->
                 {{ workspace_list_html }}
             </aside>
 
             <section class="content col-12 col-lg-9 col-xl-10">
+                {% if notice %}
+                <div class="members-notice members-notice-{{ notice_tone }}">{{ notice }}</div>
+                {% endif %}
                 {{ account_content_html }}
             </section>
         </div>
     </main>
+
+    <form id="accountEmailForm" action="{{ url_for('update_account_email') }}" method="POST" hidden>
+        <input type="text" name="email" id="accountEmailInput">
+    </form>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

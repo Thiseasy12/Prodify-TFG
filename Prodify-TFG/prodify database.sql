@@ -5,6 +5,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS cards;
 DROP TABLE IF EXISTS board_columns;
 DROP TABLE IF EXISTS boards;
+DROP TABLE IF EXISTS workspace_members;
 DROP TABLE IF EXISTS workspaces;
 DROP TABLE IF EXISTS user_profiles;
 DROP TABLE IF EXISTS users;
@@ -17,18 +18,12 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL
 );
 
-INSERT IGNORE INTO users (email, password)
-VALUES ('test@prodify.com', '1234');
-
 -- Perfil de usuario
 CREATE TABLE user_profiles (
     user_id INT PRIMARY KEY,
     display_name VARCHAR(80) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
-INSERT IGNORE INTO user_profiles (user_id, display_name)
-SELECT id, 'Usuario' FROM users WHERE email = 'test@prodify.com';
 
 -- Espacios de trabajo
 CREATE TABLE workspaces (
@@ -37,6 +32,20 @@ CREATE TABLE workspaces (
     name VARCHAR(120) NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_workspaces_user (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Miembros de los espacios
+CREATE TABLE workspace_members (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    workspace_id INT NOT NULL,
+    user_id INT NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'lector',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_workspace_member_user (workspace_id, user_id),
+    INDEX idx_workspace_members_workspace (workspace_id),
+    INDEX idx_workspace_members_user (user_id),
+    FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

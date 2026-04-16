@@ -52,10 +52,38 @@ Cuando arranque, abre esta direccion:
 
 `http://127.0.0.1:5000/login`
 
-## Usuario de prueba
+## Activar correos de verificacion
 
-- Email: `test@prodify.com`
-- Contrasena: `1234`
+Prodify ya crea y envia el correo de verificacion al email que escribe el usuario al registrarse, pero necesitas configurar un proveedor de correo en `.env`.
+
+Puedes usar una de estas opciones:
+
+### Opcion 1: Resend
+
+```env
+RESEND_API_KEY=re_xxxxxxxxx
+RESEND_FROM=Prodify <onboarding@resend.dev>
+```
+
+### Opcion 2: SMTP
+
+Ejemplo con Gmail:
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=tu_correo@gmail.com
+SMTP_PASSWORD=tu_app_password
+SMTP_FROM=Prodify <tu_correo@gmail.com>
+SMTP_USE_TLS=1
+```
+
+Notas:
+
+- En Gmail normalmente necesitas una `App Password`, no tu contrasena normal.
+- Cuando el usuario se registra, Prodify manda el enlace de verificacion al correo que ha escrito en el formulario.
+- Si no configuras Resend ni SMTP, el enlace se imprime en la terminal del servidor en modo local.
+
 
 ## Si algo no funciona
 
@@ -63,3 +91,4 @@ Cuando arranque, abre esta direccion:
 - Revisa que la base de datos se llame `prodify_db`
 - Revisa que has importado el archivo `prodify database.sql`
 - Revisa que has instalado las dependencias con `requirements.txt`
+- Si borras usuarios manualmente desde phpMyAdmin, Prodify ya intenta dejar las relaciones en cascada al arrancar para que tambien se borren sus perfiles, espacios, tableros, tarjetas y actividad.

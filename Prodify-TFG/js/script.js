@@ -5,6 +5,77 @@
     const body = document.body;
     const themeButton = document.getElementById('themeToggle');
     const savedTheme = window.localStorage.getItem('prodify-theme');
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+    if (csrfToken) {
+        const postForms = document.querySelectorAll('form[method="POST"], form[method="post"]');
+        for (let f = 0; f < postForms.length; f += 1) {
+            if (postForms[f].querySelector('input[name="csrf_token"]')) continue;
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = 'csrf_token';
+            tokenInput.value = csrfToken;
+            postForms[f].appendChild(tokenInput);
+        }
+    }
+
+    const languageForms = document.querySelectorAll('.js-language-form');
+    for (let lf = 0; lf < languageForms.length; lf += 1) {
+        const form = languageForms[lf];
+        const dropdown = form.querySelector('.js-language-dropdown');
+        const trigger = form.querySelector('.js-language-trigger');
+        const menu = form.querySelector('.topbar-language-menu');
+        const hiddenInput = form.querySelector('input[name="preferred_language"]');
+        const options = form.querySelectorAll('.js-language-option');
+
+        if (!dropdown || !trigger || !menu || !hiddenInput || !options.length) continue;
+
+        trigger.addEventListener('click', function () {
+            const isOpen = !menu.hasAttribute('hidden');
+            const allMenus = document.querySelectorAll('.topbar-language-menu');
+            const allTriggers = document.querySelectorAll('.js-language-trigger');
+
+            for (let index = 0; index < allMenus.length; index += 1) {
+                allMenus[index].setAttribute('hidden', 'hidden');
+            }
+            for (let index = 0; index < allTriggers.length; index += 1) {
+                allTriggers[index].setAttribute('aria-expanded', 'false');
+            }
+
+            if (!isOpen) {
+                menu.removeAttribute('hidden');
+                trigger.setAttribute('aria-expanded', 'true');
+            }
+        });
+
+        for (let optionIndex = 0; optionIndex < options.length; optionIndex += 1) {
+            options[optionIndex].addEventListener('click', function () {
+                const selectedValue = this.getAttribute('data-language-value') || '';
+                if (!selectedValue || selectedValue === hiddenInput.value) {
+                    menu.setAttribute('hidden', 'hidden');
+                    trigger.setAttribute('aria-expanded', 'false');
+                    return;
+                }
+                hiddenInput.value = selectedValue;
+                form.submit();
+            });
+        }
+    }
+
+    document.addEventListener('click', function (event) {
+        for (let lf = 0; lf < languageForms.length; lf += 1) {
+            const form = languageForms[lf];
+            const dropdown = form.querySelector('.js-language-dropdown');
+            const trigger = form.querySelector('.js-language-trigger');
+            const menu = form.querySelector('.topbar-language-menu');
+            if (!dropdown || !trigger || !menu) continue;
+            if (!dropdown.contains(event.target)) {
+                menu.setAttribute('hidden', 'hidden');
+                trigger.setAttribute('aria-expanded', 'false');
+            }
+        }
+    });
 
     /*
      * Si el usuario habia guardado el tema claro, lo aplico al entrar.
@@ -16,14 +87,33 @@
     /*
      * Cambio el icono del boton segun el tema activo.
      */
+    const themeToggleLabels = {
+        es: { dark: 'Activar modo oscuro', light: 'Activar modo claro' },
+        en: { dark: 'Turn on dark mode', light: 'Turn on light mode' },
+        fr: { dark: 'Activer le mode sombre', light: 'Activer le mode clair' },
+        de: { dark: 'Dunklen Modus aktivieren', light: 'Hellen Modus aktivieren' },
+        it: { dark: 'Attiva la modalita scura', light: 'Attiva la modalita chiara' },
+        pt: { dark: 'Ativar modo escuro', light: 'Ativar modo claro' },
+        ar: { dark: 'تفعيل الوضع الداكن', light: 'تفعيل الوضع الفاتح' },
+        hi: { dark: 'डार्क मोड चालू करें', light: 'लाइट मोड चालू करें' },
+        'zh-CN': { dark: '切换到深色模式', light: '切换到浅色模式' },
+        ja: { dark: 'ダークモードに切り替える', light: 'ライトモードに切り替える' }
+    };
+
+    function getThemeLabels() {
+        const htmlLang = (document.documentElement.getAttribute('lang') || 'es').trim();
+        return themeToggleLabels[htmlLang] || themeToggleLabels[htmlLang.split('-')[0]] || themeToggleLabels.es;
+    }
+
     function updateThemeText() {
         if (!themeButton) return;
+        const labels = getThemeLabels();
         if (body.classList.contains('theme-light')) {
             themeButton.textContent = '☀';
-            themeButton.setAttribute('aria-label', 'Activar modo oscuro');
+            themeButton.setAttribute('aria-label', labels.dark);
         } else {
             themeButton.textContent = '🌙';
-            themeButton.setAttribute('aria-label', 'Activar modo claro');
+            themeButton.setAttribute('aria-label', labels.light);
         }
     }
 
@@ -78,66 +168,481 @@
             /*
              * Si el click es fuera, cierro el menu.
              */
-            if (!accountMenu.contains(event.target) && event.target !== accountButton) {
+            if (!accountMenu.contains(event.target) && !accountButton.contains(event.target)) {
                 accountMenu.setAttribute('hidden', 'hidden');
             }
         });
     }
 
-    /*
-     * Boton y formulario para crear espacios de trabajo.
-     */
+    const avatarFileInput = document.getElementById('avatarFileInput');
+    const avatarPickerButton = document.querySelector('.js-avatar-picker');
+    const avatarFileName = document.getElementById('avatarFileName');
+
+    if (avatarFileInput && avatarPickerButton) {
+        avatarPickerButton.addEventListener('click', function () {
+            avatarFileInput.click();
+        });
+
+        avatarFileInput.addEventListener('change', function () {
+            if (!avatarFileName) return;
+            const file = this.files && this.files[0] ? this.files[0].name : '';
+            avatarFileName.textContent = file || 'Ningún archivo seleccionado';
+        });
+    }
+
+    function parseJsonScript(id) {
+        const element = document.getElementById(id);
+        if (!element || !element.textContent) return [];
+        try {
+            return JSON.parse(element.textContent);
+        } catch (_error) {
+            return [];
+        }
+    }
+
+    function escapeHtml(text) {
+        return String(text || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     const createWorkspaceButton = document.querySelector('.js-create-workspace');
+    const createDropdown = document.getElementById('createDropdown');
+    const createBoardOption = document.querySelector('.js-create-board-option');
+    const createTemplateOption = document.querySelector('.js-create-template-option');
     const workspaceForm = document.getElementById('workspaceCreateForm');
     const workspaceNameInput = document.getElementById('workspaceNameInput');
+    const workspaceBoardNameInput = document.getElementById('workspaceBoardNameInput');
+    const boardForm = document.getElementById('boardCreateForm');
+    const boardNameInput = document.getElementById('boardNameInput');
+    const createBoardCards = document.querySelectorAll('.js-create-board');
+    const templateButtons = document.querySelectorAll('.js-use-template');
+    const templateForm = document.getElementById('templateCreateForm');
+    const templateWorkspaceInput = document.getElementById('templateWorkspaceInput');
+    const templateWorkspaceIdInput = document.getElementById('templateWorkspaceIdInput');
+    const templateBoardInput = document.getElementById('templateBoardInput');
+    const templateIdInput = document.getElementById('templateIdInput');
+    const creationWorkspaces = parseJsonScript('boardCreationWorkspaces');
+    const creationTemplates = parseJsonScript('boardCreationTemplates');
 
-    if (createWorkspaceButton && workspaceForm && workspaceNameInput) {
-        createWorkspaceButton.addEventListener('click', function () {
-            if (!window.Swal) return;
-            Swal.fire({
-                title: 'Nuevo espacio de trabajo',
-                input: 'text',
-                inputLabel: 'Escribe el nombre',
-                inputPlaceholder: 'Ej. Marketing y Ventas',
-                confirmButtonText: 'Crear espacio',
-                showCancelButton: true,
-                cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#2f63ff',
-                background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
-                color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
-                inputValidator: function (value) {
-                    if (!value || !value.trim()) return 'El nombre es obligatorio';
-                    return undefined;
+    function getTemplateById(templateId) {
+        for (let i = 0; i < creationTemplates.length; i += 1) {
+            if (creationTemplates[i].id === templateId) return creationTemplates[i];
+        }
+        return creationTemplates[0] || null;
+    }
+
+    function buildWorkspaceOptions(selectedWorkspaceId) {
+        const options = ['<option value="">Selecciona un espacio</option>'];
+        for (let i = 0; i < creationWorkspaces.length; i += 1) {
+            const workspace = creationWorkspaces[i];
+            const selected = String(selectedWorkspaceId || '') === String(workspace.id) ? ' selected' : '';
+            options.push('<option value="' + escapeHtml(workspace.id) + '"' + selected + '>' + escapeHtml(workspace.name) + '</option>');
+        }
+        options.push('<option value="__new__">Crear espacio nuevo</option>');
+        return options.join('');
+    }
+
+    function buildTemplatePicker(selectedTemplateId) {
+        if (!creationTemplates.length) {
+            return '<div class="board-creator-empty">No hay plantillas disponibles todavía.</div>';
+        }
+
+        const cards = [];
+        for (let i = 0; i < Math.min(6, creationTemplates.length); i += 1) {
+            const template = creationTemplates[i];
+            const active = template.id === selectedTemplateId ? ' is-active' : '';
+            cards.push(
+                '<button type="button" class="board-template-option' + active + '" data-template-option="' + escapeHtml(template.id) + '">' +
+                    '<strong>' + escapeHtml(template.name) + '</strong>' +
+                    '<span>' + escapeHtml(template.category) + '</span>' +
+                '</button>'
+            );
+        }
+        return cards.join('');
+    }
+
+    function buildPreviewColumns(template) {
+        const columns = template && template.columns ? template.columns.slice(0, 3) : ['Pendiente', 'En curso', 'Listo'];
+        const items = [];
+        for (let i = 0; i < columns.length; i += 1) {
+            items.push(
+                '<div class="board-creator-col">' +
+                    '<span class="board-creator-col-title">' + escapeHtml(columns[i]) + '</span>' +
+                    '<i></i><i></i><i></i>' +
+                '</div>'
+            );
+        }
+        return items.join('');
+    }
+
+    function applyPreviewBackground(previewShell, colorValue, fileInput) {
+        if (!previewShell) return;
+        const selectedFile = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+        if (selectedFile) {
+            const objectUrl = URL.createObjectURL(selectedFile);
+            previewShell.style.backgroundImage = 'linear-gradient(rgba(6, 10, 18, .18), rgba(6, 10, 18, .28)), url("' + objectUrl + '")';
+            previewShell.style.backgroundSize = 'cover';
+            previewShell.style.backgroundPosition = 'center';
+            return;
+        }
+        previewShell.style.backgroundImage = 'none';
+        previewShell.style.background = colorValue || '';
+    }
+
+    function updateBoardCreationPreview(popup, mode, selectedTemplateId) {
+        const preview = popup.querySelector('[data-board-preview]');
+        const summary = popup.querySelector('[data-template-summary]');
+        const pickerWrap = popup.querySelector('[data-template-wrap]');
+        const confirmButton = Swal.getConfirmButton();
+        const template = getTemplateById(selectedTemplateId);
+        const appearanceWrap = popup.querySelector('[data-appearance-wrap]');
+        const activeColor = popup.querySelector('.board-color-option.is-active');
+        const colorValue = activeColor ? activeColor.getAttribute('data-color-value') : '';
+        const fileInput = popup.querySelector('#swal-board-cover');
+        const previewShell = popup.querySelector('.board-creator-preview-shell');
+
+        if (preview) {
+            preview.innerHTML = buildPreviewColumns(mode === 'template' ? template : null);
+        }
+        if (summary) {
+            summary.textContent = mode === 'template' && template
+                ? template.summary
+                : 'Crea un tablero vacio con la estructura base y personalizalo despues.';
+        }
+        if (pickerWrap) {
+            pickerWrap.hidden = mode !== 'template';
+        }
+        if (appearanceWrap) {
+            appearanceWrap.hidden = mode !== 'normal';
+        }
+        if (confirmButton) {
+            confirmButton.textContent = mode === 'template' ? 'Crear tablero con plantilla' : 'Crear tablero';
+        }
+        applyPreviewBackground(previewShell, mode === 'normal' ? colorValue : '', mode === 'normal' ? fileInput : null);
+    }
+
+    function updateWorkspaceField(popup) {
+        const workspaceSelect = popup.querySelector('#swal-board-workspace');
+        const newWorkspaceField = popup.querySelector('[data-new-workspace-field]');
+        if (!workspaceSelect || !newWorkspaceField) return;
+        newWorkspaceField.hidden = workspaceSelect.value !== '__new__';
+    }
+
+    function openBoardCreationModal(config) {
+        if (!window.Swal || !workspaceForm || !workspaceNameInput || !workspaceBoardNameInput || !boardForm || !boardNameInput || !templateForm || !templateWorkspaceInput || !templateWorkspaceIdInput || !templateBoardInput || !templateIdInput) {
+            return;
+        }
+
+        const initialMode = config.mode === 'template' ? 'template' : 'normal';
+        const lockMode = !!config.lockMode;
+        const initialWorkspaceId = config.workspaceId ? String(config.workspaceId) : '';
+        const initialWorkspaceName = config.workspaceName || '';
+        const initialBoardName = config.boardName || '';
+        const initialTemplate = getTemplateById(config.templateId) || getTemplateById('');
+        const initialTemplateId = initialTemplate ? initialTemplate.id : '';
+
+        Swal.fire({
+            title: initialMode === 'template' ? 'Crear tablero con plantilla' : 'Crear tablero',
+            width: 620,
+            showCancelButton: true,
+            cancelButtonText: 'Cancelar',
+            confirmButtonText: initialMode === 'template' ? 'Crear tablero con plantilla' : 'Crear tablero',
+            confirmButtonColor: '#2f63ff',
+            background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
+            color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
+            customClass: {
+                popup: 'board-creator-modal',
+                htmlContainer: 'board-creator-body-wrap',
+                confirmButton: 'board-creator-confirm',
+                cancelButton: 'board-creator-cancel',
+            },
+            html:
+                '<div class="board-creator-body">' +
+                    (lockMode ? '' :
+                        '<div class="board-creator-mode">' +
+                            '<button type="button" class="board-mode-btn' + (initialMode === 'normal' ? ' is-active' : '') + '" data-mode="normal">Crear normal</button>' +
+                            '<button type="button" class="board-mode-btn' + (initialMode === 'template' ? ' is-active' : '') + '" data-mode="template">Usar plantilla</button>' +
+                        '</div>'
+                    ) +
+                    '<div class="board-creator-preview-shell">' +
+                        '<div class="board-creator-preview-top"><span>Vista previa</span><span class="board-creator-preview-icon"></span></div>' +
+                        '<div class="board-creator-preview" data-board-preview></div>' +
+                    '</div>' +
+                    '<div class="board-creator-template-copy" data-template-summary></div>' +
+                    '<div class="board-creator-appearance" data-appearance-wrap' + (initialMode === 'normal' ? '' : ' hidden') + '>' +
+                        '<div class="board-creator-field board-creator-field-tight"><label>Fondo del tablero</label></div>' +
+                        '<div class="board-color-grid">' +
+                            '<button type="button" class="board-color-option is-active" data-color-value="#1d4ed8" style="background:#1d4ed8"></button>' +
+                            '<button type="button" class="board-color-option" data-color-value="#0f766e" style="background:#0f766e"></button>' +
+                            '<button type="button" class="board-color-option" data-color-value="#be185d" style="background:#be185d"></button>' +
+                            '<button type="button" class="board-color-option" data-color-value="#7c3aed" style="background:#7c3aed"></button>' +
+                            '<button type="button" class="board-color-option" data-color-value="#ea580c" style="background:#ea580c"></button>' +
+                            '<button type="button" class="board-color-option" data-color-value="#334155" style="background:#334155"></button>' +
+                        '</div>' +
+                        '<div class="board-cover-upload">' +
+                            '<label for="swal-board-cover" class="board-cover-upload-btn">Subir imagen</label>' +
+                            '<input id="swal-board-cover" type="file" accept=".jpg,.jpeg,.png,.svg,.webp,image/jpeg,image/png,image/svg+xml,image/webp">' +
+                            '<span class="board-cover-upload-name" id="swal-board-cover-name">Ningún archivo seleccionado</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="board-creator-field">' +
+                        '<label for="swal-board-title">Titulo del tablero</label>' +
+                        '<input id="swal-board-title" class="swal2-input board-creator-input" value="' + escapeHtml(initialBoardName) + '" placeholder="Ej. Sprint de abril">' +
+                    '</div>' +
+                    '<div class="board-creator-field">' +
+                        '<label for="swal-board-workspace">Espacio de trabajo</label>' +
+                        '<select id="swal-board-workspace" class="swal2-select board-creator-select">' + buildWorkspaceOptions(initialWorkspaceId) + '</select>' +
+                    '</div>' +
+                    '<div class="board-creator-field" data-new-workspace-field hidden>' +
+                        '<label for="swal-new-workspace">Nombre del nuevo espacio</label>' +
+                        '<input id="swal-new-workspace" class="swal2-input board-creator-input" value="' + escapeHtml(initialWorkspaceName) + '" placeholder="Ej. Producto Q2">' +
+                    '</div>' +
+                    '<div class="board-creator-template-wrap" data-template-wrap' + (initialMode === 'template' ? '' : ' hidden') + '>' +
+                        '<div class="board-creator-field board-creator-field-tight"><label>Plantilla</label></div>' +
+                        '<div class="board-template-grid">' + buildTemplatePicker(initialTemplateId) + '</div>' +
+                    '</div>' +
+                '</div>',
+            didOpen: function (popup) {
+                let currentMode = initialMode;
+                let currentTemplateId = initialTemplateId;
+                const modeButtons = popup.querySelectorAll('[data-mode]');
+                const workspaceSelect = popup.querySelector('#swal-board-workspace');
+                const modalTemplateButtons = popup.querySelectorAll('[data-template-option]');
+                const colorButtons = popup.querySelectorAll('.board-color-option');
+                const coverInput = popup.querySelector('#swal-board-cover');
+                const coverName = popup.querySelector('#swal-board-cover-name');
+
+                updateWorkspaceField(popup);
+                updateBoardCreationPreview(popup, currentMode, currentTemplateId);
+
+                if (!lockMode) {
+                    for (let i = 0; i < modeButtons.length; i += 1) {
+                        modeButtons[i].addEventListener('click', function () {
+                            currentMode = this.getAttribute('data-mode') || 'normal';
+                            for (let j = 0; j < modeButtons.length; j += 1) {
+                                modeButtons[j].classList.toggle('is-active', modeButtons[j] === this);
+                            }
+                            updateBoardCreationPreview(popup, currentMode, currentTemplateId);
+                        });
+                    }
+                }
+
+                if (workspaceSelect) {
+                    workspaceSelect.addEventListener('change', function () {
+                        updateWorkspaceField(popup);
+                    });
+                }
+
+                for (let i = 0; i < modalTemplateButtons.length; i += 1) {
+                    modalTemplateButtons[i].addEventListener('click', function () {
+                        currentTemplateId = this.getAttribute('data-template-option') || '';
+                        for (let j = 0; j < modalTemplateButtons.length; j += 1) {
+                            modalTemplateButtons[j].classList.toggle('is-active', modalTemplateButtons[j] === this);
+                        }
+                        updateBoardCreationPreview(popup, currentMode, currentTemplateId);
+                    });
+                }
+
+                for (let i = 0; i < colorButtons.length; i += 1) {
+                    colorButtons[i].addEventListener('click', function () {
+                        for (let j = 0; j < colorButtons.length; j += 1) {
+                            colorButtons[j].classList.toggle('is-active', colorButtons[j] === this);
+                        }
+                        updateBoardCreationPreview(popup, currentMode, currentTemplateId);
+                    });
+                }
+
+                if (coverInput) {
+                    coverInput.addEventListener('change', function () {
+                        if (coverName) {
+                            coverName.textContent = this.files && this.files[0] ? this.files[0].name : 'Ningún archivo seleccionado';
+                        }
+                        updateBoardCreationPreview(popup, currentMode, currentTemplateId);
+                    });
+                }
+            },
+            preConfirm: function () {
+                const popup = Swal.getPopup();
+                const boardTitle = popup.querySelector('#swal-board-title').value.trim();
+                const workspaceValue = popup.querySelector('#swal-board-workspace').value;
+                const newWorkspaceName = popup.querySelector('#swal-new-workspace').value.trim();
+                const activeModeButton = popup.querySelector('.board-mode-btn.is-active');
+                const activeTemplateButton = popup.querySelector('.board-template-option.is-active');
+                const activeColorButton = popup.querySelector('.board-color-option.is-active');
+                const coverInput = popup.querySelector('#swal-board-cover');
+                const mode = lockMode ? initialMode : (activeModeButton ? activeModeButton.getAttribute('data-mode') : 'normal');
+                const templateId = activeTemplateButton ? activeTemplateButton.getAttribute('data-template-option') : initialTemplateId;
+                const backgroundColor = activeColorButton ? activeColorButton.getAttribute('data-color-value') : '#1d4ed8';
+                const coverFile = coverInput && coverInput.files && coverInput.files[0] ? coverInput.files[0] : null;
+
+                if (!boardTitle) {
+                    Swal.showValidationMessage('Es necesario indicar el titulo del tablero');
+                    return false;
+                }
+                if (!workspaceValue) {
+                    Swal.showValidationMessage('Selecciona un espacio de trabajo o crea uno nuevo');
+                    return false;
+                }
+                if (workspaceValue === '__new__' && !newWorkspaceName) {
+                    Swal.showValidationMessage('Escribe el nombre del nuevo espacio');
+                    return false;
+                }
+                if (mode === 'template' && !templateId) {
+                    Swal.showValidationMessage('Selecciona una plantilla para continuar');
+                    return false;
+                }
+
+                return {
+                    mode: mode,
+                    boardTitle: boardTitle,
+                    workspaceValue: workspaceValue,
+                    newWorkspaceName: newWorkspaceName,
+                    templateId: templateId,
+                    backgroundColor: backgroundColor,
+                    coverFile: coverFile,
+                };
+            },
+        }).then(function (result) {
+            if (!result.isConfirmed) return;
+            const value = result.value;
+
+            if (value.mode === 'template') {
+                templateBoardInput.value = value.boardTitle;
+                templateIdInput.value = value.templateId || '';
+                if (value.workspaceValue === '__new__') {
+                    templateWorkspaceInput.value = value.newWorkspaceName;
+                    templateWorkspaceIdInput.value = '';
+                } else {
+                    templateWorkspaceInput.value = '';
+                    templateWorkspaceIdInput.value = value.workspaceValue;
+                }
+                window.sessionStorage.setItem('prodify-toast', 'Tablero creado desde plantilla');
+                templateForm.submit();
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('csrf_token', csrfToken);
+            formData.append('board_name', value.boardTitle);
+            formData.append('board_background', value.backgroundColor || '#1d4ed8');
+            if (value.coverFile) {
+                formData.append('board_cover_file', value.coverFile);
+            }
+
+            let endpoint = '';
+            let successToast = 'Tablero creado correctamente';
+            if (value.workspaceValue === '__new__') {
+                formData.append('workspace_name', value.newWorkspaceName);
+                endpoint = '/workspaces/create';
+                successToast = 'Espacio y tablero creados correctamente';
+            } else {
+                endpoint = '/workspaces/' + value.workspaceValue + '/boards/create';
+            }
+
+            fetch(endpoint, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-Token': csrfToken,
+                    'X-Requested-With': 'fetch',
                 },
-            }).then(function (result) {
-                if (!result.isConfirmed) return;
-                workspaceNameInput.value = result.value.trim();
-                window.sessionStorage.setItem('prodify-toast', 'Espacio creado correctamente');
-                workspaceForm.submit();
+            }).then(function (response) {
+                if (!response.ok) throw new Error('No se pudo crear el tablero');
+                return response.json();
+            }).then(function (data) {
+                window.sessionStorage.setItem('prodify-toast', successToast);
+                if (data && data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                    return;
+                }
+                window.location.reload();
+            }).catch(function () {
+                if (!window.Swal) return;
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No se pudo crear el tablero',
+                    text: 'Revisa la imagen elegida o vuelve a intentarlo.',
+                    confirmButtonColor: '#2f63ff',
+                    background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
+                    color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
+                });
             });
         });
     }
 
-    const boardForm = document.getElementById('boardCreateForm');
-    const boardNameInput = document.getElementById('boardNameInput');
-    const createBoardCards = document.querySelectorAll('.js-create-board');
+    function closeCreateDropdown() {
+        if (!createDropdown || !createWorkspaceButton) return;
+        createDropdown.setAttribute('hidden', 'hidden');
+        createWorkspaceButton.setAttribute('aria-expanded', 'false');
+    }
 
-    if (boardForm && boardNameInput && createBoardCards.length) {
-        /*
-         * Recorro todas las tarjetas que permiten crear un tablero.
-         */
+    if (createWorkspaceButton && createDropdown) {
+        createWorkspaceButton.addEventListener('click', function () {
+            if (createDropdown.hasAttribute('hidden')) {
+                createDropdown.removeAttribute('hidden');
+                createWorkspaceButton.setAttribute('aria-expanded', 'true');
+            } else {
+                closeCreateDropdown();
+            }
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!createDropdown.contains(event.target) && !createWorkspaceButton.contains(event.target)) {
+                closeCreateDropdown();
+            }
+        });
+    }
+
+    if (createBoardOption) {
+        createBoardOption.addEventListener('click', function () {
+            closeCreateDropdown();
+            openBoardCreationModal({ mode: 'normal', lockMode: true });
+        });
+    }
+
+    if (createTemplateOption) {
+        createTemplateOption.addEventListener('click', function () {
+            closeCreateDropdown();
+            openBoardCreationModal({ mode: 'template', lockMode: true });
+        });
+    }
+
+    if (createBoardCards.length) {
         for (let i = 0; i < createBoardCards.length; i += 1) {
             createBoardCards[i].addEventListener('click', function () {
+                openBoardCreationModal({
+                    mode: 'normal',
+                    workspaceId: this.getAttribute('data-workspace-id') || '',
+                    workspaceName: this.getAttribute('data-workspace-name') || '',
+                });
+            });
+        }
+    }
+
+    const workspaceUpdateForm = document.getElementById('workspaceUpdateForm');
+    const workspaceUpdateNameInput = document.getElementById('workspaceUpdateNameInput');
+    const workspaceSettingsButtons = document.querySelectorAll('.js-workspace-settings');
+
+    if (workspaceSettingsButtons.length && workspaceUpdateForm && workspaceUpdateNameInput) {
+        for (let s = 0; s < workspaceSettingsButtons.length; s += 1) {
+            workspaceSettingsButtons[s].addEventListener('click', function () {
                 if (!window.Swal) return;
+
                 const workspaceId = this.getAttribute('data-workspace-id');
+                const workspaceName = this.getAttribute('data-workspace-name') || '';
                 if (!workspaceId) return;
 
                 Swal.fire({
-                    title: 'Nuevo tablero',
+                    title: 'Configuracion del espacio',
                     input: 'text',
-                    inputLabel: 'Nombre del tablero',
-                    inputPlaceholder: 'Ej. Plan semanal',
-                    confirmButtonText: 'Crear tablero',
+                    inputLabel: 'Nombre del espacio',
+                    inputValue: workspaceName,
+                    inputPlaceholder: 'Ej. Producto y roadmap',
+                    confirmButtonText: 'Guardar cambios',
                     showCancelButton: true,
                     cancelButtonText: 'Cancelar',
                     confirmButtonColor: '#2f63ff',
@@ -149,69 +654,66 @@
                     },
                 }).then(function (result) {
                     if (!result.isConfirmed) return;
-                    boardForm.action = '/workspaces/' + workspaceId + '/boards/create';
-                    boardNameInput.value = result.value.trim();
-                    window.sessionStorage.setItem('prodify-toast', 'Tablero creado correctamente');
-                    boardForm.submit();
+                    workspaceUpdateForm.action = '/workspaces/' + workspaceId + '/update';
+                    workspaceUpdateNameInput.value = result.value.trim();
+                    window.sessionStorage.setItem('prodify-toast', 'Espacio actualizado correctamente');
+                    workspaceUpdateForm.submit();
                 });
             });
         }
     }
 
-    const templateButtons = document.querySelectorAll('.js-use-template');
-    const templateForm = document.getElementById('templateCreateForm');
-    const templateWorkspaceInput = document.getElementById('templateWorkspaceInput');
-    const templateBoardInput = document.getElementById('templateBoardInput');
-    const templateIdInput = document.getElementById('templateIdInput');
-
-    if (templateButtons.length && templateForm && templateWorkspaceInput && templateBoardInput && templateIdInput) {
+    if (templateButtons.length) {
         /*
          * Esto sirve para crear un tablero a partir de una plantilla.
          */
         for (let t = 0; t < templateButtons.length; t += 1) {
             templateButtons[t].addEventListener('click', function () {
-                if (!window.Swal) return;
-
                 const templateName = this.getAttribute('data-template-name') || 'Nuevo tablero';
                 const templateId = this.getAttribute('data-template-id') || '';
-
-                Swal.fire({
-                    title: 'Usar plantilla',
-                    html:
-                        '<label class="swal-label">Nombre del espacio de trabajo</label>' +
-                        '<input id="swal-workspace" class="swal2-input" placeholder="Ej. Equipo Creativo">' +
-                        '<label class="swal-label">Nombre del tablero</label>' +
-                        '<input id="swal-board" class="swal2-input" value="' + templateName + '">',
-                    focusConfirm: false,
-                    showCancelButton: true,
-                    confirmButtonText: 'Crear espacio y tablero',
-                    cancelButtonText: 'Cancelar',
-                    confirmButtonColor: '#2f63ff',
-                    background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
-                    color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
-                    preConfirm: function () {
-                        const workspaceName = document.getElementById('swal-workspace').value.trim();
-                        const boardName = document.getElementById('swal-board').value.trim();
-                        if (!workspaceName) {
-                            Swal.showValidationMessage('El espacio de trabajo es obligatorio');
-                            return false;
-                        }
-                        if (!boardName) {
-                            Swal.showValidationMessage('El nombre del tablero es obligatorio');
-                            return false;
-                        }
-                        return { workspaceName: workspaceName, boardName: boardName };
-                    },
-                }).then(function (result) {
-                    if (!result.isConfirmed) return;
-                    templateWorkspaceInput.value = result.value.workspaceName;
-                    templateBoardInput.value = result.value.boardName;
-                    templateIdInput.value = templateId;
-                    window.sessionStorage.setItem('prodify-toast', 'Tablero creado desde plantilla');
-                    templateForm.submit();
+                openBoardCreationModal({
+                    mode: 'template',
+                    boardName: templateName,
+                    templateId: templateId,
                 });
             });
         }
+    }
+
+    const accountUpdateEmailButton = document.querySelector('.js-account-update-email');
+    const accountEmailForm = document.getElementById('accountEmailForm');
+    const accountEmailInput = document.getElementById('accountEmailInput');
+
+    if (accountUpdateEmailButton && accountEmailForm && accountEmailInput) {
+        accountUpdateEmailButton.addEventListener('click', function () {
+            if (!window.Swal) return;
+            const currentEmail = this.getAttribute('data-current-email') || '';
+
+            Swal.fire({
+                title: 'Actualizar email',
+                input: 'email',
+                inputLabel: 'Nuevo correo electronico',
+                inputValue: currentEmail,
+                inputPlaceholder: 'correo@ejemplo.com',
+                confirmButtonText: 'Guardar email',
+                showCancelButton: true,
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#2f63ff',
+                background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
+                color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
+                inputValidator: function (value) {
+                    if (!value || !value.trim()) return 'Introduce un correo electronico';
+                    const emailValue = value.trim();
+                    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailPattern.test(emailValue)) return 'Introduce un correo electronico valido';
+                    return undefined;
+                },
+            }).then(function (result) {
+                if (!result.isConfirmed) return;
+                accountEmailInput.value = result.value.trim();
+                accountEmailForm.submit();
+            });
+        });
     }
 
     /*
@@ -220,6 +722,9 @@
     const addColumnButton = document.querySelector('.js-add-column');
     const columnForm = document.getElementById('columnCreateForm');
     const columnTitleInput = document.getElementById('columnTitleInput');
+    const columnUpdateForm = document.getElementById('columnUpdateForm');
+    const columnUpdateTitleInput = document.getElementById('columnUpdateTitleInput');
+    const editColumnButtons = document.querySelectorAll('.js-edit-column');
 
     if (addColumnButton && columnForm && columnTitleInput) {
         addColumnButton.addEventListener('click', function () {
@@ -245,6 +750,40 @@
                 columnForm.submit();
             });
         });
+    }
+
+    if (editColumnButtons.length && columnUpdateForm && columnUpdateTitleInput) {
+        for (let columnIndex = 0; columnIndex < editColumnButtons.length; columnIndex += 1) {
+            editColumnButtons[columnIndex].addEventListener('click', function () {
+                if (!window.Swal) return;
+                const columnId = this.getAttribute('data-column-id');
+                const currentTitle = this.getAttribute('data-column-title') || '';
+                if (!columnId) return;
+
+                Swal.fire({
+                    title: 'Editar columna',
+                    input: 'text',
+                    inputValue: currentTitle,
+                    inputLabel: 'Nuevo nombre de la columna',
+                    showCancelButton: true,
+                    confirmButtonText: 'Guardar columna',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#2f63ff',
+                    background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
+                    color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
+                    inputValidator: function (value) {
+                        if (!value || !value.trim()) return 'El nombre es obligatorio';
+                        return undefined;
+                    },
+                }).then(function (result) {
+                    if (!result.isConfirmed) return;
+                    columnUpdateForm.action = '/columns/' + columnId + '/update';
+                    columnUpdateTitleInput.value = result.value.trim();
+                    window.sessionStorage.setItem('prodify-toast', 'Columna actualizada');
+                    columnUpdateForm.submit();
+                });
+            });
+        }
     }
 
     /*
@@ -350,8 +889,81 @@
     /*
      * Elementos necesarios para el drag and drop del kanban.
      */
+    const kanbanColumnShells = document.querySelectorAll('.kanban-column[data-column-id]');
+    const columnDragHandles = document.querySelectorAll('.js-column-drag-handle[data-column-id]');
     const kanbanCards = document.querySelectorAll('.kanban-card[draggable="true"]');
     const kanbanColumns = document.querySelectorAll('.kanban-cards[data-column-id]');
+
+    if (kanbanColumnShells.length && columnDragHandles.length && window.PRODIFY_BOARD_ID) {
+        let draggedColumn = null;
+
+        const syncColumnOrder = function () {
+            const orderedIds = [];
+            const orderedColumns = document.querySelectorAll('.kanban-column[data-column-id]');
+            for (let index = 0; index < orderedColumns.length; index += 1) {
+                const columnId = orderedColumns[index].getAttribute('data-column-id');
+                if (columnId) orderedIds.push(columnId);
+            }
+            if (!orderedIds.length) return;
+
+            fetch('/boards/' + window.PRODIFY_BOARD_ID + '/columns/reorder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRF-Token': csrfToken,
+                },
+                body: 'column_order=' + encodeURIComponent(orderedIds.join(',')),
+            }).catch(function () {
+                window.location.reload();
+            });
+        };
+
+        for (let handleIndex = 0; handleIndex < columnDragHandles.length; handleIndex += 1) {
+            columnDragHandles[handleIndex].addEventListener('dragstart', function (event) {
+                draggedColumn = this.closest('.kanban-column');
+                if (!draggedColumn) return;
+                draggedColumn.classList.add('dragging-column');
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', draggedColumn.getAttribute('data-column-id') || '');
+            });
+
+            columnDragHandles[handleIndex].addEventListener('dragend', function () {
+                if (draggedColumn) {
+                    draggedColumn.classList.remove('dragging-column');
+                }
+                for (let columnIndex = 0; columnIndex < kanbanColumnShells.length; columnIndex += 1) {
+                    kanbanColumnShells[columnIndex].classList.remove('drag-over-column');
+                }
+                draggedColumn = null;
+            });
+        }
+
+        for (let shellIndex = 0; shellIndex < kanbanColumnShells.length; shellIndex += 1) {
+            kanbanColumnShells[shellIndex].addEventListener('dragover', function (event) {
+                if (!draggedColumn || draggedColumn === this) return;
+                event.preventDefault();
+                this.classList.add('drag-over-column');
+            });
+
+            kanbanColumnShells[shellIndex].addEventListener('dragleave', function () {
+                this.classList.remove('drag-over-column');
+            });
+
+            kanbanColumnShells[shellIndex].addEventListener('drop', function (event) {
+                if (!draggedColumn || draggedColumn === this) return;
+                event.preventDefault();
+
+                const kanbanGrid = this.parentElement;
+                if (!kanbanGrid) return;
+
+                this.classList.remove('drag-over-column');
+                const bounds = this.getBoundingClientRect();
+                const insertAfter = event.clientX > bounds.left + (bounds.width / 2);
+                kanbanGrid.insertBefore(draggedColumn, insertAfter ? this.nextSibling : this);
+                syncColumnOrder();
+            });
+        }
+    }
 
     if (kanbanCards.length && kanbanColumns.length) {
         /*
@@ -423,7 +1035,10 @@
 
                 fetch('/cards/' + cardId + '/move', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRF-Token': csrfToken,
+                    },
                     body: 'column_id=' + encodeURIComponent(targetColumnId),
                 }).catch(function () {
                     /*

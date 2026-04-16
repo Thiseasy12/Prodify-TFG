@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ current_language|default('es') }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prodify | Plantillas</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Prodify | {{ t('templates.title') }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('send_favicon_svg') }}">
+    <link rel="alternate icon" type="image/x-icon" href="{{ url_for('send_favicon') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -24,13 +27,26 @@
             </div>
 
             <div class="topbar-center d-flex align-items-center">
-                <input class="search-input form-control" type="text" placeholder="Buscar plantillas o tableros">
-                <button class="create-btn js-create-workspace btn" type="button">Crear</button>
+                <input class="search-input form-control" type="text" placeholder="{{ t('topbar.search_templates') }}">
+                <div class="create-menu-wrap">
+                    <button class="create-btn js-create-workspace btn" type="button" aria-haspopup="true" aria-expanded="false">{{ t('common.create') }}</button>
+                    <div class="create-dropdown" id="createDropdown" hidden>
+                        <button type="button" class="create-dropdown-item js-create-board-option">
+                            <span class="create-dropdown-icon" aria-hidden="true">▥</span>
+                            <span><strong>{{ t('common.create_board') }}</strong><small>{{ t('common.create_board_help') }}</small></span>
+                        </button>
+                        <button type="button" class="create-dropdown-item js-create-template-option">
+                            <span class="create-dropdown-icon" aria-hidden="true">⊞</span>
+                            <span><strong>{{ t('common.start_with_template') }}</strong><small>{{ t('common.template_help') }}</small></span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div class="topbar-right">
-                <button class="theme-toggle btn" id="themeToggle" type="button" aria-label="Cambiar tema">Modo claro</button>
-                <button class="user-badge" id="accountToggle" type="button">{{ user_initial }}</button>
+                <button class="theme-toggle btn" id="themeToggle" type="button" aria-label="{{ t('theme.toggle') }}">{{ t('theme.light') }}</button>
+                {{ language_switcher_html }}
+                {{ account_toggle_html }}
                 {{ account_menu_html }}
             </div>
         </div>
@@ -43,12 +59,12 @@
                 <!-- Navegacion lateral del proyecto. -->
                 {{ side_nav_html }}
 
-                <div class="workspace-title">Espacios de trabajo</div>
+                <div class="workspace-title">{{ t('workspace.title') }}</div>
 
                 <!-- Espacios disponibles del usuario. -->
                 {{ workspace_list_html }}
 
-                <div class="workspace-title">Plantillas</div>
+                <div class="workspace-title">{{ t('nav.templates') }}</div>
                 <div class="template-sidebar">{{ templates_sidebar_html }}</div>
             </aside>
 
@@ -94,13 +110,21 @@
     <!-- Formularios ocultos para crear espacios y tableros desde una plantilla. -->
     <form id="workspaceCreateForm" action="{{ url_for('create_workspace') }}" method="POST" hidden>
         <input type="text" name="workspace_name" id="workspaceNameInput">
+        <input type="text" name="board_name" id="workspaceBoardNameInput">
+    </form>
+
+    <form id="boardCreateForm" action="" method="POST" hidden>
+        <input type="text" name="board_name" id="boardNameInput">
     </form>
 
     <form id="templateCreateForm" action="{{ url_for('use_template') }}" method="POST" hidden>
         <input type="text" name="workspace_name" id="templateWorkspaceInput">
+        <input type="hidden" name="workspace_id" id="templateWorkspaceIdInput">
         <input type="text" name="board_name" id="templateBoardInput">
         <input type="hidden" name="template_id" id="templateIdInput">
     </form>
+    <script id="boardCreationWorkspaces" type="application/json">{{ manageable_workspaces|tojson }}</script>
+    <script id="boardCreationTemplates" type="application/json">{{ board_templates|tojson }}</script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('js_static', filename='script.js') }}"></script>
