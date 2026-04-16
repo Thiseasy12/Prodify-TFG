@@ -2639,10 +2639,9 @@ def build_board_columns_html(columns, cards_by_column, board_id=0, can_edit=Fals
                 f'<button type="button" class="kanban-column-name js-edit-column" data-column-id="{column.id}" data-column-title="{escape(column.title)}" title="{escape(tr("board.column_rename"))}">{escape(column.title)}</button>'
                 f'<span>{len(column_cards)} {escape(tr("board.task"))}</span>'
                 '</div>'
-                '<span class="kanban-drag-grip" aria-hidden="true"><svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor"><circle cx="3" cy="2" r="1.5"/><circle cx="7" cy="2" r="1.5"/><circle cx="3" cy="8" r="1.5"/><circle cx="7" cy="8" r="1.5"/><circle cx="3" cy="14" r="1.5"/><circle cx="7" cy="14" r="1.5"/></svg></span>'
-                '<div class="kanban-actions">'
+                '<div class="kanban-col-delete">'
                 f'<form action="{escape(url_for("delete_column", column_id=column.id))}" method="POST" class="inline-form">'
-                f'<button type="submit" class="column-icon-btn delete-col-btn js-delete-column" title="{escape(tr("board.delete_column"))}" draggable="false">🗑</button>'
+                f'<button type="submit" class="delete-col-btn js-delete-column" title="{escape(tr("board.delete_column"))}" draggable="false">🗑</button>'
                 '</form>'
                 '</div>'
                 '</div>'
@@ -2674,14 +2673,18 @@ def build_board_columns_html(columns, cards_by_column, board_id=0, can_edit=Fals
         else:
             html.append(f'<div class="kanban-card ghost">{escape(tr("board.no_tasks"))}</div>')
         
+        html.append('</div>')
+        
         if can_edit:
+            html.append('<div class="kanban-footer">')
             html.append(
                 f'<button type="button" class="add-card-btn js-add-card" data-column-id="{column.id}" title="Agregar nueva tarea">'
                 '+ Tarea'
                 '</button>'
             )
+            html.append('</div>')
         
-        html.append('</div></div>')
+        html.append('</div>')
     return Markup(''.join(html))
 
 

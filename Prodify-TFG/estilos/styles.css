@@ -3685,7 +3685,7 @@ body {
 
 .kanban {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 300px);
+    grid-template-columns: repeat(auto-fill, 320px);
     gap: 18px;
     align-items: start;
 }
@@ -3699,18 +3699,19 @@ body {
     flex-direction: column;
     gap: 10px;
     min-height: 220px;
-    width: 300px;
+    width: 320px;
     flex-shrink: 0;
     box-shadow: 0 14px 28px rgba(3, 10, 24, .18);
 }
 
 .kanban-title {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 8px;
     cursor: grab;
     user-select: none;
+    margin-bottom: 6px;
 }
 
 .kanban-title-copy {
@@ -3756,9 +3757,9 @@ body {
 }
 
 .add-card-btn {
-    display: block !important;
+    display: inline-flex !important;
     visibility: visible !important;
-    width: 100% !important;
+    flex: 1;
     min-height: 36px;
     border: 2px solid rgba(47, 99, 255, 0.4) !important;
     background: linear-gradient(135deg, rgba(47, 99, 255, 0.15), rgba(30, 167, 255, 0.1)) !important;
@@ -3773,6 +3774,9 @@ body {
     transition: all 0.2s ease !important;
     opacity: 1 !important;
     z-index: 10 !important;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 }
 
 .add-card-btn:hover {
@@ -3790,12 +3794,33 @@ body {
     display: inline-flex !important;
     visibility: visible !important;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     flex-wrap: nowrap;
     justify-content: flex-end;
     flex-shrink: 0;
     opacity: 1 !important;
     z-index: 10 !important;
+    margin-top: 12px;
+    margin-bottom: 8px;
+}
+
+.kanban-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.kanban-col-delete {
+    display: inline-flex;
+    margin: 0;
+    padding: 0;
+}
+
+.kanban-col-delete .inline-form {
+    display: flex;
+    margin: 0;
+    padding: 0;
 }
 
 .column-icon-btn {
@@ -3817,25 +3842,50 @@ body {
     filter: brightness(1.08);
 }
 
+/* Botón Eliminar columna — texto en lugar de icono papelera */
 .delete-col-btn {
     display: inline-flex !important;
     visibility: visible !important;
-    width: 36px !important;
-    height: 36px !important;
-    border-color: rgba(239, 68, 68, 0.6) !important;
-    background: rgba(239, 68, 68, 0.18) !important;
-    color: #ff6b8a !important;
-    font-size: 18px !important;
-    padding: 0 !important;
+    height: 30px !important;
+    padding: 0 12px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    background: #dc2626 !important;
+    color: #ffffff !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    cursor: pointer !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
     opacity: 1 !important;
     z-index: 10 !important;
+    transition: background 0.15s ease !important;
 }
 
 .delete-col-btn:hover {
-    background: rgba(239, 68, 68, 0.3) !important;
-    border-color: rgba(239, 68, 68, 0.8) !important;
+    background: #b91c1c !important;
     filter: none !important;
-    transform: scale(1.1);
+    transform: none !important;
+    color: #ffffff !important;
+}
+
+/* Modo claro: fondo rojo, texto negro */
+.theme-light .delete-col-btn {
+    background: #dc2626 !important;
+    color: #000000 !important;
+}
+
+.theme-light .delete-col-btn:hover {
+    background: #b91c1c !important;
+    color: #000000 !important;
+}
+
+.kanban-footer .inline-form {
+    display: flex;
+    margin: 0;
+    padding: 0;
 }
 
 .kanban-card.dragging {
@@ -3866,13 +3916,20 @@ body {
     min-height: 100px;
 }
 
+/* ── Kanban card ── */
 .kanban-card {
     position: relative;
-    border-radius: 12px;
-    padding: 10px 34px 10px 12px;
+    border-radius: 10px;
+    padding: 10px 36px 10px 12px;
     font-size: 13px;
     background: color-mix(in srgb, var(--surface-2) 85%, #151f34);
     border: 1px solid var(--line-soft);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kanban-card:hover {
+    border-color: rgba(127, 178, 255, 0.22);
+    box-shadow: 0 2px 10px rgba(3, 10, 24, 0.22);
 }
 
 .kanban-card.ghost {
@@ -3880,48 +3937,60 @@ body {
     font-size: 12px;
 }
 
+/* Formulario absolutamente posicionado, top fijo para que no baile */
 .card-delete-form {
     position: absolute;
-    top: 6px;
-    right: 6px;
+    top: 0;
+    right: 0;
+    bottom: 0;
     margin: 0;
     padding: 0;
+    display: flex;
+    align-items: center;
+    padding-right: 8px;
 }
 
+/* Botón X — limpio, centrado, aparece solo al hover de la tarjeta */
 .card-delete-btn {
     position: static !important;
-    width: 28px !important;
-    height: 28px !important;
-    min-width: 28px !important;
-    border-radius: 6px !important;
-    border: 1.5px solid rgba(239, 68, 68, 0.7) !important;
-    background: rgba(239, 68, 68, 0.25) !important;
-    color: transparent !important;
-    font-size: 18px !important;
-    line-height: 1 !important;
+    transform: none !important;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    border-radius: 5px !important;
+    border: none !important;
+    background: transparent !important;
+    color: rgba(239, 68, 68, 0.55) !important;
+    font-size: 14px !important;
+    line-height: 20px !important;
     cursor: pointer !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     padding: 0 !important;
-    opacity: 1 !important;
-    transition: all 0.2s ease !important;
+    opacity: 0 !important;
+    transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease !important;
     visibility: visible !important;
     z-index: 15 !important;
     flex-shrink: 0 !important;
 }
 
+/* Mostrar al hacer hover sobre la tarjeta */
+.kanban-card:hover .card-delete-btn {
+    opacity: 1 !important;
+}
+
 .card-delete-btn:hover {
-    background: rgba(239, 68, 68, 0.4) !important;
-    border-color: rgba(239, 68, 68, 0.9) !important;
-    transform: scale(1.15) !important;
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #ff6b8a !important;
 }
 
 .card-delete-btn:active {
-    transform: scale(0.95) !important;
+    background: rgba(239, 68, 68, 0.28) !important;
 }
 
-.card-delete-btn::before {
+.card-delete-btn::before,
+.card-delete-btn::after {
     content: none !important;
     display: none !important;
 }
@@ -5406,49 +5475,1020 @@ body {
     }
 }
 
-/* 1. Posicionamos la X arriba a la derecha y ocultamos su texto original */
-.card-delete-btn,
+/* ── js-delete-card — alias del servidor, mismo comportamiento que .card-delete-btn ── */
 .js-delete-card {
-    position: absolute !important;
-    top: 6px !important;
-    right: 6px !important;
-    width: 24px !important;
-    height: 24px !important;
-    border-radius: 6px !important;
-    background: transparent !important;
+    position: static !important;
+    transform: none !important;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    border-radius: 5px !important;
     border: none !important;
-    
-    /* Ocultamos el texto original para que no haya doble X */
-    font-size: 0 !important; 
-    color: transparent !important; 
-    
-    /* Centramos el contenido nuevo */
+    background: transparent !important;
+    color: rgba(239, 68, 68, 0.55) !important;
+    font-size: 14px !important;
+    line-height: 20px !important;
+    cursor: pointer !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    padding: 0 !important;
+    opacity: 0 !important;
+    transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease !important;
+    visibility: visible !important;
+    z-index: 15 !important;
+    flex-shrink: 0 !important;
 }
 
-/* 2. Ocultamos cualquier icono SVG o imagen que genere la otra X */
-.card-delete-btn svg,
-.js-delete-card svg {
+.kanban-card:hover .js-delete-card {
+    opacity: 1 !important;
+}
+
+.js-delete-card:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #ff6b8a !important;
+}
+
+.js-delete-card::before,
+.js-delete-card::after {
+    content: none !important;
     display: none !important;
 }
 
-/* 3. Dibujamos nuestra propia X limpia y única */
-.card-delete-btn::after,
-.js-delete-card::after {
-    content: '×' !important; /* El símbolo matemático de multiplicar (más limpio) */
-    font-size: 20px !important;
-    color: rgba(239, 68, 68, 0.7) !important;
-    line-height: 1 !important;
+.js-delete-card svg {
+    display: block !important;
+    width: 13px !important;
+    height: 13px !important;
 }
 
-/* 4. Efecto al pasar el ratón */
-.card-delete-btn:hover,
-.js-delete-card:hover {
-    background: rgba(239, 68, 68, 0.15) !important;
+.js-delete-card svg {
+    display: block !important;
+    width: 13px !important;
+    height: 13px !important;
 }
-.card-delete-btn:hover::after,
-.js-delete-card:hover::after {
-    color: rgba(239, 68, 68, 1) !important;
+
+.js-delete-card::before,
+.js-delete-card::after {
+    content: none !important;
+    display: none !important;
+}
+/* ============================================================
+   LIGHT MODE — CORRECCIONES COMPLETAS DE VISIBILIDAD
+   Todas las reglas van bajo .theme-light para no afectar
+   al modo oscuro.
+   ============================================================ */
+
+/* ── Variables extra para modo claro ── */
+.theme-light {
+    --brand: #1d4ed8;
+    --brand-2: #0284c7;
+}
+
+/* ── Topbar ── */
+.theme-light .topbar {
+    background: color-mix(in srgb, #edf3ff 90%, #c8d9f8);
+    border-bottom-color: #b8cef0;
+}
+
+.theme-light .search-input.form-control,
+.theme-light .account-form input {
+    background: #ffffff;
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+.theme-light .search-input.form-control::placeholder {
+    color: #6b85b0;
+}
+
+.theme-light .topbar-language-trigger {
+    background: #ffffff;
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+.theme-light .topbar-language-caret::before {
+    border-color: #4f6797;
+}
+
+.theme-light .topbar-language-menu {
+    background: #ffffff;
+    border-color: #b8cef0;
+    box-shadow: 0 18px 35px rgba(22, 46, 98, .16);
+}
+
+.theme-light .topbar-language-option {
+    color: #132a54;
+}
+
+.theme-light .topbar-language-option:hover,
+.theme-light .topbar-language-option[aria-pressed="true"] {
+    background: rgba(47, 99, 255, .08);
+}
+
+/* ── Sidebar ── */
+.theme-light .sidebar {
+    background: linear-gradient(180deg, #e4eeff, #eaf1ff);
+    border-right-color: #b8cef0;
+}
+
+.theme-light .side-link {
+    color: #132a54;
+}
+
+.theme-light .side-link:hover {
+    background: rgba(47, 99, 255, .08);
+}
+
+.theme-light .side-link.active {
+    color: #1d4ed8;
+    background: rgba(47, 99, 255, .12);
+    border-color: rgba(47, 99, 255, .3);
+}
+
+.theme-light .workspace-title {
+    color: #4f6797;
+}
+
+.theme-light .workspace-item {
+    color: #132a54;
+}
+
+.theme-light .workspace-item:hover {
+    background: rgba(47, 99, 255, .07);
+}
+
+.theme-light .workspace-role-badge,
+.theme-light .workspace-role-label,
+.theme-light .member-role,
+.theme-light .board-readonly-badge {
+    background: #ffffff;
+    border-color: #b8cef0;
+    color: #1d4ed8;
+}
+
+/* ── Account menu ── */
+.theme-light .account-menu {
+    background: #ffffff;
+    border-color: #b8cef0;
+    box-shadow: 0 20px 45px rgba(22, 46, 98, .18);
+}
+
+.theme-light .account-hero {
+    background: linear-gradient(135deg, rgba(219, 234, 255, .9), rgba(235, 244, 255, .95));
+    border-color: #b8cef0;
+}
+
+.theme-light .account-meta strong {
+    color: #132a54;
+}
+
+.theme-light .account-meta span {
+    color: #4f6797;
+}
+
+.theme-light .account-meta small {
+    color: #1d4ed8;
+}
+
+.theme-light .account-link {
+    color: #132a54;
+}
+
+.theme-light .account-link:hover {
+    background: rgba(47, 99, 255, .07);
+    border-color: #b8cef0;
+}
+
+.theme-light .account-link-ghost {
+    background: #f0f6ff;
+    border-color: #b8cef0;
+}
+
+.theme-light .account-divider {
+    background: #b8cef0;
+}
+
+.theme-light .account-section {
+    background: #f4f8ff;
+    border-color: #b8cef0;
+}
+
+.theme-light .account-section-title {
+    color: #4f6797;
+}
+
+.theme-light .account-link-ext::after,
+.theme-light .account-link-arrow::after {
+    color: #4f6797;
+}
+
+/* ── Buttons ── */
+.theme-light .theme-toggle,
+.theme-light .workspace-actions .btn,
+.theme-light .closed-btn,
+.theme-light .account-form button,
+.theme-light .logout-btn {
+    background: #ffffff;
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+.theme-light .theme-toggle:hover,
+.theme-light .workspace-actions .btn:hover,
+.theme-light .closed-btn:hover,
+.theme-light .account-form button:hover,
+.theme-light .logout-btn:hover {
+    background: #e4eeff;
+}
+
+.theme-light .workspace-delete-btn {
+    color: #8b1a2f !important;
+    background: #ffedf2 !important;
+    border-color: #f0a8bc !important;
+}
+
+.theme-light .workspace-delete-btn:hover {
+    background: #ffd6e2 !important;
+}
+
+/* ── Board cards (index) ── */
+.theme-light .board-card {
+    background: #ffffff;
+    border-color: #b8cef0;
+    box-shadow: 0 6px 18px rgba(22, 46, 98, .08);
+}
+
+.theme-light .board-name {
+    color: #132a54;
+}
+
+.theme-light .board-create {
+    background: #f4f8ff;
+}
+
+.theme-light .board-create-text {
+    color: #4f6797;
+}
+
+/* ── Workspace header ── */
+.theme-light .workspace-label strong {
+    color: #132a54;
+}
+
+.theme-light .section-title {
+    color: #132a54;
+}
+
+/* ── Create dropdown ── */
+.theme-light .create-dropdown {
+    background: #ffffff;
+    border-color: #b8cef0;
+    box-shadow: 0 18px 45px rgba(22, 46, 98, .14);
+}
+
+.theme-light .create-dropdown-item {
+    color: #132a54;
+}
+
+.theme-light .create-dropdown-item:hover {
+    background: #f0f6ff;
+}
+
+.theme-light .create-dropdown-item small {
+    color: #4f6797;
+}
+
+/* ── Empty note ── */
+.theme-light .empty-note {
+    color: #4f6797;
+    border-color: #b8cef0;
+}
+
+/* ── Templates sidebar ── */
+.theme-light .template-group {
+    background: #f4f8ff;
+    border-color: #b8cef0;
+}
+
+.theme-light .template-group summary {
+    color: #132a54;
+}
+
+.theme-light .template-group summary::after {
+    color: #4f6797;
+}
+
+.theme-light .template-group-links a {
+    color: #4f6797;
+}
+
+.theme-light .template-group-links a:hover {
+    color: #132a54;
+}
+
+/* ── Template card (modo claro completo) ── */
+.theme-light .template-card {
+    background: #ffffff;
+    border-color: #c8d7f5;
+}
+
+.theme-light .template-head h3 {
+    color: #132a54;
+}
+
+.theme-light .template-head p {
+    color: #4f6797;
+}
+
+.theme-light .template-tags span {
+    color: #2a4a8a;
+}
+
+/* ── Templates hero text ── */
+.theme-light .templates-hero h1,
+.theme-light .inicio-hero-text h1 {
+    color: #132a54;
+}
+
+.theme-light .templates-hero p,
+.theme-light .templates-count {
+    color: #4f6797;
+}
+
+.theme-light .templates-chips span {
+    color: #132a54;
+}
+
+/* ── Inicio page ── */
+.theme-light .inicio-hero-text p,
+.theme-light .inicio-stats span,
+.theme-light .panel-header,
+.theme-light .panel-card p,
+.theme-light .inicio-card p,
+.theme-light .inicio-highlight p {
+    color: #4f6797;
+}
+
+.theme-light .inicio-stats strong,
+.theme-light .inicio-stats div {
+    color: #132a54;
+}
+
+.theme-light .panel-card h4 {
+    color: #132a54;
+}
+
+.theme-light .panel-header strong {
+    color: #132a54;
+}
+
+.theme-light .inicio-card h3,
+.theme-light .inicio-card ul {
+    color: #132a54;
+}
+
+.theme-light .inicio-highlight h2 {
+    color: #132a54;
+}
+
+.theme-light .badge {
+    background: rgba(29, 78, 216, .12);
+    color: #1d4ed8;
+}
+
+.theme-light .badge.alt {
+    background: rgba(21, 128, 61, .12);
+    color: #15803d;
+}
+
+.theme-light .badge.soft {
+    background: rgba(100, 116, 139, .12);
+    color: #475569;
+}
+
+/* ── Kanban ── */
+.theme-light .kanban-column {
+    background: #ffffff !important;
+    border-color: #d4dfe8 !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, .08) !important;
+}
+
+.theme-light .kanban-title h3,
+.theme-light .kanban-column-name {
+    color: #132a54;
+}
+
+.theme-light .kanban-title-copy span,
+.theme-light .kanban-drag-grip {
+    color: #4f6797;
+}
+
+.theme-light .kanban-card:not(.ghost) {
+    background: #ffffff;
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+.theme-light .kanban-card.ghost {
+    color: #4f6797;
+}
+
+.theme-light .kanban-card:not(.ghost):hover {
+    border-color: rgba(29, 78, 216, .35);
+    box-shadow: 0 4px 14px rgba(22, 46, 98, .12);
+}
+
+.theme-light .add-card-btn {
+    border-color: rgba(29, 78, 216, 0.3) !important;
+    background: rgba(29, 78, 216, 0.06) !important;
+    color: #1d4ed8 !important;
+}
+
+.theme-light .add-card-btn:hover {
+    border-color: rgba(29, 78, 216, 0.6) !important;
+    background: rgba(29, 78, 216, 0.12) !important;
+}
+
+.theme-light .column-icon-btn {
+    background: #ffffff;
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+.theme-light .kanban-card-count {
+    background: rgba(29, 78, 216, .1);
+    color: #1d4ed8;
+}
+
+/* ── Board header ── */
+.theme-light .board-header h1 {
+    color: #132a54;
+}
+
+.theme-light .board-role-copy {
+    color: #4f6797;
+}
+
+.theme-light .board-settings-shell {
+    background: #f4f8ff;
+    border-color: #b8cef0;
+    box-shadow: 0 18px 34px rgba(22, 46, 98, .12);
+}
+
+.theme-light .board-settings-head p,
+.theme-light .board-settings-section-head span,
+.theme-light .board-settings-help {
+    color: #4f6797;
+}
+
+.theme-light .board-settings-label {
+    color: #4f6797;
+}
+
+.theme-light .board-settings-metric {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .board-settings-metric span {
+    color: #4f6797;
+}
+
+.theme-light .board-settings-metric strong {
+    color: #132a54;
+}
+
+.theme-light .board-settings-select,
+.theme-light .board-settings-input {
+    background: #ffffff;
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+.theme-light .board-settings-close {
+    background: #ffffff;
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+.theme-light .board-settings-column-row,
+.theme-light .board-member-row {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .board-member-copy strong {
+    color: #132a54;
+}
+
+.theme-light .board-member-copy span {
+    color: #4f6797;
+}
+
+.theme-light .board-member-role-form select,
+.theme-light .member-add-form input,
+.theme-light .member-add-form select,
+.theme-light .member-role-form select {
+    background: #ffffff;
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+.theme-light .board-settings-column-index {
+    background: rgba(29, 78, 216, .08);
+    border-color: rgba(29, 78, 216, .22);
+    color: #1d4ed8;
+}
+
+.theme-light .board-settings-column-copy strong {
+    color: #132a54;
+}
+
+.theme-light .board-settings-column-copy span {
+    color: #4f6797;
+}
+
+/* ── Members page ── */
+.theme-light .members-panel,
+.theme-light .members-header-card {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .members-panel h2,
+.theme-light .members-header-card h1 {
+    color: #132a54;
+}
+
+.theme-light .members-header-card p {
+    color: #4f6797;
+}
+
+.theme-light .members-counter {
+    color: #4f6797;
+}
+
+.theme-light .member-row {
+    background: #f4f8ff;
+    border-color: #b8cef0;
+}
+
+.theme-light .member-identity strong {
+    color: #132a54;
+}
+
+.theme-light .member-identity span,
+.theme-light .member-identity small,
+.theme-light .members-empty,
+.theme-light .members-readonly-note {
+    color: #4f6797;
+}
+
+.theme-light .members-notice-success {
+    background: rgba(21, 128, 61, .1);
+    border-color: #86efac;
+    color: #166534;
+}
+
+.theme-light .members-notice-error {
+    background: rgba(220, 38, 38, .08);
+    border-color: #fca5a5;
+    color: #991b1b;
+}
+
+.theme-light .members-notice-info {
+    background: rgba(29, 78, 216, .08);
+    border-color: #93c5fd;
+    color: #1e40af;
+}
+
+.theme-light .member-role-owner {
+    color: #92400e;
+    background: rgba(217, 119, 6, .1);
+    border-color: rgba(217, 119, 6, .35);
+}
+
+/* ── Account / Settings pages ── */
+.theme-light .account-page-hero {
+    background: linear-gradient(140deg, #e8f1ff, #f0f7ff);
+    border-color: #b8cef0;
+    box-shadow: 0 18px 36px rgba(22, 46, 98, .1);
+}
+
+.theme-light .chip {
+    background: #ffffff;
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+.theme-light .account-hero-card {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .account-hero-card strong {
+    color: #132a54;
+}
+
+.theme-light .account-hero-card span {
+    color: #4f6797;
+}
+
+.theme-light .account-hero-tag {
+    color: #1d4ed8;
+}
+
+.theme-light .account-page-card {
+    background: #ffffff;
+    border-color: #b8cef0;
+    box-shadow: 0 8px 20px rgba(22, 46, 98, .07);
+}
+
+.theme-light .account-page-card h3 {
+    color: #132a54;
+}
+
+.theme-light .account-page-card p {
+    color: #4f6797;
+}
+
+.theme-light .account-page-row span {
+    color: #4f6797;
+}
+
+.theme-light .overview-metric {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .overview-metric span {
+    color: #4f6797;
+}
+
+.theme-light .overview-metric strong {
+    color: #132a54;
+}
+
+.theme-light .overview-metric small {
+    color: #4f6797;
+}
+
+.theme-light .settings-nav-item {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .settings-nav-item strong {
+    color: #132a54;
+}
+
+.theme-light .settings-nav-item span {
+    color: #4f6797;
+}
+
+.theme-light .settings-nav-item.active {
+    background: rgba(29, 78, 216, .06);
+    border-color: rgba(29, 78, 216, .3);
+}
+
+.theme-light .settings-row,
+.theme-light .integration-row {
+    background: #f4f8ff;
+    border-color: #b8cef0;
+}
+
+.theme-light .settings-row-copy strong {
+    color: #132a54;
+}
+
+.theme-light .settings-row-copy span {
+    color: #4f6797;
+}
+
+.theme-light .settings-row-meta small {
+    color: #4f6797;
+}
+
+.theme-light .settings-action-btn {
+    background: #ffffff;
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+.theme-light .settings-basic-row {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .settings-basic-copy strong {
+    color: #132a54;
+}
+
+.theme-light .settings-basic-copy span {
+    color: #4f6797;
+}
+
+.theme-light .settings-basic-value {
+    background: #f0f6ff;
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+.theme-light .settings-note {
+    border-color: #b8cef0;
+    color: #4f6797;
+}
+
+.theme-light .settings-section {
+    border-bottom-color: #b8cef0;
+}
+
+.theme-light .settings-section-tag {
+    background: rgba(29, 78, 216, .1);
+    color: #1d4ed8;
+}
+
+.theme-light .toggle-item {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .toggle-item strong {
+    color: #132a54;
+}
+
+.theme-light .toggle-item span {
+    color: #4f6797;
+}
+
+.theme-light .toggle-pill {
+    background: rgba(29, 78, 216, .1);
+    color: #1d4ed8;
+}
+
+.theme-light .pill {
+    background: #ffffff;
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+.theme-light .action-btn {
+    background: #ffffff;
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+.theme-light .profile-preview {
+    background: #f4f8ff;
+    border-color: #b8cef0;
+}
+
+.theme-light .profile-preview strong {
+    color: #132a54;
+}
+
+.theme-light .profile-preview span {
+    color: #4f6797;
+}
+
+.theme-light .account-file-picker {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .account-file-btn {
+    background: #f0f6ff;
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+.theme-light .account-file-name {
+    color: #132a54;
+}
+
+.theme-light .account-field-label {
+    color: #132a54;
+}
+
+/* ── Activity / timeline ── */
+.theme-light .activity-entry,
+.theme-light .timeline-row {
+    background: #ffffff;
+    border-color: #b8cef0;
+    box-shadow: 0 10px 24px rgba(22, 46, 98, .06);
+}
+
+.theme-light .activity-entry-body strong,
+.theme-light .timeline-row-body strong {
+    color: #132a54;
+}
+
+.theme-light .activity-entry-body span,
+.theme-light .timeline-row-body span {
+    color: #4f6797;
+}
+
+.theme-light .activity-entry small,
+.theme-light .timeline-row time {
+    color: #4f6797;
+}
+
+.theme-light .activity-item {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .activity-item span,
+.theme-light .activity-item small {
+    color: #4f6797;
+}
+
+.theme-light .activity-page-btn {
+    background: #ffffff;
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+.theme-light .activity-pagination-summary {
+    color: #4f6797;
+}
+
+.theme-light .activity-pagination-summary strong {
+    color: #132a54;
+}
+
+.theme-light .timeline-item {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .timeline-item span {
+    color: #4f6797;
+}
+
+.theme-light .status-line {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .status-line span {
+    color: #4f6797;
+}
+
+.theme-light .status-line strong {
+    color: #132a54;
+}
+
+/* ── Stat / backlog / kanban-mini ── */
+.theme-light .stat-card {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .stat-card strong {
+    color: #132a54;
+}
+
+.theme-light .stat-card span {
+    color: #4f6797;
+}
+
+.theme-light .kanban-mini-col {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .kanban-mini-title {
+    color: #4f6797;
+}
+
+.theme-light .kanban-mini-card {
+    background: rgba(29, 78, 216, .08);
+    color: #132a54;
+}
+
+.theme-light .backlog-item {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .backlog-item span {
+    color: #4f6797;
+}
+
+.theme-light .signature-card {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .signature-card span {
+    color: #4f6797;
+}
+
+.theme-light .signature-badges span {
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+.theme-light .help-card {
+    background: #ffffff;
+    border-color: #b8cef0;
+}
+
+.theme-light .help-card strong {
+    color: #132a54;
+}
+
+.theme-light .help-card span {
+    color: #4f6797;
+}
+
+.theme-light .priority.high {
+    background: rgba(220, 38, 38, .1);
+    color: #991b1b;
+}
+
+.theme-light .priority.med {
+    background: rgba(217, 119, 6, .1);
+    color: #92400e;
+}
+
+.theme-light .priority.low {
+    background: rgba(5, 150, 105, .1);
+    color: #065f46;
+}
+
+.theme-light .badge-soft {
+    background: rgba(29, 78, 216, .1);
+    color: #1d4ed8;
+}
+
+/* ── Board creator modal (SweetAlert) ── */
+.theme-light .board-mode-btn {
+    background: #f0f6ff;
+    border-color: #b8cef0;
+    color: #4f6797;
+}
+
+.theme-light .board-creator-preview-shell {
+    background: #f4f8ff;
+    border-color: #b8cef0;
+}
+
+.theme-light .board-creator-preview-top {
+    color: #4f6797;
+}
+
+/* ── Eyebrow ── */
+.theme-light .eyebrow {
+    color: #1d4ed8;
+}
+
+/* ── Resource items ── */
+.theme-light .resource-item {
+    background: #f4f8ff;
+    border-color: #b8cef0;
+    color: #132a54;
+}
+
+/* ── SweetAlert en modo claro — texto visible ── */
+.theme-light .swal2-popup {
+    background: #ffffff !important;
+    color: #132a54 !important;
+}
+
+.theme-light .swal2-title,
+.theme-light .swal2-html-container {
+    color: #132a54 !important;
+}
+
+.theme-light .swal-label {
+    color: #4f6797;
+}
+
+.theme-light .swal-member-card {
+    background: #f4f8ff;
+    border-color: #b8cef0;
+}
+
+.theme-light .swal-member-card span,
+.theme-light .swal-member-card small,
+.theme-light .swal-members-note {
+    color: #4f6797;
+}
+
+/* ── Board config panel (floating) ── */
+.theme-light .bcp-pending-row {
+    background: #f4f8ff;
+    border-color: #b8cef0;
+}
+
+.theme-light .bcp-pending-email {
+    color: #132a54;
+}
+
+/* ── Scroll & misc ── */
+.theme-light .kanban-board-wrap {
+    scrollbar-color: rgba(29, 78, 216, .25) transparent;
 }
