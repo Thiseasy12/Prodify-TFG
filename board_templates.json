@@ -1,0 +1,218 @@
+[
+  {
+    "id": "product-launch",
+    "name": "Lanzamiento de producto",
+    "summary": "Coordina estrategia, entregables y salida al mercado.",
+    "accent": "template-accent-blue",
+    "category": "Producto",
+    "tags": ["Roadmap", "Go-to-market", "Release"],
+    "columns": ["Idea", "Planificacion", "En progreso", "Revision", "Lanzado"]
+  },
+  {
+    "id": "sprint-kanban",
+    "name": "Sprint de desarrollo",
+    "summary": "Gestiona backlog, tareas activas, QA y entrega final.",
+    "accent": "template-accent-violet",
+    "category": "Producto",
+    "tags": ["Sprint", "Scrum", "Equipo"],
+    "columns": ["Backlog", "En progreso", "En revision", "QA", "Done"]
+  },
+  {
+    "id": "bug-tracker",
+    "name": "Seguimiento de bugs",
+    "summary": "Controla incidencias desde el reporte hasta la resolucion.",
+    "accent": "template-accent-rose",
+    "category": "Calidad",
+    "tags": ["Bugs", "QA", "Fixes"],
+    "columns": ["Nuevo", "Triaged", "En progreso", "Re-test", "Resuelto"]
+  },
+  {
+    "id": "product-roadmap",
+    "name": "Roadmap de producto",
+    "summary": "Visualiza iniciativas y prioridades del trimestre.",
+    "accent": "template-accent-blue",
+    "category": "Producto",
+    "tags": ["Roadmap", "Prioridades", "Vision"],
+    "columns": ["Descubrimiento", "Priorizado", "Planificado", "En curso", "Completado"]
+  },
+  {
+    "id": "marketing-campaign",
+    "name": "Campana de marketing",
+    "summary": "Organiza piezas, revisiones y publicaciones.",
+    "accent": "template-accent-mint",
+    "category": "Marketing",
+    "tags": ["Contenido", "Ads", "Campanas"],
+    "columns": ["Brief", "Produccion", "Revision", "Programado", "Publicado"]
+  },
+  {
+    "id": "content-calendar",
+    "name": "Calendario editorial",
+    "summary": "Planifica articulos, creatividades y publicaciones semanales.",
+    "accent": "template-accent-amber",
+    "category": "Marketing",
+    "tags": ["Editorial", "SEO", "Social"],
+    "columns": ["Ideas", "Brief", "Redaccion", "Edicion", "Publicado"]
+  },
+  {
+    "id": "social-media",
+    "name": "Contenido para redes",
+    "summary": "Gestiona posts, copies y aprobaciones en un solo tablero.",
+    "accent": "template-accent-rose",
+    "category": "Marketing",
+    "tags": ["Social", "Creativo", "Calendario"],
+    "columns": ["Ideas", "Produccion", "Aprobacion", "Programado", "Publicado"]
+  },
+  {
+    "id": "sales-pipeline",
+    "name": "Pipeline de ventas",
+    "summary": "Sigue cada oportunidad desde lead hasta cierre.",
+    "accent": "template-accent-amber",
+    "category": "Ventas",
+    "tags": ["CRM", "Leads", "Cierre"],
+    "columns": ["Nuevo lead", "Contacto", "Demo", "Propuesta", "Cerrado"]
+  },
+  {
+    "id": "sales-plan",
+    "name": "Plan comercial",
+    "summary": "Ordena objetivos, acciones y seguimiento del equipo de ventas.",
+    "accent": "template-accent-blue",
+    "category": "Ventas",
+    "tags": ["Objetivos", "Seguimiento", "Quarter"],
+    "columns": ["Pendiente", "En curso", "Validacion", "Listo"]
+  },
+  {
+    "id": "crm-board",
+    "name": "CRM ligero",
+    "summary": "Centraliza clientes, contactos y proxima accion comercial.",
+    "accent": "template-accent-violet",
+    "category": "Clientes",
+    "tags": ["CRM", "Clientes", "Relacion"],
+    "columns": ["Prospecto", "Calificado", "Negociacion", "Ganado", "Postventa"]
+  },
+  {
+    "id": "client-onboarding",
+    "name": "Onboarding de clientes",
+    "summary": "Coordina kick-off, materiales y entrega inicial.",
+    "accent": "template-accent-mint",
+    "category": "Clientes",
+    "tags": ["Onboarding", "Servicios", "Entrega"],
+    "columns": ["Kick-off", "Pendiente cliente", "Implementacion", "Revision", "Entregado"]
+  },
+  {
+    "id": "client-management",
+    "name": "Gestion de clientes",
+    "summary": "Haz seguimiento de cuentas activas y acciones pendientes.",
+    "accent": "template-accent-slate",
+    "category": "Clientes",
+    "tags": ["Cuentas", "Seguimiento", "Operativa"],
+    "columns": ["Activo", "Seguimiento", "Riesgo", "Renovacion", "Cerrado"]
+  },
+  {
+    "id": "support-desk",
+    "name": "Mesa de soporte",
+    "summary": "Prioriza tickets y coordina respuestas del equipo.",
+    "accent": "template-accent-rose",
+    "category": "Soporte",
+    "tags": ["Tickets", "SLA", "Customer"],
+    "columns": ["Nuevo", "Asignado", "En investigacion", "Esperando respuesta", "Resuelto"]
+  },
+  {
+    "id": "incident-management",
+    "name": "Gestion de incidencias",
+    "summary": "Responde rapido ante problemas internos o de clientes.",
+    "accent": "template-accent-blue",
+    "category": "Soporte",
+    "tags": ["Incidencias", "Urgente", "Soporte"],
+    "columns": ["Detectado", "Analisis", "En curso", "Comprobacion", "Cerrado"]
+  },
+  {
+    "id": "operations-weekly",
+    "name": "Operaciones semanales",
+    "summary": "Organiza tareas recurrentes y puntos criticos del equipo.",
+    "accent": "template-accent-mint",
+    "category": "Operaciones",
+    "tags": ["Ops", "Rutinas", "Checklist"],
+    "columns": ["Por hacer", "En curso", "Bloqueado", "Completado"]
+  },
+  {
+    "id": "process-improvement",
+    "name": "Mejora de procesos",
+    "summary": "Recoge mejoras, valida impacto y ejecuta cambios.",
+    "accent": "template-accent-violet",
+    "category": "Operaciones",
+    "tags": ["Procesos", "Eficiencia", "Mejora continua"],
+    "columns": ["Idea", "Analisis", "Priorizado", "Implementacion", "Validado"]
+  },
+  {
+    "id": "recruitment-pipeline",
+    "name": "Proceso de seleccion",
+    "summary": "Controla candidatos desde sourcing hasta oferta.",
+    "accent": "template-accent-amber",
+    "category": "Recursos Humanos",
+    "tags": ["Hiring", "Entrevistas", "Talento"],
+    "columns": ["Sourcing", "Screening", "Entrevista", "Oferta", "Contratado"]
+  },
+  {
+    "id": "employee-onboarding",
+    "name": "Onboarding de empleados",
+    "summary": "Asegura pasos claros para nuevas incorporaciones.",
+    "accent": "template-accent-blue",
+    "category": "Recursos Humanos",
+    "tags": ["Onboarding", "HR", "Equipo"],
+    "columns": ["Antes de entrar", "Primera semana", "Primer mes", "Seguimiento", "Completo"]
+  },
+  {
+    "id": "project-management",
+    "name": "Gestion de proyecto",
+    "summary": "Controla fases, responsables y estado general del proyecto.",
+    "accent": "template-accent-slate",
+    "category": "Proyectos",
+    "tags": ["Proyecto", "Entregables", "Seguimiento"],
+    "columns": ["Pendiente", "En progreso", "En revision", "Bloqueado", "Completado"]
+  },
+  {
+    "id": "event-planning",
+    "name": "Planificacion de eventos",
+    "summary": "Coordina agenda, materiales y proveedores.",
+    "accent": "template-accent-rose",
+    "category": "Eventos",
+    "tags": ["Evento", "Logistica", "Produccion"],
+    "columns": ["Idea", "Preparacion", "Confirmado", "En marcha", "Post-evento"]
+  },
+  {
+    "id": "creative-studio",
+    "name": "Produccion creativa",
+    "summary": "Ordena briefs, diseno, feedback y entrega final.",
+    "accent": "template-accent-violet",
+    "category": "Creativo",
+    "tags": ["Diseno", "Creativo", "Assets"],
+    "columns": ["Brief", "Diseno", "Feedback", "Ajustes", "Entregado"]
+  },
+  {
+    "id": "agency-workflow",
+    "name": "Flujo de agencia",
+    "summary": "Gestiona clientes, briefs y trabajos activos de la agencia.",
+    "accent": "template-accent-blue",
+    "category": "Agencia",
+    "tags": ["Agencia", "Clientes", "Proyectos"],
+    "columns": ["Brief", "Planificado", "En produccion", "Revision cliente", "Cerrado"]
+  },
+  {
+    "id": "finance-closings",
+    "name": "Cierre financiero",
+    "summary": "Haz seguimiento de tareas clave de cierre mensual.",
+    "accent": "template-accent-mint",
+    "category": "Finanzas",
+    "tags": ["Finanzas", "Cierre", "Control"],
+    "columns": ["Pendiente", "En revision", "Validado", "Cerrado"]
+  },
+  {
+    "id": "personal-productivity",
+    "name": "Productividad personal",
+    "summary": "Organiza prioridades semanales y tareas personales.",
+    "accent": "template-accent-slate",
+    "category": "Personal",
+    "tags": ["Focus", "Rutina", "Tareas"],
+    "columns": ["Pendiente", "Hoy", "En progreso", "Hecho"]
+  }
+]
