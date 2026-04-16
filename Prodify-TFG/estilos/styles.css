@@ -59,6 +59,10 @@ body {
         linear-gradient(180deg, color-mix(in srgb, var(--bg) 90%, #0a1220) 0%, var(--bg) 100%);
 }
 
+.theme-light.boards-page {
+    background: #ffffff !important;
+}
+
 .boards-page:not(.theme-light) .workspace-title,
 .boards-page:not(.theme-light) .inicio-hero-text p,
 .boards-page:not(.theme-light) .inicio-stats span,
@@ -1699,6 +1703,18 @@ body {
     color: #fff;
     transform: scale(1.05);
     filter: none;
+}
+
+.theme-light .template-action {
+    background: hsla(var(--t-h), var(--t-s), calc(var(--t-l) - 35%), 0.18) !important;
+    color: hsl(var(--t-h), calc(var(--t-s) - 8%), 35%) !important;
+    border-color: hsla(var(--t-h), var(--t-s), var(--t-l), 0.42) !important;
+}
+
+.theme-light .template-action:hover {
+    background: hsla(var(--t-h), var(--t-s), calc(var(--t-l) - 30%), 0.32) !important;
+    color: hsl(var(--t-h), var(--t-s), 15%) !important;
+    transform: scale(1.05);
 }
 
 .template-tags {
@@ -5908,6 +5924,28 @@ body {
 .theme-light .add-card-btn:hover {
     border-color: rgba(29, 78, 216, 0.6) !important;
     background: rgba(29, 78, 216, 0.12) !important;
+}
+
+.theme-light .kanban-col-delete .delete-col-btn {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-color: rgba(239, 68, 68, 0.5) !important;
+    color: #dc2626 !important;
+}
+
+.theme-light .kanban-col-delete .delete-col-btn:hover {
+    background: rgba(239, 68, 68, 0.25) !important;
+    border-color: rgba(239, 68, 68, 0.7) !important;
+}
+
+.theme-light .card-delete-btn {
+    border-color: rgba(239, 68, 68, 0.6) !important;
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #dc2626 !important;
+}
+
+.theme-light .card-delete-btn:hover {
+    background: rgba(239, 68, 68, 0.25) !important;
+    border-color: rgba(239, 68, 68, 0.8) !important;
 }
 
 .theme-light .column-icon-btn {
