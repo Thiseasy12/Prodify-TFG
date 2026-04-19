@@ -52,10 +52,6 @@ Cuando arranque, abre esta direccion:
 
 `http://127.0.0.1:5000/login`
 
-## Activar correos de verificacion
-
-
-
 
 ## Si algo no funciona
 

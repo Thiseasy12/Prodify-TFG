@@ -33,7 +33,6 @@
 
             <div class="topbar-right">
                 <button class="theme-toggle btn" id="themeToggle" type="button" aria-label="{{ t('theme.toggle') }}">{{ t('theme.light') }}</button>
-                {{ language_switcher_html }}
                 {{ account_toggle_html }}
                 {{ account_menu_html }}
             </div>
@@ -66,6 +65,7 @@
         <input type="text" name="email" id="accountEmailInput">
     </form>
 
+    <script id="i18nData" type="application/json">{{ js_translations|tojson }}</script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('js_static', filename='script.js') }}"></script>

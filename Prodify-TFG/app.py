@@ -314,8 +314,9 @@ WORKSPACE_ROLE_LABELS = {
     'lector': 'Lector',
 }
 
-WORKSPACE_MEMBER_ROLES = ('admin', 'editor', 'lector')
-BOARD_MEMBER_ROLES = ('admin', 'editor', 'lector')
+MEMBER_ROLES = ('admin', 'editor', 'lector')
+WORKSPACE_MEMBER_ROLES = MEMBER_ROLES
+BOARD_MEMBER_ROLES = MEMBER_ROLES
 ROLE_PRIORITY = {
     'owner': 4,
     'admin': 3,
@@ -453,645 +454,16 @@ COUNTRY_FLAG_URLS = {
     for item in COUNTRIES_CATALOG
     if isinstance(item, dict) and str(item.get('code') or '').strip() and str(item.get('flag') or '').strip()
 }
-BUILTIN_TRANSLATION_FALLBACKS = {
-    'nav.boards': 'Tableros',
-    'nav.templates': 'Plantillas',
-    'nav.home': 'Inicio',
-    'workspace.title': 'Espacios de trabajo',
-    'workspace.empty': 'Aun no tienes espacios de trabajo.',
-    'workspace.back': 'Volver al espacio',
-    'topbar.search_settings': 'Buscar ajustes o secciones',
-    'topbar.search_boards': 'Buscar tableros, tareas o miembros',
-    'topbar.search_templates': 'Buscar plantillas o tableros',
-    'topbar.search_members': 'Buscar miembros o correos',
-    'topbar.search_in_board': 'Buscar en {name}',
-    'topbar.back': 'Volver',
-    'theme.toggle': 'Cambiar tema',
-    'theme.light': 'Modo claro',
-    'account.section': 'Cuenta',
-    'account.open_menu': 'Abrir menu de cuenta',
-    'account.avatar_of': 'Avatar de {name}',
-    'account.active': 'Cuenta activa',
-    'account.change_accounts': 'Cambiar cuentas',
-    'account.manage': 'Gestionar cuenta',
-    'account.profile': 'Perfil y visibilidad',
-    'account.activity': 'Actividad',
-    'account.cards': 'Tarjetas',
-    'account.settings': 'Ajustes',
-    'account.help': 'Ayuda',
-    'account.logout': 'Cerrar sesion',
-    'hero.team': 'Equipo',
-    'hero.active_flows': 'Flujos activos',
-    'hero.productivity': 'Productividad',
-    'hero.status': 'Estado',
-    'hero.active': 'Activo',
-    'hero.last_access_today': 'Ultimo acceso: hoy',
-    'hero.pace': 'Ritmo',
-    'hero.week_vs_week': 'Semana vs semana',
-    'page.account.title': 'Gestionar cuenta',
-    'page.account.description': 'Aqui puedes revisar los datos basicos de tu cuenta y su estado.',
-    'page.profile.title': 'Perfil y visibilidad',
-    'page.profile.description': 'Configuracion basica del perfil y como se muestra tu nombre en la app.',
-    'page.activity.title': 'Actividad',
-    'page.activity.description': 'Resumen de acciones recientes dentro de tus tableros y espacios.',
-    'page.cards.title': 'Tarjetas',
-    'page.cards.description': 'Listado general de tareas (en esta version se muestra como vista informativa).',
-    'page.settings.title': 'Ajustes',
-    'page.settings.description': 'Preferencias generales de la aplicacion.',
-    'page.help.title': 'Ayuda',
-    'page.help.description': 'Recursos rapidos para resolver dudas y usar la plataforma.',
-    'settings.title': 'Preferencias',
-    'settings.description': 'Gestiona las opciones basicas de tu cuenta y de la interfaz.',
-    'settings.language_label': 'Idioma de la interfaz',
-    'settings.save_button': 'Guardar idioma',
-    'settings.language_saved': 'Idioma guardado correctamente.',
-    'settings.current_language': 'Idioma actual',
-    'settings.current_language_help': 'Se aplica a esta cuenta y se mantendra cuando vuelvas a entrar.',
-    'settings.theme': 'Tema',
-    'settings.theme_help': 'Elige entre modo claro u oscuro.',
-    'settings.theme_value': 'Oscuro',
-    'settings.email_notifications': 'Notificaciones por email',
-    'settings.email_notifications_help': 'Recibe avisos de actividad importante.',
-    'settings.email_notifications_value': 'Activadas',
-    'settings.reminders': 'Recordatorios',
-    'settings.reminders_help': 'Avisos antes de vencimientos y fechas limite.',
-    'settings.reminders_value': 'Activados',
-    'settings.sounds': 'Sonidos',
-    'settings.sounds_help': 'Reproduce sonido en acciones y alertas.',
-    'settings.sounds_value': 'Desactivados',
-    'settings.shortcuts': 'Atajos de teclado',
-    'settings.shortcuts_help': 'Usa accesos rapidos dentro de tableros y tarjetas.',
-    'settings.shortcuts_value': 'Activados',
-    'board.current': 'Tablero actual',
-    'board.delete': 'Borrar tablero',
-    'board.settings': 'Configuracion del tablero',
-    'board.settings_overview': 'Vista general',
-    'board.settings_overview_help': 'Personaliza el nombre, el fondo y la estructura del tablero.',
-    'board.settings_general': 'General',
-    'board.settings_general_help': 'Ajusta el nombre visible y revisa los permisos de este tablero.',
-    'board.settings_background': 'Fondo',
-    'board.settings_background_help': 'Elige un color base o sube una imagen para el tablero.',
-    'board.settings_columns': 'Columnas',
-    'board.settings_columns_help': 'Renombra, reordena y organiza tus columnas como en Trello.',
-    'board.settings_danger': 'Zona delicada',
-    'board.settings_danger_help': 'Acciones permanentes sobre este tablero.',
-    'board.rename_label': 'Nombre del tablero',
-    'board.rename_placeholder': 'Ej. Sprint de abril',
-    'board.background_color_label': 'Color del tablero',
-    'board.background_cover_label': 'Imagen de portada',
-    'board.background_cover_help': 'Si subes una imagen, tendra prioridad sobre el color.',
-    'board.save_changes': 'Guardar cambios',
-    'board.columns_count': '{count} columnas',
-    'board.cards_count': '{count} tarjetas',
-    'board.column_move_left': 'Mover a la izquierda',
-    'board.column_move_right': 'Mover a la derecha',
-    'board.column_rename': 'Renombrar columna',
-    'board.column_actions': 'Acciones de columna',
-    'board.create_first': 'Crea tu primer tablero',
-    'board.create_new': 'Crear un tablero nuevo',
-    'board.delete_column': 'Eliminar columna',
-    'board.delete_task': 'Eliminar tarea',
-    'board.no_tasks': 'Sin tareas aun',
-    'board.task': 'Tarea',
-    'workspace.members': 'Miembros',
-    'workspace.settings': 'Configuracion',
-    'workspace.recent': 'Visto recientemente',
-    'workspace.your_workspaces': 'Tus espacios de trabajo',
-    'workspace.current_role': 'Tu rol actual',
-    'workspace.members_title': 'Miembros del espacio',
-    'workspace.owner': 'Propietario',
-    'workspace.owner_title': 'Propietario del espacio',
-    'workspace.team': 'Equipo',
-    'workspace.users_with_access': 'Usuarios con acceso',
-    'workspace.people_count': '{count} personas',
-    'workspace.add_member': 'Anadir miembro',
-    'workspace.readonly_note': 'Puedes ver quien forma parte del espacio, pero no gestionar invitaciones ni roles.',
-    'workspace.you': 'Tu',
-    'workspace.save': 'Guardar',
-    'workspace.leave': 'Salir',
-    'workspace.remove': 'Quitar',
-    'workspace.empty_members': 'Todavia no has anadido miembros a este espacio.',
-    'common.delete': 'Eliminar',
-    'common.create': 'Crear',
-    'common.start_with_template': 'Empieza con una plantilla',
-    'common.create_board': 'Crear tablero',
-    'common.create_board_help': 'Un tablero es un conjunto de tarjetas ordenadas en listas para organizar tu trabajo.',
-    'common.template_help': 'Ponte en marcha mas rapido con una plantilla de tablero.',
-    'index.title': 'Tableros',
-    'inicio.title': 'Inicio',
-    'templates.title': 'Plantillas',
-    'board.access_current': 'Acceso actual',
-    'role.owner': 'Propietario',
-    'role.admin': 'Admin',
-    'role.editor': 'Editor',
-    'role.reader': 'Lector',
-    'role.no_access': 'Sin acceso',
-}
-INLINE_TRANSLATION_OVERRIDES = {
-    'es': {
-        'auth.login.page_title': 'Iniciar sesion',
-        'auth.login.subtitle': 'Organiza proyectos, equipos y resultados en un solo lugar.',
-        'auth.login.heading': 'Inicia sesion para entrar a tus tableros',
-        'auth.email_placeholder': 'Correo electronico',
-        'auth.password_placeholder': 'Contrasena',
-        'auth.submit_login': 'Entrar',
-        'auth.forgot_password_link': 'He olvidado mi contrasena',
-        'auth.register_link': 'Registrarse',
-        'auth.register.page_title': 'Registro',
-        'auth.register.subtitle': 'Crea una cuenta real para guardar tus tableros en la base de datos.',
-        'auth.register.heading': 'Registra tu cuenta',
-        'auth.display_name_placeholder': 'Nombre visible (opcional)',
-        'auth.password_helper': 'Usa al menos 8 caracteres con mayuscula, minuscula, numero y simbolo.',
-        'auth.confirm_password_placeholder': 'Repite la contrasena',
-        'auth.language_label': 'Idioma de la cuenta',
-        'auth.submit_register': 'Crear cuenta',
-        'auth.login_link': 'Ya tengo cuenta',
-        'auth.recover_access_link': 'Recuperar acceso',
-        'auth.forgot.page_title': 'Recuperar acceso',
-        'auth.forgot.subtitle': 'Si no puedes iniciar sesion, te enviaremos un correo seguro para recuperar tu cuenta.',
-        'auth.forgot.heading': 'Recuperar acceso',
-        'auth.submit_forgot': 'Enviar correo de recuperacion',
-        'auth.back_to_login': 'Volver al login',
-        'auth.create_account_link': 'Crear cuenta',
-        'auth.reset.page_title': 'Nueva contrasena',
-        'auth.reset.subtitle': 'Define una nueva contrasena para volver a entrar.',
-        'auth.reset.heading': 'Cambiar contrasena',
-        'auth.new_password_placeholder': 'Nueva contrasena',
-        'auth.reset_helper': 'Debe incluir mayuscula, minuscula, numero y caracter especial.',
-        'auth.submit_reset': 'Guardar contrasena',
-        'auth.request_another_link': 'Solicitar otro enlace',
-        'auth.verify.page_title': 'Verificar cuenta',
-        'auth.verify.subtitle': 'Te avisamos en cuanto el correo de verificacion sale para que completes el alta.',
-        'auth.verify.heading': 'Revisa tu correo',
-        'auth.submit_resend': 'Reenviar correo',
-        'auth.invalid_credentials': 'Credenciales invalidas',
-        'auth.account_created': 'Cuenta creada correctamente. Ya puedes iniciar sesion.',
-        'auth.password_updated': 'Contrasena actualizada. Inicia sesion con la nueva clave.',
-        'auth.complete_required': 'Completa todos los campos obligatorios.',
-        'auth.invalid_email': 'Introduce un correo electronico valido.',
-        'auth.passwords_mismatch': 'Las contrasenas no coinciden.',
-        'auth.email_taken': 'Ese correo ya esta registrado.',
-        'auth.default_user_name': 'Usuario',
-        'auth.local_mode_copy_link': 'Modo local: revisa la terminal del servidor para copiar el enlace.',
-        'auth.local_mode_open_link': 'Modo local: revisa la terminal del servidor para abrir el enlace.',
-        'auth.recovery_sent': 'Si existe una cuenta con ese correo, te hemos enviado instrucciones para recuperar el acceso.',
-        'auth.verification_sent': 'Si la cuenta existe y sigue pendiente, te hemos enviado un nuevo correo de verificacion.',
-        'auth.password_reset_link_expired': 'El enlace de recuperacion ha caducado.',
-        'auth.password_reset_link_invalid': 'El enlace de recuperacion no es valido.',
-        'auth.verification_link_expired': 'El enlace de verificacion ha caducado.',
-        'auth.verification_link_invalid': 'El enlace de verificacion no es valido.',
-        'auth.account_missing': 'La cuenta asociada ya no existe.',
-        'inicio.hero_eyebrow': 'Bienvenido a Prodify',
-        'inicio.hero_title': 'Tu equipo en modo enfoque, cada dia.',
-        'inicio.hero_description': 'Prodify convierte tus ideas en tableros vivos. Disena flujos tipo Trello, alinea objetivos y sigue el progreso en tiempo real.',
-        'inicio.hero_cta_templates': 'Explorar plantillas',
-        'inicio.hero_cta_boards': 'Ir a tableros',
-        'inicio.stat_templates': 'Plantillas listas',
-        'inicio.stat_clarity': 'Mas claridad diaria',
-        'inicio.stat_workspace': 'Espacio de trabajo',
-        'inicio.panel_summary': 'Resumen de hoy',
-        'inicio.panel_focus_title': 'Stand-up rapido',
-        'inicio.panel_focus_body': '3 tareas en progreso',
-        'inicio.panel_focus_badge': 'En foco',
-        'inicio.panel_suggested_title': 'Nuevo tablero sugerido',
-        'inicio.panel_suggested_body': 'Plantilla Marketing',
-        'inicio.panel_suggested_badge': 'Sugerido',
-        'inicio.panel_activity_title': 'Ultima actividad',
-        'inicio.panel_activity_body': 'Actualiza el roadmap',
-        'inicio.panel_activity_badge': 'Hoy',
-        'inicio.card_1_title': 'Organiza tu dia',
-        'inicio.card_1_body': 'Crea listas claras, asigna prioridades y mueve tareas en segundos.',
-        'inicio.card_1_item_1': 'Columnas personalizables',
-        'inicio.card_1_item_2': 'Etiquetas y prioridades',
-        'inicio.card_1_item_3': 'Filtros rapidos',
-        'inicio.card_2_title': 'Colabora sin ruido',
-        'inicio.card_2_body': 'Manten al equipo sincronizado con actualizaciones en tiempo real.',
-        'inicio.card_2_item_1': 'Tableros por area',
-        'inicio.card_2_item_2': 'Revisiones claras',
-        'inicio.card_2_item_3': 'Responsables visibles',
-        'inicio.card_3_title': 'Mide tu avance',
-        'inicio.card_3_body': 'Visualiza progreso y detecta bloqueos al instante.',
-        'inicio.card_3_item_1': 'Indicadores de estado',
-        'inicio.card_3_item_2': 'Seguimiento semanal',
-        'inicio.card_3_item_3': 'Insights del equipo',
-        'inicio.highlight_title': 'Una presentacion clara de tu pagina',
-        'inicio.highlight_body': 'Convierte el inicio en una experiencia que explica tu propuesta de valor y deja al usuario listo para crear su primer tablero.',
-        'inicio.highlight_cta': 'Crear desde plantilla',
-        'templates.hero_eyebrow': 'Plantillas listas',
-        'templates.hero_title': 'Empieza con tableros que ya piensan por ti',
-        'templates.hero_body': 'Elige una plantilla tipo Trello y crea tu tablero con flujos probados. Personaliza columnas, tareas y ritmo del equipo en minutos.',
-        'templates.recommended_flow': 'Flujo recomendado',
-        'templates.flow_idea': 'Idea',
-        'templates.flow_progress': 'En progreso',
-        'templates.flow_review': 'Revision',
-        'templates.flow_done': 'Listo',
-        'templates.note_states': '4 estados clave',
-        'templates.note_checklist': 'Checklist y prioridades',
-        'templates.available_count': '{count} plantillas disponibles',
-        'templates.chip_product': 'Producto',
-        'templates.chip_marketing': 'Marketing',
-        'templates.chip_sales': 'Ventas',
-        'templates.chip_operations': 'Operaciones',
-        'board.eyebrow': 'Tablero',
-        'board.create_column': 'Nueva columna',
-        'board.readonly': 'Modo lectura',
-        'board.settings_cta': 'Configuracion',
-        'workspace.member_email_placeholder': 'correo@ejemplo.com',
-        'js.no_file_selected': 'Ningun archivo seleccionado',
-        'js.select_workspace': 'Selecciona un espacio',
-        'js.create_new_workspace': 'Crear espacio nuevo',
-        'js.no_templates': 'No hay plantillas disponibles todavia.',
-        'js.empty_board_summary': 'Crea un tablero vacio con la estructura base y personalizalo despues.',
-        'js.create_board_with_template': 'Crear tablero con plantilla',
-        'js.create_board': 'Crear tablero',
-        'js.cancel': 'Cancelar',
-        'js.create_normal': 'Crear normal',
-        'js.use_template': 'Usar plantilla',
-        'js.preview': 'Vista previa',
-        'js.board_background': 'Fondo del tablero',
-        'js.upload_image': 'Subir imagen',
-        'js.board_title': 'Titulo del tablero',
-        'js.board_title_placeholder': 'Ej. Sprint de abril',
-        'js.workspace': 'Espacio de trabajo',
-        'js.new_workspace_name': 'Nombre del nuevo espacio',
-        'js.new_workspace_placeholder': 'Ej. Producto Q2',
-        'js.template': 'Plantilla',
-        'js.create_board_failed_title': 'No se pudo crear el tablero',
-        'js.create_board_failed_text': 'Revisa la imagen elegida o vuelve a intentarlo.',
-        'js.workspace_settings_title': 'Configuracion del espacio',
-        'js.workspace_name': 'Nombre del espacio',
-        'js.workspace_name_placeholder': 'Ej. Producto y roadmap',
-        'js.save_changes': 'Guardar cambios',
-        'js.field_required': 'El nombre es obligatorio',
-        'js.workspace_updated': 'Espacio actualizado correctamente',
-        'js.default_board_name': 'Nuevo tablero',
-        'js.update_email_title': 'Actualizar email',
-        'js.update_email_label': 'Nuevo correo electronico',
-        'js.update_email_placeholder': 'correo@ejemplo.com',
-        'js.save_email': 'Guardar email',
-        'js.email_required': 'Introduce un correo electronico',
-        'js.email_invalid': 'Introduce un correo electronico valido',
-        'js.new_column_title': 'Nueva columna',
-        'js.column_name': 'Nombre de la columna',
-        'js.column_placeholder': 'Ej. En revision',
-        'js.create': 'Crear',
-        'js.new_task_title': 'Nueva tarea',
-        'js.task_name': 'Nombre de la tarea',
-        'js.task_placeholder': 'Ej. Revisar copy',
-        'js.delete_column_title': 'Eliminar columna?',
-        'js.delete_column_text': 'Se borraran tambien todas las tareas.',
-        'js.confirm_delete': 'Si, eliminar',
-        'js.column_deleted': 'Columna eliminada',
-        'js.delete_task_title': 'Eliminar tarea?',
-        'js.delete_task_text': 'Esta accion no se puede deshacer.',
-        'js.task_deleted': 'Tarea eliminada',
-        'js.delete_board_title': 'Borrar tablero?',
-        'js.confirm_delete_board': 'Si, borrar',
-        'js.board_deleted': 'Tablero eliminado',
-        'js.delete_workspace_title': 'Borrar espacio de trabajo?',
-        'js.delete_workspace_text': 'Se borraran tambien todos sus tableros.',
-        'js.confirm_delete_workspace': 'Si, borrar espacio',
-        'js.workspace_deleted': 'Espacio eliminado',
-        'js.board_settings_saved': 'Tablero actualizado',
-        'js.edit_column_title': 'Editar columna',
-        'js.edit_column_label': 'Nuevo nombre de la columna',
-        'js.edit_column_save': 'Guardar columna',
-        'js.move_left': 'Mover a la izquierda',
-        'js.move_right': 'Mover a la derecha',
-        'js.column_updated': 'Columna actualizada',
-    },
-    'en': {
-        'auth.login.page_title': 'Sign In',
-        'auth.login.subtitle': 'Organize projects, teams, and results in one place.',
-        'auth.login.heading': 'Sign in to access your boards',
-        'auth.email_placeholder': 'Email address',
-        'auth.password_placeholder': 'Password',
-        'auth.submit_login': 'Sign in',
-        'auth.forgot_password_link': 'I forgot my password',
-        'auth.register_link': 'Sign up',
-        'auth.register.page_title': 'Register',
-        'auth.register.subtitle': 'Create a real account to save your boards in the database.',
-        'auth.register.heading': 'Create your account',
-        'auth.display_name_placeholder': 'Display name (optional)',
-        'auth.password_helper': 'Use at least 8 characters with uppercase, lowercase, number, and symbol.',
-        'auth.confirm_password_placeholder': 'Repeat password',
-        'auth.language_label': 'Account language',
-        'auth.submit_register': 'Create account',
-        'auth.login_link': 'I already have an account',
-        'auth.recover_access_link': 'Recover access',
-        'auth.forgot.page_title': 'Recover access',
-        'auth.forgot.subtitle': 'If you cannot sign in, we will send a secure email so you can recover your account.',
-        'auth.forgot.heading': 'Recover access',
-        'auth.submit_forgot': 'Send recovery email',
-        'auth.back_to_login': 'Back to login',
-        'auth.create_account_link': 'Create account',
-        'auth.reset.page_title': 'New password',
-        'auth.reset.subtitle': 'Set a new password to sign in again.',
-        'auth.reset.heading': 'Change password',
-        'auth.new_password_placeholder': 'New password',
-        'auth.reset_helper': 'It must include uppercase, lowercase, number, and special character.',
-        'auth.submit_reset': 'Save password',
-        'auth.request_another_link': 'Request another link',
-        'auth.verify.page_title': 'Verify account',
-        'auth.verify.subtitle': 'We will notify you as soon as the verification email is sent so you can finish signing up.',
-        'auth.verify.heading': 'Check your inbox',
-        'auth.submit_resend': 'Resend email',
-        'auth.invalid_credentials': 'Invalid credentials',
-        'auth.account_created': 'Account created successfully. You can sign in now.',
-        'auth.password_updated': 'Password updated. Sign in with your new password.',
-        'auth.complete_required': 'Complete all required fields.',
-        'auth.invalid_email': 'Enter a valid email address.',
-        'auth.passwords_mismatch': 'Passwords do not match.',
-        'auth.email_taken': 'That email is already registered.',
-        'auth.default_user_name': 'User',
-        'auth.local_mode_copy_link': 'Local mode: check the server terminal to copy the link.',
-        'auth.local_mode_open_link': 'Local mode: check the server terminal to open the link.',
-        'auth.recovery_sent': 'If an account exists for that email, we have sent instructions to recover access.',
-        'auth.verification_sent': 'If the account exists and is still pending, we have sent a new verification email.',
-        'auth.password_reset_link_expired': 'The recovery link has expired.',
-        'auth.password_reset_link_invalid': 'The recovery link is not valid.',
-        'auth.verification_link_expired': 'The verification link has expired.',
-        'auth.verification_link_invalid': 'The verification link is not valid.',
-        'auth.account_missing': 'The linked account no longer exists.',
-        'inicio.hero_eyebrow': 'Welcome to Prodify',
-        'inicio.hero_title': 'Your team, fully focused every day.',
-        'inicio.hero_description': 'Prodify turns your ideas into living boards. Build Trello-style flows, align goals, and track progress in real time.',
-        'inicio.hero_cta_templates': 'Explore templates',
-        'inicio.hero_cta_boards': 'Go to boards',
-        'inicio.stat_templates': 'Ready templates',
-        'inicio.stat_clarity': 'More daily clarity',
-        'inicio.stat_workspace': 'Workspace',
-        'inicio.panel_summary': 'Today summary',
-        'inicio.panel_focus_title': 'Quick stand-up',
-        'inicio.panel_focus_body': '3 tasks in progress',
-        'inicio.panel_focus_badge': 'Focused',
-        'inicio.panel_suggested_title': 'Suggested new board',
-        'inicio.panel_suggested_body': 'Marketing template',
-        'inicio.panel_suggested_badge': 'Suggested',
-        'inicio.panel_activity_title': 'Latest activity',
-        'inicio.panel_activity_body': 'Update the roadmap',
-        'inicio.panel_activity_badge': 'Today',
-        'inicio.card_1_title': 'Organize your day',
-        'inicio.card_1_body': 'Create clear lists, assign priorities, and move tasks in seconds.',
-        'inicio.card_1_item_1': 'Custom columns',
-        'inicio.card_1_item_2': 'Labels and priorities',
-        'inicio.card_1_item_3': 'Quick filters',
-        'inicio.card_2_title': 'Collaborate without noise',
-        'inicio.card_2_body': 'Keep the team aligned with real-time updates.',
-        'inicio.card_2_item_1': 'Boards by area',
-        'inicio.card_2_item_2': 'Clear reviews',
-        'inicio.card_2_item_3': 'Visible owners',
-        'inicio.card_3_title': 'Measure progress',
-        'inicio.card_3_body': 'Visualize progress and spot blockers instantly.',
-        'inicio.card_3_item_1': 'Status indicators',
-        'inicio.card_3_item_2': 'Weekly tracking',
-        'inicio.card_3_item_3': 'Team insights',
-        'inicio.highlight_title': 'A clear presentation of your page',
-        'inicio.highlight_body': 'Turn the home page into an experience that explains your value proposition and gets the user ready to create their first board.',
-        'inicio.highlight_cta': 'Create from template',
-        'templates.hero_eyebrow': 'Ready templates',
-        'templates.hero_title': 'Start with boards that already think for you',
-        'templates.hero_body': 'Choose a Trello-style template and create your board with proven workflows. Customize columns, tasks, and team pace in minutes.',
-        'templates.recommended_flow': 'Recommended flow',
-        'templates.flow_idea': 'Idea',
-        'templates.flow_progress': 'In progress',
-        'templates.flow_review': 'Review',
-        'templates.flow_done': 'Done',
-        'templates.note_states': '4 key stages',
-        'templates.note_checklist': 'Checklist and priorities',
-        'templates.available_count': '{count} templates available',
-        'templates.chip_product': 'Product',
-        'templates.chip_marketing': 'Marketing',
-        'templates.chip_sales': 'Sales',
-        'templates.chip_operations': 'Operations',
-        'board.eyebrow': 'Board',
-        'board.create_column': 'New column',
-        'board.readonly': 'Read-only mode',
-        'board.settings_cta': 'Settings',
-        'workspace.member_email_placeholder': 'email@example.com',
-        'js.no_file_selected': 'No file selected',
-        'js.select_workspace': 'Select a workspace',
-        'js.create_new_workspace': 'Create new workspace',
-        'js.no_templates': 'There are no templates available yet.',
-        'js.empty_board_summary': 'Create an empty board with the base structure and customize it later.',
-        'js.create_board_with_template': 'Create board with template',
-        'js.create_board': 'Create board',
-        'js.cancel': 'Cancel',
-        'js.create_normal': 'Create standard',
-        'js.use_template': 'Use template',
-        'js.preview': 'Preview',
-        'js.board_background': 'Board background',
-        'js.upload_image': 'Upload image',
-        'js.board_title': 'Board title',
-        'js.board_title_placeholder': 'e.g. April sprint',
-        'js.workspace': 'Workspace',
-        'js.new_workspace_name': 'New workspace name',
-        'js.new_workspace_placeholder': 'e.g. Product Q2',
-        'js.template': 'Template',
-        'js.create_board_failed_title': 'Board could not be created',
-        'js.create_board_failed_text': 'Check the selected image or try again.',
-        'js.workspace_settings_title': 'Workspace settings',
-        'js.workspace_name': 'Workspace name',
-        'js.workspace_name_placeholder': 'e.g. Product and roadmap',
-        'js.save_changes': 'Save changes',
-        'js.field_required': 'The name is required',
-        'js.workspace_updated': 'Workspace updated successfully',
-        'js.default_board_name': 'New board',
-        'js.update_email_title': 'Update email',
-        'js.update_email_label': 'New email address',
-        'js.update_email_placeholder': 'email@example.com',
-        'js.save_email': 'Save email',
-        'js.email_required': 'Enter an email address',
-        'js.email_invalid': 'Enter a valid email address',
-        'js.new_column_title': 'New column',
-        'js.column_name': 'Column name',
-        'js.column_placeholder': 'e.g. In review',
-        'js.create': 'Create',
-        'js.new_task_title': 'New task',
-        'js.task_name': 'Task name',
-        'js.task_placeholder': 'e.g. Review copy',
-        'js.delete_column_title': 'Delete column?',
-        'js.delete_column_text': 'All tasks in it will also be deleted.',
-        'js.confirm_delete': 'Yes, delete',
-        'js.column_deleted': 'Column deleted',
-        'js.delete_task_title': 'Delete task?',
-        'js.delete_task_text': 'This action cannot be undone.',
-        'js.task_deleted': 'Task deleted',
-        'js.delete_board_title': 'Delete board?',
-        'js.confirm_delete_board': 'Yes, delete',
-        'js.board_deleted': 'Board deleted',
-        'js.delete_workspace_title': 'Delete workspace?',
-        'js.delete_workspace_text': 'All its boards will also be deleted.',
-        'js.confirm_delete_workspace': 'Yes, delete workspace',
-        'js.workspace_deleted': 'Workspace deleted',
-        'js.board_settings_saved': 'Board updated',
-        'js.edit_column_title': 'Edit column',
-        'js.edit_column_label': 'New column name',
-        'js.edit_column_save': 'Save column',
-        'js.move_left': 'Move left',
-        'js.move_right': 'Move right',
-        'js.column_updated': 'Column updated',
-    },
-}
+
+
 LANGUAGE_ALIASES = {
     'es-es': 'es',
     'en-us': 'en',
     'en-gb': 'en',
-    'pt-br': 'pt',
-    'pt-pt': 'pt',
-    'zh': 'zh-CN',
-    'zh-cn': 'zh-CN',
-    'zh-hans': 'zh-CN',
-    'zh-tw': 'zh-TW',
-    'zh-hant': 'zh-TW',
+    'fr-fr': 'fr',
+    'it-it': 'it',
+    'de-de': 'de',
 }
-
-LANGUAGE_NAME_TRANSLATIONS = {
-    'es': {
-        'es': 'Español',
-        'en': 'Inglés',
-        'fr': 'Francés',
-        'it': 'Italiano',
-        'pt': 'Portugués',
-        'de': 'Alemán',
-        'nl': 'Neerlandés',
-        'ar': 'Árabe',
-        'hi': 'Hindi',
-        'zh-CN': 'Chino simplificado',
-        'ja': 'Japonés',
-    },
-    'en': {
-        'es': 'Spanish',
-        'en': 'English',
-        'fr': 'French',
-        'it': 'Italian',
-        'pt': 'Portuguese',
-        'de': 'German',
-        'nl': 'Dutch',
-        'ar': 'Arabic',
-        'hi': 'Hindi',
-        'zh-CN': 'Simplified Chinese',
-        'ja': 'Japanese',
-    },
-    'fr': {
-        'es': 'Espagnol',
-        'en': 'Anglais',
-        'fr': 'Français',
-        'it': 'Italien',
-        'pt': 'Portugais',
-        'de': 'Allemand',
-        'nl': 'Néerlandais',
-        'ar': 'Arabe',
-        'hi': 'Hindi',
-        'zh-CN': 'Chinois simplifié',
-        'ja': 'Japonais',
-    },
-    'it': {
-        'es': 'Spagnolo',
-        'en': 'Inglese',
-        'fr': 'Francese',
-        'it': 'Italiano',
-        'pt': 'Portoghese',
-        'de': 'Tedesco',
-        'nl': 'Olandese',
-        'ar': 'Arabo',
-        'hi': 'Hindi',
-        'zh-CN': 'Cinese semplificato',
-        'ja': 'Giapponese',
-    },
-    'pt': {
-        'es': 'Espanhol',
-        'en': 'Inglês',
-        'fr': 'Francês',
-        'it': 'Italiano',
-        'pt': 'Português',
-        'de': 'Alemão',
-        'nl': 'Neerlandês',
-        'ar': 'Árabe',
-        'hi': 'Hindi',
-        'zh-CN': 'Chinês simplificado',
-        'ja': 'Japonês',
-    },
-    'de': {
-        'es': 'Spanisch',
-        'en': 'Englisch',
-        'fr': 'Französisch',
-        'it': 'Italienisch',
-        'pt': 'Portugiesisch',
-        'de': 'Deutsch',
-        'nl': 'Niederländisch',
-        'ar': 'Arabisch',
-        'hi': 'Hindi',
-        'zh-CN': 'Vereinfachtes Chinesisch',
-        'ja': 'Japanisch',
-    },
-    'nl': {
-        'es': 'Spaans',
-        'en': 'Engels',
-        'fr': 'Frans',
-        'it': 'Italiaans',
-        'pt': 'Portugees',
-        'de': 'Duits',
-        'nl': 'Nederlands',
-        'ar': 'Arabisch',
-        'hi': 'Hindi',
-        'zh-CN': 'Vereenvoudigd Chinees',
-        'ja': 'Japans',
-    },
-    'ar': {
-        'es': 'الإسبانية',
-        'en': 'الإنجليزية',
-        'fr': 'الفرنسية',
-        'it': 'الإيطالية',
-        'pt': 'البرتغالية',
-        'de': 'الألمانية',
-        'nl': 'الهولندية',
-        'ar': 'العربية',
-        'hi': 'الهندية',
-        'zh-CN': 'الصينية المبسطة',
-        'ja': 'اليابانية',
-    },
-    'hi': {
-        'es': 'स्पेनिश',
-        'en': 'अंग्रेज़ी',
-        'fr': 'फ़्रेंच',
-        'it': 'इतालवी',
-        'pt': 'पुर्तगाली',
-        'de': 'जर्मन',
-        'nl': 'डच',
-        'ar': 'अरबी',
-        'hi': 'हिन्दी',
-        'zh-CN': 'सरलीकृत चीनी',
-        'ja': 'जापानी',
-    },
-    'zh-CN': {
-        'es': '西班牙语',
-        'en': '英语',
-        'fr': '法语',
-        'it': '意大利语',
-        'pt': '葡萄牙语',
-        'de': '德语',
-        'nl': '荷兰语',
-        'ar': '阿拉伯语',
-        'hi': '印地语',
-        'zh-CN': '简体中文',
-        'ja': '日语',
-    },
-    'ja': {
-        'es': 'スペイン語',
-        'en': '英語',
-        'fr': 'フランス語',
-        'it': 'イタリア語',
-        'pt': 'ポルトガル語',
-        'de': 'ドイツ語',
-        'nl': 'オランダ語',
-        'ar': 'アラビア語',
-        'hi': 'ヒンディー語',
-        'zh-CN': '簡体字中国語',
-        'ja': '日本語',
-    },
-}
-
 
 def normalize_language_code(value):
     """Normaliza el codigo de idioma y aplica alias comunes."""
@@ -1116,15 +488,14 @@ def normalize_language_code(value):
 
 
 def get_language_label(language_code, display_language=None):
-    """Devuelve el nombre visible del idioma."""
+    """Devuelve el nombre visible del idioma leido desde translations.json."""
     normalized_code = normalize_language_code(language_code)
     normalized_display = normalize_language_code(display_language or normalized_code)
-    translated_labels = LANGUAGE_NAME_TRANSLATIONS.get(normalized_display, {})
-    return (
-        translated_labels.get(normalized_code)
-        or LANGUAGE_LABELS.get(normalized_code)
-        or LANGUAGE_LABELS.get(DEFAULT_LANGUAGE, 'Espanol')
-    )
+    translation_key = f'lang.name.{normalized_code}'
+    translated = translate_text(translation_key, normalized_display)
+    if translated and translated != translation_key:
+        return translated
+    return LANGUAGE_LABELS.get(normalized_code) or LANGUAGE_LABELS.get(DEFAULT_LANGUAGE, 'Espanol')
 
 
 def get_language_flag(language_code):
@@ -1305,16 +676,10 @@ def translate_text(key, language_code=None, **kwargs):
     normalized_code = normalize_language_code(language_code)
     message = (
         TRANSLATIONS_CATALOG.get(normalized_code, {}).get(key)
-        or INLINE_TRANSLATION_OVERRIDES.get(normalized_code, {}).get(key)
         or TRANSLATIONS_CATALOG.get('en', {}).get(key)
-        or INLINE_TRANSLATION_OVERRIDES.get('en', {}).get(key)
         or TRANSLATIONS_CATALOG.get(DEFAULT_LANGUAGE, {}).get(key)
-        or INLINE_TRANSLATION_OVERRIDES.get(DEFAULT_LANGUAGE, {}).get(key)
-        or BUILTIN_TRANSLATION_FALLBACKS.get(key)
         or key
     )
-    if message == key and key in BUILTIN_TRANSLATION_FALLBACKS:
-        message = BUILTIN_TRANSLATION_FALLBACKS[key]
     if kwargs:
         try:
             return message.format(**kwargs)
@@ -1396,10 +761,57 @@ def build_topbar_language_html(selected_language):
     )
 
 
+def build_register_language_selector(selected_language):
+    """Genera el selector de idioma para el formulario de registro."""
+    normalized_selected = normalize_language_code(selected_language)
+    current_label = get_language_label(normalized_selected, normalized_selected)
+    current_flag_url = get_language_flag_url(normalized_selected)
+    current_flag_markup = (
+        Markup(f'<img src="{escape(current_flag_url)}" alt="" loading="lazy" decoding="async">')
+        if current_flag_url
+        else get_language_flag_svg(normalized_selected)
+    )
+    options = []
+    for item in LANGUAGE_CATALOG:
+        code = item['code']
+        selected_attr = 'true' if code == normalized_selected else 'false'
+        flag_url = get_language_flag_url(code)
+        flag_markup = (
+            Markup(f'<img src="{escape(flag_url)}" alt="" loading="lazy" decoding="async">')
+            if flag_url
+            else get_language_flag_svg(code)
+        )
+        label = get_language_label(code, normalized_selected)
+        options.append(
+            '<button type="button" class="topbar-language-option js-reg-lang-option" '
+            f'data-language-value="{escape(code)}" aria-pressed="{selected_attr}">'
+            f'<span class="topbar-language-option-flag" aria-hidden="true">{flag_markup}</span>'
+            f'<span class="topbar-language-option-label">{escape(label)}</span>'
+            '</button>'
+        )
+    options_html = Markup(''.join(options))
+    return Markup(
+        '<div class="register-language-selector js-reg-lang-dropdown">'
+        f'<input type="hidden" name="preferred_language" value="{escape(normalized_selected)}">'
+        f'<button type="button" class="topbar-language-trigger js-reg-lang-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="{escape(current_label)}">'
+        f'<span class="topbar-language-flag js-reg-lang-flag" aria-hidden="true">{current_flag_markup}</span>'
+        f'<span class="topbar-language-current-label js-reg-lang-label" aria-hidden="true">{escape(current_label)}</span>'
+        '<span class="topbar-language-caret" aria-hidden="true"></span>'
+        '</button>'
+        '<div class="topbar-language-menu" hidden>'
+        '<div class="topbar-language-options" role="listbox">'
+        f'{options_html}'
+        '</div>'
+        '</div>'
+        '</div>'
+    )
+
+
 def build_client_translations(language_code=None):
     """Expone los textos del frontend que necesita JavaScript."""
     keys = [
         'js.no_file_selected', 'js.select_workspace', 'js.create_new_workspace', 'js.no_templates',
+        'js.col_pending', 'js.col_in_progress', 'js.col_done',
         'js.empty_board_summary', 'js.create_board_with_template', 'js.create_board', 'js.cancel',
         'js.create_normal', 'js.use_template', 'js.preview', 'js.board_background',
         'js.upload_image', 'js.board_title', 'js.board_title_placeholder', 'js.workspace',
@@ -1415,6 +827,11 @@ def build_client_translations(language_code=None):
         'js.task_deleted', 'js.delete_board_title', 'js.confirm_delete_board',
         'js.board_deleted', 'js.delete_workspace_title', 'js.delete_workspace_text',
         'js.confirm_delete_workspace', 'js.workspace_deleted',
+        'js.board_title_required', 'js.workspace_required', 'js.new_workspace_required',
+        'js.template_required', 'js.board_created_from_template', 'js.board_created',
+        'js.workspace_and_board_created', 'js.empty_column',
+        'js.edit_column_title', 'js.edit_column_label', 'js.edit_column_save', 'js.column_updated',
+        'js.board_settings_saved', 'js.move_left', 'js.move_right',
     ]
     return {key: translate_text(key, language_code) for key in keys}
 
@@ -1531,10 +948,12 @@ def build_email_shell(
     outro=None,
     show_cta=False,
     show_cta_fallback=False,
+    buttons=None,
+    intro_html=None,
 ):
     """Construye una plantilla HTML sencilla y cuidada para los emails de Prodify."""
     safe_title = html_escape(title)
-    safe_intro = html_escape(intro).replace('\n', '<br>')
+    safe_intro = intro_html if intro_html is not None else html_escape(intro).replace('\n', '<br>')
     safe_cta_label = html_escape(cta_label or '')
     safe_cta_url = html_escape(cta_url or '')
     safe_outro = html_escape(outro or '').replace('\n', '<br>')
@@ -1555,6 +974,35 @@ def build_email_shell(
             'Detalles importantes</div>'
             f'<ul style="padding-left:18px;margin:0;">{detail_items}</ul>'
             '</div>'
+        )
+
+    buttons_html = ''
+    if buttons:
+        parts = []
+        for btn in buttons:
+            btn_url = html_escape(btn.get('url', ''))
+            btn_label = html_escape(btn.get('label', ''))
+            if btn.get('primary'):
+                parts.append(
+                    f'<a href="{btn_url}" style="display:inline-block;padding:13px 26px;border-radius:999px;'
+                    f'background:linear-gradient(135deg,#2f63ff,#1ea7ff);color:#ffffff !important;'
+                    f'-webkit-text-fill-color:#ffffff !important;font-size:15px;font-weight:700;'
+                    f'text-decoration:none;box-shadow:0 12px 28px rgba(47,99,255,.3);">{btn_label}</a>'
+                )
+            else:
+                parts.append(
+                    f'<a href="{btn_url}" style="display:inline-block;padding:12px 24px;border-radius:999px;'
+                    f'background:transparent;color:#93c5fd !important;-webkit-text-fill-color:#93c5fd !important;'
+                    f'font-size:15px;font-weight:700;text-decoration:none;border:1.5px solid #2f63ff;">{btn_label}</a>'
+                )
+        fallback_url = html_escape(buttons[0].get('url', '')) if buttons else ''
+        buttons_html = (
+            '<div style="margin:28px 0 16px;display:flex;gap:12px;flex-wrap:wrap;">' +
+            ''.join(parts) +
+            '</div>'
+            f'<div style="color:#64748b;font-size:12px;margin-bottom:8px;">'
+            f'Si los botones no se abren, copia este enlace: '
+            f'<span style="color:#93c5fd;word-break:break-all;">{fallback_url}</span></div>'
         )
 
     cta_html = ''
@@ -1601,6 +1049,7 @@ def build_email_shell(
         f'<div style="display:inline-block;margin-bottom:14px;padding:6px 10px;border-radius:999px;background:rgba(47,99,255,.18);color:#bfdbfe !important;-webkit-text-fill-color:#bfdbfe !important;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Notificacion de cuenta</div>'
         f'<h1 style="margin:0 0 14px;color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;font-size:30px;font-weight:800;line-height:1.15;">{safe_title}</h1>'
         f'<p style="margin:0;color:#cbd5e1 !important;-webkit-text-fill-color:#cbd5e1 !important;font-size:16px;line-height:1.75;">{safe_intro}</p>'
+        f'{buttons_html}'
         f'{cta_html}'
         f'{details_html}'
         f'{cta_fallback_html}'
@@ -1632,6 +1081,7 @@ def send_email_message(to_email, subject, text_content, html_content=None):
             headers={
                 'Authorization': f'Bearer {resend_api_key}',
                 'Content-Type': 'application/json',
+                'User-Agent': 'Prodify/1.0',
             },
             method='POST',
         )
@@ -1830,26 +1280,33 @@ def send_registration_welcome_email(user):
 def send_board_invitation_email(invitation, board, workspace, invited_by_user):
     """Envia una invitacion por email para acceder a un tablero concreto."""
     accept_url = f'{public_base_url}{url_for("accept_board_invitation", token=invitation.token)}'
+    board_url = f'{public_base_url}{url_for("board_view", board_id=board.id)}'
     inviter_name = invited_by_user.email if invited_by_user else 'Prodify'
     role_label = get_role_label(invitation.role)
     subject = f'Te han invitado al tablero "{board.name}" en Prodify'
     text_content = (
         f'{inviter_name} te ha invitado al tablero "{board.name}"'
         f' del espacio "{workspace.name}" como {role_label}.\n\n'
-        f'Abre este enlace para aceptar la invitacion:\n{accept_url}\n\n'
+        f'Acepta la invitacion:\n{accept_url}\n\n'
+        f'Ver tablero:\n{board_url}\n\n'
         'Si no tenias cuenta, podras registrarte con ese mismo correo y entrar directamente.'
     )
     html_content = build_email_shell(
         'Invitacion a tablero',
-        f'{inviter_name} quiere que te unas al tablero "{board.name}" dentro de Prodify.',
-        'Aceptar invitacion',
-        accept_url,
-        [
-            f'Espacio: {workspace.name}',
-            f'Rol asignado: {role_label}',
+        '',
+        intro_html=(
+            f'{html_escape(inviter_name)} quiere que te unas al tablero '
+            f'<strong style="color:#ffffff">{html_escape(board.name)}</strong> dentro de Prodify.'
+        ),
+        detail_lines=[
+            f'Espacio: {html_escape(workspace.name)}',
+            f'Rol asignado: {html_escape(role_label)}',
             'Si todavia no tienes cuenta, podras crearla con este correo y entrar despues.',
         ],
-        'La invitacion te llevara directamente al tablero cuando aceptes.'
+        outro='Haz clic en Aceptar invitacion para unirte. Iniciara sesion automaticamente y te llevara al tablero.',
+        buttons=[
+            {'label': 'Aceptar invitacion', 'url': accept_url, 'primary': True},
+        ],
     )
     return send_email_message(invitation.email, subject, text_content, html_content)
 
@@ -2270,33 +1727,58 @@ def build_workspace_blocks_html(workspaces, boards_by_workspace, active_workspac
     return Markup(''.join(html))
 
 
-def build_templates_sidebar_html(template_categories, grouped_templates):
+def get_translated_board_templates(language_code=None):
+    lang = language_code or get_current_language()
+    tr = lambda key: translate_text(key, lang)
+    result = []
+    for tpl in BOARD_TEMPLATES:
+        raw_id = tpl['id']
+        cat_key = 'template.cat.' + tpl['category'].lower().replace(' ', '_')
+        translated = dict(tpl)
+        translated['name']     = tr(f'template.{raw_id}.name') or tpl['name']
+        translated['summary']  = tr(f'template.{raw_id}.summary') or tpl['summary']
+        translated['category'] = tr(cat_key) or tpl['category']
+        translated['columns']  = [tr(f'template.{raw_id}.col.{i}') or c for i, c in enumerate(tpl['columns'])]
+        translated['tags']     = [tr(f'template.{raw_id}.tag.{i}') or tag for i, tag in enumerate(tpl['tags'])]
+        result.append(translated)
+    return result
+
+
+def build_templates_sidebar_html(template_categories, grouped_templates, language_code=None):
     """Genera el indice lateral de plantillas."""
+    tr = lambda key, **kwargs: translate_text(key, language_code or get_current_language(), **kwargs)
     html = []
     for category in template_categories:
+        cat_key = 'template.cat.' + category.lower().replace(' ', '_')
+        cat_label = tr(cat_key) or category
         html.append('<details class="template-group" open>')
-        html.append(f'<summary>{escape(category)}</summary>')
+        html.append(f'<summary>{escape(cat_label)}</summary>')
         html.append('<div class="template-group-links">')
         for template in grouped_templates.get(category, []):
-            html.append(f'<a href="#template-{escape(template["id"])}">{escape(template["name"])}</a>')
+            t_id = template["id"]
+            t_name = tr(f'template.{t_id}.name') or template["name"]
+            html.append(f'<a href="#template-{escape(t_id)}">{escape(t_name)}</a>')
         html.append('</div></details>')
     return Markup(''.join(html))
 
 
-def build_templates_grid_html(templates):
+def build_templates_grid_html(templates, language_code=None):
     """Genera las tarjetas del catalogo de plantillas con diseno mejorado."""
+    tr = lambda key, **kwargs: translate_text(key, language_code or get_current_language(), **kwargs)
     html = []
     for template in templates:
-        column_count = len(template["columns"])
-        t_id     = escape(template["id"])
-        t_acc    = escape(template["accent"])
-        t_cat    = escape(template["category"])
-        t_name   = escape(template["name"])
-        t_sum    = escape(template["summary"])
+        raw_id  = template["id"]
+        t_id    = escape(raw_id)
+        t_acc   = escape(template["accent"])
+        cat_key = 'template.cat.' + template["category"].lower().replace(' ', '_')
+        t_cat   = escape(tr(cat_key) or template["category"])
+        t_name  = escape(tr(f'template.{raw_id}.name') or template["name"])
+        t_sum   = escape(tr(f'template.{raw_id}.summary') or template["summary"])
+        raw_cols = [tr(f'template.{raw_id}.col.{i}') or c for i, c in enumerate(template["columns"])]
+        column_count = len(raw_cols)
 
         html.append(
             f'<article class="template-card {t_acc}" id="template-{t_id}">'
-            # ── Poster superior con miniatura del tablero ──────────
             '<div class="template-poster">'
             '<div class="template-orb"></div>'
             '<div class="template-poster-top">'
@@ -2307,102 +1789,41 @@ def build_templates_grid_html(templates):
             '<div class="template-board-chrome"><span></span><span></span><span></span></div>'
             '<div class="template-preview">'
         )
-        for column in template["columns"]:
+        for col in raw_cols:
             html.append(
                 '<div class="preview-col">'
-                f'<div class="preview-title">{escape(column)}</div>'
+                f'<div class="preview-title">{escape(col)}</div>'
                 '<div class="preview-card"></div>'
                 '<div class="preview-card small"></div>'
                 '<div class="preview-card micro"></div>'
                 '</div>'
             )
         html.append(
-            '</div>'  # .template-preview
+            '</div>'
             '<div class="template-board-footer">'
             '<span class="board-pill"></span>'
             '<span class="board-pill short"></span>'
             '<span class="board-avatar-stack"><i></i><i></i><i></i></span>'
             '</div>'
-            '</div>'  # .template-board-shell
-            '</div>'  # .template-poster
-            # ── Contenido textual ──────────────────────────────────
+            '</div>'
+            '</div>'
             '<div class="template-head"><div>'
             f'<h3>{t_name}</h3>'
             f'<p>{t_sum}</p>'
             '</div>'
             f'<button type="button" class="template-action js-use-template" '
             f'data-template-name="{t_name}" data-template-id="{t_id}">'
-            'Usar plantilla</button></div>'
+            f'{escape(tr("common.start_with_template"))}</button></div>'
             '<div class="template-tags">'
         )
-        for tag in template["tags"]:
+        raw_tags = [tr(f'template.{raw_id}.tag.{i}') or tag for i, tag in enumerate(template["tags"])]
+        for tag in raw_tags:
             html.append(f'<span>#{escape(tag)}</span>')
         html.append('</div></article>')
     return Markup(''.join(html))
 
 
 _BOARD_ACCENTS = ['blue', 'violet', 'rose', 'mint', 'amber', 'slate']
-
-def build_board_columns_html(columns, cards_by_column, board_id=0, can_edit=False):
-    """Genera las columnas del kanban con color de acento consistente por tablero."""
-    accent = _BOARD_ACCENTS[board_id % len(_BOARD_ACCENTS)]
-    tr = lambda key, **kwargs: translate_text(key, get_current_language(), **kwargs)
-    html = []
-    for column in columns:
-        column_cards = cards_by_column.get(column.id, [])
-        html.append(
-            f'<div class="kanban-column" data-column-id="{column.id}" data-accent="{accent}">'
-        )
-        if can_edit:
-            html.append(
-                f'<button type="button" class="column-icon-btn js-edit-column" '
-                f'data-column-id="{column.id}" data-column-title="{escape(column.title)}" '
-                f'title="{escape(tr("board.column_rename"))}">✎</button>'
-            )
-            html.append(
-                f'<form action="{escape(url_for("move_column", column_id=column.id))}" method="POST" class="inline-form">'
-                '<input type="hidden" name="direction" value="left">'
-                f'<button type="submit" class="column-icon-btn" title="{escape(tr("board.column_move_left"))}">←</button>'
-                '</form>'
-            )
-            html.append(
-                f'<form action="{escape(url_for("move_column", column_id=column.id))}" method="POST" class="inline-form">'
-                '<input type="hidden" name="direction" value="right">'
-                f'<button type="submit" class="column-icon-btn" title="{escape(tr("board.column_move_right"))}">→</button>'
-                '</form>'
-            )
-            html.append(
-                f'<button type="button" class="add-card-btn js-add-card" '
-                f'data-column-id="{column.id}">+ {escape(tr("board.task"))}</button>'
-            )
-            html.append(
-                f'<form action="{escape(url_for("delete_column", column_id=column.id))}" method="POST" class="inline-form">'
-                f'<button type="submit" class="delete-col-btn js-delete-column" title="{escape(tr("board.delete_column"))}">{escape(tr("common.delete"))}</button>'
-                '</form>'
-            )
-        html.append('</div></div>')
-        html.append(f'<div class="kanban-cards" data-column-id="{column.id}">')
-        column_cards = cards_by_column.get(column.id, [])
-        if column_cards:
-            for card in column_cards:
-                draggable = 'true' if can_edit else 'false'
-                html.append(
-                    f'<div class="kanban-card" draggable="{draggable}" data-card-id="{card.id}">'
-                    f'<span class="card-title">{escape(card.title)}</span>'
-                )
-                if can_edit:
-                    html.append(
-                        f'<form action="{escape(url_for("delete_card", card_id=card.id))}" method="POST" class="card-delete-form">'
-                        f'<button type="submit" class="card-delete-btn js-delete-card" title="{escape(tr("board.delete_task"))}" draggable="false">&times;</button>'
-                        '</form>'
-                    )
-                html.append(
-                    '</div>'
-                )
-        else:
-            html.append(f'<div class="kanban-card ghost">{escape(tr("board.no_tasks"))}</div>')
-        html.append('</div></div>')
-    return Markup(''.join(html))
 
 
 def build_board_settings_panel_html(board, columns, cards_by_column, workspace_role):
@@ -2426,9 +1847,9 @@ def build_board_settings_panel_html(board, columns, cards_by_column, workspace_r
         '<div class="board-settings-head-main">',
         f'<span class="eyebrow">{escape(tr("board.settings"))}</span>',
         f'<h2>{escape(tr("board.settings"))}</h2>',
-        '<p>Controla el fondo, las personas con acceso y las invitaciones del tablero.</p>',
+        f'<p>{escape(tr("board.settings_subtitle"))}</p>',
         '</div>',
-        '<button type="button" class="board-settings-close js-board-settings-close" aria-label="Cerrar panel" title="Cerrar panel">&times;</button>',
+        f'<button type="button" class="board-settings-close js-board-settings-close" aria-label="{escape(tr("board.settings_close"))}" title="{escape(tr("board.settings_close"))}">&times;</button>',
         '</div>',
         '<div class="board-settings-metrics">',
         f'<div class="board-settings-metric"><span>{escape(tr("board.columns_count", count=len(columns)))}</span><strong>{len(columns)}</strong></div>',
@@ -2459,31 +1880,7 @@ def build_board_settings_panel_html(board, columns, cards_by_column, workspace_r
         '</form>',
         '</section>',
         '<section class="board-settings-section">',
-        f'<div class="board-settings-section-head"><div><strong>{escape(tr("board.settings_columns"))}</strong><span>{escape(tr("board.settings_columns_help"))}</span></div></div>',
-        '<div class="board-settings-column-list">',
-    ])
-    for column in columns:
-        html.append(
-            '<div class="board-settings-column-row">'
-            f'<div class="board-settings-column-copy"><span class="board-settings-column-index">{column.position + 1:02d}</span><div><strong>{escape(column.title)}</strong><span>{len(cards_by_column.get(column.id, []))} {escape(tr("board.task"))}</span></div></div>'
-            '<div class="board-settings-column-actions">'
-        )
-        if can_manage:
-            html.append(
-                f'<button type="button" class="settings-action-btn compact js-edit-column" data-column-id="{column.id}" data-column-title="{escape(column.title)}">{escape(tr("board.column_rename"))}</button>'
-            )
-            html.append(
-                f'<form action="{escape(url_for("move_column", column_id=column.id))}" method="POST" class="inline-form"><input type="hidden" name="direction" value="left"><button type="submit" class="settings-action-btn compact" aria-label="{escape(tr("board.column_move_left"))}" title="{escape(tr("board.column_move_left"))}">&#8592;</button></form>'
-            )
-            html.append(
-                f'<form action="{escape(url_for("move_column", column_id=column.id))}" method="POST" class="inline-form"><input type="hidden" name="direction" value="right"><button type="submit" class="settings-action-btn compact" aria-label="{escape(tr("board.column_move_right"))}" title="{escape(tr("board.column_move_right"))}">&#8594;</button></form>'
-            )
-        html.append('</div></div>')
-    html.extend([
-        '</div>',
-        '</section>',
-        '<section class="board-settings-section">',
-        '<div class="board-settings-section-head"><div><strong>Permisos del tablero</strong><span>Invita personas por correo y define el rol que tendran dentro de este tablero.</span></div></div>',
+        f'<div class="board-settings-section-head"><div><strong>{escape(tr("board.settings_permissions"))}</strong><span>{escape(tr("board.settings_permissions_help"))}</span></div></div>',
         '<div class="board-permissions-list">',
         '<div class="board-member-row board-owner-row">',
         f'<div class="board-member-copy"><strong>{escape(owner_display["user_name"])}</strong><span>{escape(owner.email if owner else "")}</span></div>',
@@ -2511,20 +1908,20 @@ def build_board_settings_panel_html(board, columns, cards_by_column, workspace_r
         '</div>',
         f'<form class="board-settings-form board-invite-form" action="{escape(url_for("invite_board_member", board_id=board.id))}" method="POST">',
         '<div class="board-invite-grid">',
-        '<input type="email" name="member_email" class="board-settings-input" placeholder="correo@ejemplo.com" required>',
+        f'<input type="email" name="member_email" class="board-settings-input" placeholder="{escape(tr("board.invite_email_placeholder"))}" required>',
         '<select name="role" class="board-settings-select">',
     ])
     for role in BOARD_MEMBER_ROLES:
         html.append(f'<option value="{escape(role)}">{escape(get_role_label(role))}</option>')
     html.extend([
         '</select>',
-        f'<button type="submit" class="btn-primary" {"disabled" if not can_manage else ""}>Invitar</button>',
+        f'<button type="submit" class="btn-primary" {"disabled" if not can_manage else ""}>{escape(tr("board.invite_btn"))}</button>',
         '</div>',
         '</form>',
     ])
     if pending_invitations:
         html.extend([
-            '<div class="board-settings-section-head"><div><strong>Invitaciones pendientes</strong><span>Correos enviados que aun no han aceptado.</span></div></div>',
+            f'<div class="board-settings-section-head"><div><strong>{escape(tr("board.pending_invitations"))}</strong><span>{escape(tr("board.pending_invitations_help"))}</span></div></div>',
             '<div class="board-pending-list">',
         ])
         for invitation in pending_invitations:
@@ -2536,81 +1933,6 @@ def build_board_settings_panel_html(board, columns, cards_by_column, workspace_r
             html.append('</div></div>')
         html.append('</div>')
     html.extend([
-        '</section>',
-        '<section class="board-settings-section board-settings-danger">',
-        f'<div class="board-settings-section-head"><div><strong>{escape(tr("board.settings_danger"))}</strong><span>{escape(tr("board.settings_danger_help"))}</span></div></div>',
-        f'<form action="{escape(url_for("delete_board", board_id=board.id))}" method="POST" class="inline-form"><button type="submit" class="workspace-delete-btn js-delete-board btn btn-sm" {"disabled" if not can_manage else ""}>{escape(tr("board.delete"))}</button></form>',
-        '</section>',
-        '</div>',
-        '</aside>',
-    ])
-    return Markup(''.join(html))
-
-    html = [
-        '<aside class="board-settings-panel">',
-        '<div class="board-settings-shell">',
-        '<div class="board-settings-head">',
-        f'<span class="eyebrow">{escape(tr("board.settings"))}</span>',
-        f'<h2>{escape(tr("board.settings"))}</h2>',
-        '<p>Controla el fondo, las personas con acceso y las invitaciones del tablero.</p>',
-        '</div>',
-        '<div class="board-settings-metrics">',
-        f'<div class="board-settings-metric"><span>{escape(tr("board.columns_count", count=len(columns)))}</span><strong>{len(columns)}</strong></div>',
-        f'<div class="board-settings-metric"><span>{escape(tr("board.cards_count", count=total_cards))}</span><strong>{total_cards}</strong></div>',
-        f'<div class="board-settings-metric"><span>{escape(tr("board.access_current"))}</span><strong>{escape(get_role_label(workspace_role))}</strong></div>',
-        '</div>',
-    ]
-
-    html.extend([
-        '<section class="board-settings-section">',
-        f'<div class="board-settings-section-head"><div><strong>{escape(tr("board.settings_background"))}</strong><span>{escape(tr("board.settings_background_help"))}</span></div></div>',
-        f'<form class="board-settings-form" action="{escape(url_for("update_board", board_id=board.id))}" method="POST" enctype="multipart/form-data">',
-        f'<input type="hidden" name="board_name" value="{escape(board.name)}">',
-        f'<input type="hidden" name="board_background" value="{escape(selected_color)}" id="boardBackgroundInput">',
-        '<div class="board-color-grid board-settings-colors">',
-    ])
-    for color in color_options:
-        active = ' is-active' if color.lower() == selected_color.lower() else ''
-        disabled = ' disabled' if not can_manage else ''
-        html.append(
-            f'<button type="button" class="board-color-option js-board-color-option{active}" '
-            f'data-color-value="{escape(color)}" style="background:{escape(color)}"{disabled}></button>'
-        )
-    html.extend([
-        '</div>',
-        f'<label class="board-settings-label" for="boardSettingsCover">{escape(tr("board.background_cover_label"))}</label>',
-        '<div class="board-cover-upload board-settings-upload">',
-        f'<label for="boardSettingsCover" class="board-cover-upload-btn">{escape(translate_text("js.upload_image", get_current_language()))}</label>',
-        f'<input id="boardSettingsCover" class="js-board-cover-input" type="file" name="board_cover_file" accept=".jpg,.jpeg,.png,.svg,.webp,image/jpeg,image/png,image/svg+xml,image/webp" {"disabled" if not can_manage else ""}>',
-        f'<span class="board-cover-upload-name js-board-cover-name">{escape(board.cover_url or tr("js.no_file_selected"))}</span>',
-        '</div>',
-        f'<p class="board-settings-help">{escape(tr("board.background_cover_help"))}</p>',
-        f'<button type="submit" class="btn-primary board-settings-save" {"disabled" if not can_manage else ""}>{escape(tr("board.save_changes"))}</button>',
-        '</form>',
-        '</section>',
-        '<section class="board-settings-section">',
-        f'<div class="board-settings-section-head"><div><strong>{escape(tr("board.settings_columns"))}</strong><span>{escape(tr("board.settings_columns_help"))}</span></div></div>',
-        '<div class="board-settings-column-list">',
-    ])
-    for column in columns:
-        html.append(
-            '<div class="board-settings-column-row">'
-            f'<div class="board-settings-column-copy"><strong>{escape(column.title)}</strong><span>{len(cards_by_column.get(column.id, []))} {escape(tr("board.task"))}</span></div>'
-            '<div class="board-settings-column-actions">'
-        )
-        if can_edit:
-            html.append(
-                f'<button type="button" class="settings-action-btn compact js-edit-column" data-column-id="{column.id}" data-column-title="{escape(column.title)}">{escape(tr("board.column_rename"))}</button>'
-            )
-            html.append(
-                f'<form action="{escape(url_for("move_column", column_id=column.id))}" method="POST" class="inline-form"><input type="hidden" name="direction" value="left"><button type="submit" class="settings-action-btn compact">←</button></form>'
-            )
-            html.append(
-                f'<form action="{escape(url_for("move_column", column_id=column.id))}" method="POST" class="inline-form"><input type="hidden" name="direction" value="right"><button type="submit" class="settings-action-btn compact">→</button></form>'
-            )
-        html.append('</div></div>')
-    html.extend([
-        '</div>',
         '</section>',
         '<section class="board-settings-section board-settings-danger">',
         f'<div class="board-settings-section-head"><div><strong>{escape(tr("board.settings_danger"))}</strong><span>{escape(tr("board.settings_danger_help"))}</span></div></div>',
@@ -2699,10 +2021,6 @@ def build_auth_message_html(message, tone='error'):
         class_name = 'login-info'
     return Markup(f'<div class="{class_name}">{escape(message)}</div>')
 
-
-def auth_message(key, language_code=None, **kwargs):
-    """Devuelve un mensaje traducido para el flujo de autenticacion."""
-    return translate_text(key, language_code or get_current_language(), **kwargs)
 
 
 def ensure_auth_schema():
@@ -2837,40 +2155,40 @@ def build_account_content_html(page_key, page_title, page_description, user_name
     if page_key == 'account':
         hero.append(
             '<div class="account-grid">'
-            '<div class="account-page-card"><h3>Información de la cuenta</h3>'
-            '<div class="account-page-row"><span>Nombre</span>'
+            f'<div class="account-page-card"><h3>{escape(tr("account.info_title"))}</h3>'
+            f'<div class="account-page-row"><span>{escape(tr("account.label_name"))}</span>'
             f'<strong>{escape(user_name)}</strong></div>'
-            '<div class="account-page-row"><span>Email</span>'
+            f'<div class="account-page-row"><span>{escape(tr("account.label_email"))}</span>'
             f'<strong>{escape(user_email)}</strong></div>'
-            '<div class="account-page-row"><span>Plan</span><strong>Cuenta activa</strong></div></div>'
-            '<div class="account-page-card"><h3>Seguridad</h3><p>Buenas prácticas activas para proteger la cuenta.</p>'
-            '<div class="pill-row"><span class="pill">Sesión segura</span><span class="pill">Hash de contraseñas</span><span class="pill">Validación básica</span></div></div>'
-            '<div class="account-page-card"><h3>Acciones rápidas</h3><div class="action-list">'
-            f'<form action="{escape(url_for("account_password_reset"))}" method="POST"><button type="submit" class="action-btn wide">Cambiar contraseña</button></form>'
-            f'<button type="button" class="action-btn wide js-account-update-email" data-current-email="{escape(user_email)}">Actualizar email</button>'
-            f'<form action="{escape(url_for("logout"))}" method="POST"><button type="submit" class="action-btn wide">Cerrar sesiones</button></form>'
+            f'<div class="account-page-row"><span>{escape(tr("account.label_plan"))}</span><strong>{escape(tr("account.plan_active"))}</strong></div></div>'
+            f'<div class="account-page-card"><h3>{escape(tr("account.security_title"))}</h3><p>{escape(tr("account.security_help"))}</p>'
+            f'<div class="pill-row"><span class="pill">{escape(tr("account.pill_session"))}</span><span class="pill">{escape(tr("account.pill_passwords"))}</span><span class="pill">{escape(tr("account.pill_validation"))}</span></div></div>'
+            f'<div class="account-page-card"><h3>{escape(tr("account.quick_actions"))}</h3><div class="action-list">'
+            f'<form action="{escape(url_for("account_password_reset"))}" method="POST"><button type="submit" class="action-btn wide">{escape(tr("account.change_password"))}</button></form>'
+            f'<button type="button" class="action-btn wide js-account-update-email" data-current-email="{escape(user_email)}">{escape(tr("account.update_email"))}</button>'
+            f'<form action="{escape(url_for("logout"))}" method="POST"><button type="submit" class="action-btn wide">{escape(tr("account.close_sessions"))}</button></form>'
             '</div></div>'
-            '<div class="account-page-card wide-card"><div class="split-head"><div><h3>Resumen del entorno</h3><p>Vista rápida de espacios, tableros y tareas.</p></div><span class="badge-soft">Actualizado</span></div>'
-            '<div class="stat-grid expanded"><div class="stat-card"><strong>6</strong><span>Espacios activos</span></div><div class="stat-card"><strong>18</strong><span>Tableros en uso</span></div><div class="stat-card"><strong>42</strong><span>Tarjetas vivas</span></div><div class="stat-card"><strong>9</strong><span>En progreso</span></div></div></div>'
+            f'<div class="account-page-card wide-card"><div class="split-head"><div><h3>{escape(tr("account.summary_title"))}</h3><p>{escape(tr("account.summary_help"))}</p></div><span class="badge-soft">{escape(tr("account.badge_updated"))}</span></div>'
+            f'<div class="stat-grid expanded"><div class="stat-card"><strong>6</strong><span>{escape(tr("account.stat_spaces"))}</span></div><div class="stat-card"><strong>18</strong><span>{escape(tr("account.stat_boards"))}</span></div><div class="stat-card"><strong>42</strong><span>{escape(tr("account.stat_cards"))}</span></div><div class="stat-card"><strong>9</strong><span>{escape(tr("account.stat_in_progress"))}</span></div></div></div>'
             '</div>'
         )
     elif page_key == 'profile':
         hero.append(
             '<div class="account-grid">'
-            '<div class="account-page-card"><h3>Tu identidad en Prodify</h3><p>Así se verá tu perfil dentro de los tableros.</p><div class="profile-preview">'
+            f'<div class="account-page-card"><h3>{escape(tr("account.identity_title"))}</h3><p>{escape(tr("account.identity_help"))}</p><div class="profile-preview">'
             f'{profile_avatar_html}<div><strong>{escape(user_name)}</strong><span>{escape(user_email)}</span></div></div></div>'
-            '<div class="account-page-card"><h3>Visibilidad</h3><div class="toggle-list"><div class="toggle-item"><div><strong>Mostrar email</strong><span>Visible solo en tu perfil.</span></div><div class="toggle-pill">Activo</div></div><div class="toggle-item"><div><strong>Estado en línea</strong><span>Indica actividad reciente.</span></div><div class="toggle-pill">Activo</div></div></div></div>'
-            '<div class="account-page-card wide-card profile-upload-card"><h3>Imagen de perfil</h3><p>Sube una imagen en formato JPG, PNG, SVG o WEBP. Si no subes nada, se mostrará la inicial del nombre.</p>'
+            f'<div class="account-page-card"><h3>{escape(tr("account.visibility_title"))}</h3><div class="toggle-list"><div class="toggle-item"><div><strong>{escape(tr("account.show_email"))}</strong><span>{escape(tr("account.show_email_help"))}</span></div><div class="toggle-pill">{escape(tr("account.status_active"))}</div></div><div class="toggle-item"><div><strong>{escape(tr("account.online_status"))}</strong><span>{escape(tr("account.online_status_help"))}</span></div><div class="toggle-pill">{escape(tr("account.status_active"))}</div></div></div></div>'
+            f'<div class="account-page-card wide-card profile-upload-card"><h3>{escape(tr("account.profile_image_title"))}</h3><p>{escape(tr("account.profile_image_help"))}</p>'
             f'<form class="account-form" action="{escape(url_for("update_account"))}" method="POST" enctype="multipart/form-data">'
-            f'<label class="account-field"><span class="account-field-label">Nombre visible</span><input type="text" name="display_name" value="{escape(user_name)}" maxlength="80" placeholder="Tu nombre"></label>'
-            '<label class="account-file-field">Subir foto'
+            f'<label class="account-field"><span class="account-field-label">{escape(tr("account.display_name_label"))}</span><input type="text" name="display_name" value="{escape(user_name)}" maxlength="80" placeholder="{escape(tr("account.display_name_placeholder"))}"></label>'
+            f'<label class="account-file-field">{escape(tr("account.upload_photo"))}'
             '<div class="account-file-picker">'
             '<input id="avatarFileInput" type="file" name="avatar_file" accept=".jpg,.jpeg,.png,.svg,.webp,image/jpeg,image/png,image/svg+xml,image/webp">'
-            '<button type="button" class="account-file-btn js-avatar-picker">Seleccionar archivo</button>'
-            '<span class="account-file-name" id="avatarFileName">Ningún archivo seleccionado</span>'
+            f'<button type="button" class="account-file-btn js-avatar-picker">{escape(tr("account.select_file"))}</button>'
+            f'<span class="account-file-name" id="avatarFileName">{escape(tr("js.no_file_selected"))}</span>'
             '</div></label>'
-            '<label class="account-check"><input type="checkbox" name="remove_avatar" value="1"> Quitar foto actual</label>'
-            '<button type="submit">Guardar perfil</button></form></div>'
+            f'<label class="account-check"><input type="checkbox" name="remove_avatar" value="1"> {escape(tr("account.remove_photo"))}</label>'
+            f'<button type="submit">{escape(tr("account.save_profile"))}</button></form></div>'
             '</div>'
         )
     elif page_key == 'activity':
@@ -2913,11 +2231,12 @@ def build_account_content_html(page_key, page_title, page_description, user_name
                 else:
                     account_total += 1
 
+                action_label = tr(item.action) if item.action else ''
                 activity_html.append(
                     '<article class="activity-entry">'
                     '<span class="activity-entry-dot"></span>'
                     '<div class="activity-entry-body">'
-                    f'<strong>{escape(item.action)}</strong>'
+                    f'<strong>{escape(action_label)}</strong>'
                     f'<span>{escape(item.detail)}</span>'
                     '</div>'
                     f'<small>{escape(created_label)}</small>'
@@ -2927,7 +2246,7 @@ def build_account_content_html(page_key, page_title, page_description, user_name
                     '<article class="timeline-row">'
                     '<span class="timeline-row-dot"></span>'
                     '<div class="timeline-row-body">'
-                    f'<strong>{escape(item.action)}</strong>'
+                    f'<strong>{escape(action_label)}</strong>'
                     f'<span>{escape(item.detail)}</span>'
                     '</div>'
                     f'<time>{escape(created_label)}</time>'
@@ -2937,72 +2256,141 @@ def build_account_content_html(page_key, page_title, page_description, user_name
             activity_html.append(
                 '<article class="activity-entry is-empty">'
                 '<span class="activity-entry-dot"></span>'
-                '<div class="activity-entry-body"><strong>Aun no hay actividad</strong><span>Realiza acciones en tus tableros para verlas aqui.</span></div>'
-                '<small>Ahora</small>'
+                f'<div class="activity-entry-body"><strong>{escape(tr("account.no_activity"))}</strong><span>{escape(tr("account.no_activity_help"))}</span></div>'
+                f'<small>{escape(tr("account.now"))}</small>'
                 '</article>'
             )
             timeline_html.append(
                 '<article class="timeline-row is-empty">'
                 '<span class="timeline-row-dot"></span>'
-                '<div class="timeline-row-body"><strong>Sin eventos registrados</strong><span>Cuando hagas cambios en espacios, tableros o cuenta apareceran aqui.</span></div>'
-                '<time>Ahora</time>'
+                f'<div class="timeline-row-body"><strong>{escape(tr("account.no_events"))}</strong><span>{escape(tr("account.no_events_help"))}</span></div>'
+                f'<time>{escape(tr("account.now"))}</time>'
                 '</article>'
             )
 
-        latest_activity_label = activities[0].created_at.strftime("%d/%m %H:%M") if activities and activities[0].created_at else 'Sin registros'
+        latest_activity_label = activities[0].created_at.strftime("%d/%m %H:%M") if activities and activities[0].created_at else tr('account.no_records')
         active_days_total = len(active_days)
         pagination_html = [
             '<div class="activity-pagination">'
-            f'<div class="activity-pagination-summary">Mostrando <strong>{start_index}-{end_index}</strong> de <strong>{total_items}</strong> registros</div>'
+            f'<div class="activity-pagination-summary">{escape(tr("account.showing"))} <strong>{start_index}-{end_index}</strong> {escape(tr("account.of"))} <strong>{total_items}</strong> {escape(tr("account.records"))}</div>'
             '<div class="activity-pagination-actions">'
         ]
         if has_prev and prev_url:
-            pagination_html.append(f'<a class="activity-page-btn" href="{escape(prev_url)}">Anterior</a>')
+            pagination_html.append(f'<a class="activity-page-btn" href="{escape(prev_url)}">{escape(tr("account.prev"))}</a>')
         else:
-            pagination_html.append('<span class="activity-page-btn disabled" aria-disabled="true">Anterior</span>')
-        pagination_html.append(f'<span class="activity-page-indicator">Pagina {page} de {total_pages}</span>')
+            pagination_html.append(f'<span class="activity-page-btn disabled" aria-disabled="true">{escape(tr("account.prev"))}</span>')
+        pagination_html.append(f'<span class="activity-page-indicator">{escape(tr("account.page"))} {page} {escape(tr("account.page_of"))} {total_pages}</span>')
         if has_next and next_url:
-            pagination_html.append(f'<a class="activity-page-btn" href="{escape(next_url)}">Siguiente</a>')
+            pagination_html.append(f'<a class="activity-page-btn" href="{escape(next_url)}">{escape(tr("account.next"))}</a>')
         else:
-            pagination_html.append('<span class="activity-page-btn disabled" aria-disabled="true">Siguiente</span>')
+            pagination_html.append(f'<span class="activity-page-btn disabled" aria-disabled="true">{escape(tr("account.next"))}</span>')
         pagination_html.append('</div></div>')
         hero.append(
             '<div class="account-grid activity-grid">'
             '<div class="account-page-card wide-card activity-overview-card">'
-            '<div class="split-head"><div><h3>Panorama reciente</h3><p>Lectura rapida de los movimientos mas recientes dentro de tu cuenta.</p></div>'
-            f'<span class="badge-soft">Ultimo registro {escape(latest_activity_label)}</span></div>'
+            f'<div class="split-head"><div><h3>{escape(tr("account.activity_overview"))}</h3><p>{escape(tr("account.activity_overview_help"))}</p></div>'
+            f'<span class="badge-soft">{escape(tr("account.last_record"))} {escape(latest_activity_label)}</span></div>'
             '<div class="activity-overview-metrics">'
-            f'<div class="overview-metric"><span>Eventos visibles</span><strong>{recent_total}</strong><small>Bloque actual de hasta {per_page} registros</small></div>'
-            f'<div class="overview-metric"><span>Ultimos 7 dias</span><strong>{weekly_total}</strong><small>Actividad registrada esta semana</small></div>'
-            f'<div class="overview-metric"><span>Dias activos</span><strong>{active_days_total}</strong><small>Jornadas con movimiento reciente</small></div>'
+            f'<div class="overview-metric"><span>{escape(tr("account.visible_events"))}</span><strong>{recent_total}</strong><small>{escape(tr("account.events_block").format(per_page=per_page))}</small></div>'
+            f'<div class="overview-metric"><span>{escape(tr("account.last_7_days"))}</span><strong>{weekly_total}</strong><small>{escape(tr("account.week_activity"))}</small></div>'
+            f'<div class="overview-metric"><span>{escape(tr("account.active_days"))}</span><strong>{active_days_total}</strong><small>{escape(tr("account.active_days_help"))}</small></div>'
             '</div></div>'
-            '<div class="account-page-card wide-card activity-timeline-card"><div class="split-head"><div><h3>Linea de tiempo</h3><p>Historial completo de acciones para revisar que ha pasado sin duplicar informacion.</p></div>'
-            f'<span class="badge-soft">Pagina {page}</span></div><div class="timeline timeline-detailed">'
+            f'<div class="account-page-card wide-card activity-timeline-card"><div class="split-head"><div><h3>{escape(tr("account.timeline"))}</h3><p>{escape(tr("account.timeline_help"))}</p></div>'
+            f'<span class="badge-soft">{escape(tr("account.page"))} {page}</span></div><div class="timeline timeline-detailed">'
             + ''.join(timeline_html) +
             '</div>' + ''.join(pagination_html) + '</div>'
             '</div>'
         )
     elif page_key == 'cards':
+        ph = escape(tr('account.priority_high'))
+        pm = escape(tr('account.priority_med'))
+        pl = escape(tr('account.priority_low'))
+        def task_row(priority_cls, title, team, board, badge):
+            return (
+                f'<div class="ctask-row ctask-row--{priority_cls}">'
+                f'<div class="ctask-accent"></div>'
+                f'<div class="ctask-dot ctask-dot--{priority_cls}"></div>'
+                '<div class="ctask-body">'
+                f'<strong>{title}</strong>'
+                f'<span>{team} <span class="ctask-board">{board}</span></span>'
+                '</div>'
+                f'<span class="ctask-badge ctask-badge--{priority_cls}">{badge}</span>'
+                '</div>'
+            )
         hero.append(
-            '<div class="account-grid"><div class="account-page-card"><h3>Tarjetas destacadas</h3><div class="kanban-mini"><div class="kanban-mini-col"><div class="kanban-mini-title">Pendiente</div><div class="kanban-mini-card">Revisar landing</div><div class="kanban-mini-card">Checklist sprint</div></div><div class="kanban-mini-col"><div class="kanban-mini-title">En progreso</div><div class="kanban-mini-card">Campaña marzo</div></div><div class="kanban-mini-col"><div class="kanban-mini-title">Listo</div><div class="kanban-mini-card">Actualizar roadmap</div></div></div></div><div class="account-page-card"><h3>Filtros rápidos</h3><div class="pill-row"><span class="pill">Mis tareas</span><span class="pill">Prioridad alta</span><span class="pill">Vencen hoy</span></div></div><div class="account-page-card wide-card"><h3>Backlog prioritario</h3><div class="backlog-list"><div class="backlog-item"><span class="priority high">Alta</span><div><strong>Revisar onboarding</strong><span>UX Team &middot; 2 días</span></div></div><div class="backlog-item"><span class="priority med">Media</span><div><strong>Optimizar reports</strong><span>Ops &middot; 5 días</span></div></div><div class="backlog-item"><span class="priority low">Baja</span><div><strong>Actualizar etiquetas</strong><span>General &middot; 1 semana</span></div></div></div></div></div>'
+            '<div class="cards-page-wrap">'
+
+            '<div class="cards-stats-strip">'
+            f'<div class="cstat"><div class="cstat-inner"><span class="cstat-num">12</span><span class="cstat-label">{escape(tr("account.cards_total"))}</span></div><div class="cstat-icon cstat-icon--total">◈</div></div>'
+            f'<div class="cstat cstat--done"><div class="cstat-inner"><span class="cstat-num">8</span><span class="cstat-label">{escape(tr("account.cards_completed"))}</span></div><div class="cstat-icon cstat-icon--done">✓</div></div>'
+            f'<div class="cstat cstat--open"><div class="cstat-inner"><span class="cstat-num">4</span><span class="cstat-label">{escape(tr("account.cards_open"))}</span></div><div class="cstat-icon cstat-icon--open">◎</div></div>'
+            '</div>'
+
+            '<div class="cards-main-grid">'
+
+            '<div class="cards-col-main">'
+            '<div class="cards-section-head">'
+            f'<strong>{escape(tr("account.cards_recent"))}</strong>'
+            f'<span class="csection-pill">{escape(tr("account.cards_sorted"))}</span>'
+            '</div>'
+            '<div class="ctask-list">'
+            + task_row('high', 'Revisar onboarding',   'UX Team',   '· 2d',      ph)
+            + task_row('high', 'Documentar API',        'Dev',       '· 3d',      ph)
+            + task_row('med',  'Optimizar reports',     'Ops',       '· 5d',      pm)
+            + task_row('med',  'Revisar landing page',  'Marketing', '· 1w',      pm)
+            + task_row('low',  'Actualizar etiquetas',  'General',   '· 1w',      pl) +
+            '</div>'
+            '</div>'
+
+            '<div class="cards-col-side">'
+            '<div class="cards-section-head">'
+            f'<strong>{escape(tr("account.cards_filters"))}</strong>'
+            '</div>'
+            '<div class="cfilter-list">'
+            f'<button class="cfilter-btn cfilter-btn--active"><span class="cfilter-dot"></span>{escape(tr("account.my_tasks"))}</button>'
+            f'<button class="cfilter-btn cfilter-btn--high"><span class="cfilter-dot cfilter-dot--high"></span>{escape(tr("account.high_priority"))}</button>'
+            f'<button class="cfilter-btn"><span class="cfilter-dot cfilter-dot--time"></span>{escape(tr("account.due_today"))}</button>'
+            '</div>'
+
+            '</div>'
+
+            '</div>'
+            '</div>'
         )
     elif page_key == 'settings':
+        def stg_row(icon, label_key, help_key, value_key, badge_type):
+            return (
+                '<div class="stg-row">'
+                f'<div class="stg-icon">{icon}</div>'
+                '<div class="stg-copy">'
+                f'<strong>{escape(tr(label_key))}</strong>'
+                f'<span>{escape(tr(help_key))}</span>'
+                '</div>'
+                f'<span class="stg-badge stg-badge--{badge_type}">{escape(tr(value_key))}</span>'
+                '</div>'
+            )
         hero.append(
-            '<div class="account-grid settings-basic-grid">'
-            '<div class="account-page-card wide-card settings-basic-card">'
-            f'<h3>{escape(tr("settings.title"))}</h3><p>{escape(tr("settings.description"))}</p>'
-            '<div class="settings-basic-list">'
-            f'<div class="settings-basic-row"><div class="settings-basic-copy"><strong>{escape(tr("settings.theme"))}</strong><span>{escape(tr("settings.theme_help"))}</span></div><div class="settings-basic-value">{escape(tr("settings.theme_value"))}</div></div>'
-            f'<div class="settings-basic-row"><div class="settings-basic-copy"><strong>{escape(tr("settings.email_notifications"))}</strong><span>{escape(tr("settings.email_notifications_help"))}</span></div><div class="settings-basic-value">{escape(tr("settings.email_notifications_value"))}</div></div>'
-            f'<div class="settings-basic-row"><div class="settings-basic-copy"><strong>{escape(tr("settings.reminders"))}</strong><span>{escape(tr("settings.reminders_help"))}</span></div><div class="settings-basic-value">{escape(tr("settings.reminders_value"))}</div></div>'
-            f'<div class="settings-basic-row"><div class="settings-basic-copy"><strong>{escape(tr("settings.sounds"))}</strong><span>{escape(tr("settings.sounds_help"))}</span></div><div class="settings-basic-value">{escape(tr("settings.sounds_value"))}</div></div>'
-            f'<div class="settings-basic-row"><div class="settings-basic-copy"><strong>{escape(tr("settings.shortcuts"))}</strong><span>{escape(tr("settings.shortcuts_help"))}</span></div><div class="settings-basic-value">{escape(tr("settings.shortcuts_value"))}</div></div>'
-            '</div></div>'
+            '<div class="stg-wrap">'
+            f'<p class="stg-desc">{escape(tr("settings.description"))}</p>'
+            f'<div class="stg-section-label">{escape(tr("settings.section_appearance"))}</div>'
+            '<div class="stg-list">'
+            + stg_row('🎨', 'settings.theme', 'settings.theme_help', 'settings.theme_value', 'neutral') +
+            '</div>'
+            f'<div class="stg-section-label">{escape(tr("settings.section_notifications"))}</div>'
+            '<div class="stg-list">'
+            + stg_row('✉', 'settings.email_notifications', 'settings.email_notifications_help', 'settings.email_notifications_value', 'on')
+            + stg_row('🔔', 'settings.reminders', 'settings.reminders_help', 'settings.reminders_value', 'on')
+            + stg_row('🔊', 'settings.sounds', 'settings.sounds_help', 'settings.sounds_value', 'off') +
+            '</div>'
+            f'<div class="stg-section-label">{escape(tr("settings.section_interface"))}</div>'
+            '<div class="stg-list">'
+            + stg_row('⌨', 'settings.shortcuts', 'settings.shortcuts_help', 'settings.shortcuts_value', 'on') +
+            '</div>'
             '</div>'
         )
     elif page_key == 'help':
         hero.append(
-            '<div class="account-grid"><div class="account-page-card"><h3>Centro de ayuda</h3><div class="help-grid"><div class="help-card"><strong>Guías rápidas</strong><span>Empieza a usar tableros en minutos.</span></div><div class="help-card"><strong>Preguntas frecuentes</strong><span>Resuelve dudas comunes.</span></div><div class="help-card"><strong>Contacto</strong><span>Escríbenos para soporte.</span></div></div></div><div class="account-page-card"><h3>Recursos pro</h3><div class="resource-list"><div class="resource-item">Guía Kanban avanzada</div><div class="resource-item">Plantillas de equipos</div><div class="resource-item">Buenas prácticas de productividad</div></div></div></div>'
+            f'<div class="account-grid"><div class="account-page-card"><h3>{escape(tr("account.help_center"))}</h3><div class="help-grid"><div class="help-card"><strong>{escape(tr("account.quick_guides"))}</strong><span>{escape(tr("account.quick_guides_help"))}</span></div><div class="help-card"><strong>{escape(tr("account.faq"))}</strong><span>{escape(tr("account.faq_help"))}</span></div><div class="help-card"><strong>{escape(tr("account.contact"))}</strong><span>{escape(tr("account.contact_help"))}</span></div></div></div><div class="account-page-card"><h3>{escape(tr("account.pro_resources"))}</h3><div class="resource-list"><div class="resource-item">{escape(tr("account.kanban_guide"))}</div><div class="resource-item">{escape(tr("account.team_templates"))}</div><div class="resource-item">{escape(tr("account.productivity_tips"))}</div></div></div></div>'
         )
 
     hero.append('</div>')
@@ -3057,7 +2445,7 @@ def home():
         recent_boards_html=build_recent_boards_html(recent_boards, manageable_workspace_ids, current_language),
         workspace_blocks_html=build_workspace_blocks_html(workspaces, boards_by_workspace, None, roles_by_workspace, current_language),
         manageable_workspaces=manageable_workspaces,
-        board_templates=BOARD_TEMPLATES,
+        board_templates=get_translated_board_templates(current_language),
     )
 
 
@@ -3096,7 +2484,7 @@ def workspace_view(workspace_id):
         recent_boards_html=build_recent_boards_html(recent_boards, manageable_workspace_ids, current_language),
         workspace_blocks_html=build_workspace_blocks_html(workspaces, boards_by_workspace, workspace.id, roles_by_workspace, current_language),
         manageable_workspaces=manageable_workspaces,
-        board_templates=BOARD_TEMPLATES,
+        board_templates=get_translated_board_templates(current_language),
     )
 
 
@@ -3190,7 +2578,7 @@ def workspace_members_page(workspace_id):
         notice=notice,
         notice_tone=notice_tone,
         manageable_workspaces=manageable_workspaces,
-        board_templates=BOARD_TEMPLATES,
+        board_templates=get_translated_board_templates(current_language),
     )
 
 
@@ -3226,12 +2614,12 @@ def add_workspace_member(workspace_id):
     if membership:
         membership.role = role
         db.session.commit()
-        log_activity(user.id, 'Miembro actualizado', f'Rol actualizado en "{workspace.name}" para {target_user.email}')
+        log_activity(user.id, 'activity.member_updated', f'Rol actualizado en "{workspace.name}" para {target_user.email}')
         return redirect(url_for('workspace_members_page', workspace_id=workspace.id, tone='success', notice='Miembro actualizado correctamente.'))
 
     db.session.add(WorkspaceMember(workspace_id=workspace.id, user_id=target_user.id, role=role))
     db.session.commit()
-    log_activity(user.id, 'Miembro agregado', f'{target_user.email} unido a "{workspace.name}" como {get_role_label(role)}')
+    log_activity(user.id, 'activity.member_added', f'{target_user.email} unido a "{workspace.name}" como {get_role_label(role)}')
     return redirect(url_for('workspace_members_page', workspace_id=workspace.id, tone='success', notice='Miembro agregado correctamente.'))
 
 
@@ -3260,7 +2648,7 @@ def update_workspace_member_role(workspace_id, member_id):
     db.session.commit()
     member_user = db.session.get(User, membership.user_id)
     if member_user:
-        log_activity(user.id, 'Rol actualizado', f'{member_user.email} ahora es {get_role_label(role)} en "{workspace.name}"')
+        log_activity(user.id, 'activity.role_updated', f'{member_user.email} ahora es {get_role_label(role)} en "{workspace.name}"')
     return redirect(url_for('workspace_members_page', workspace_id=workspace.id, tone='success', notice='Rol actualizado correctamente.'))
 
 
@@ -3289,7 +2677,7 @@ def remove_workspace_member(workspace_id, member_id):
     db.session.commit()
 
     if member_user:
-        log_activity(user.id, 'Miembro eliminado', f'{member_user.email} salio de "{workspace.name}"')
+        log_activity(user.id, 'activity.member_removed', f'{member_user.email} salio de "{workspace.name}"')
 
     if removed_self:
         return redirect(url_for('home'))
@@ -3327,11 +2715,11 @@ def templates_page():
         account_menu_html=build_account_menu_html(user_display['user_name'], user_display['user_initial'], user.email, user_display['avatar_url'], current_language),
         side_nav_html=build_side_nav_html('templates', current_language),
         workspace_list_html=build_workspace_list_html(workspaces, None, roles_by_workspace, current_language),
-        templates_sidebar_html=build_templates_sidebar_html(template_categories, grouped_templates),
+        templates_sidebar_html=build_templates_sidebar_html(template_categories, grouped_templates, current_language),
         templates_count=len(BOARD_TEMPLATES),
-        templates_grid_html=build_templates_grid_html(BOARD_TEMPLATES),
+        templates_grid_html=build_templates_grid_html(BOARD_TEMPLATES, current_language),
         manageable_workspaces=manageable_workspaces,
-        board_templates=BOARD_TEMPLATES,
+        board_templates=get_translated_board_templates(current_language),
     )
 
 
@@ -3472,7 +2860,7 @@ def update_account_language():
     if user and not redirect_response:
         user.preferred_language = preferred_language
         db.session.commit()
-        log_activity(user.id, 'Idioma actualizado', f'Idioma cambiado a {get_language_label(preferred_language)}')
+        log_activity(user.id, 'activity.language_updated', f'Idioma cambiado a {get_language_label(preferred_language)}')
     if next_url.startswith('/') and not next_url.startswith('//'):
         return redirect(next_url)
     if redirect_response:
@@ -3488,7 +2876,7 @@ def account_password_reset():
         return redirect_response
 
     sent, _ = send_password_reset_email(user)
-    log_activity(user.id, 'Recuperación solicitada', 'Se ha pedido un enlace para cambiar la contraseña desde la cuenta')
+    log_activity(user.id, 'activity.recovery_requested', 'Se ha pedido un enlace para cambiar la contrasena desde la cuenta')
     notice = 'Te hemos enviado un enlace para cambiar la contraseña.'
     if not sent:
         notice += ' Modo local: revisa la terminal del servidor para copiarlo.'
@@ -3515,7 +2903,7 @@ def update_account_email():
     previous_email = user.email
     user.email = new_email
     db.session.commit()
-    log_activity(user.id, 'Email actualizado', f'Correo cambiado de "{previous_email}" a "{new_email}"')
+    log_activity(user.id, 'activity.email_updated', f'Correo cambiado de "{previous_email}" a "{new_email}"')
     return redirect(url_for('account_page', tone='success', notice='Correo actualizado correctamente.'))
 
 
@@ -3548,7 +2936,7 @@ def landing():
         side_nav_html=build_side_nav_html('home', current_language),
         workspace_list_html=build_workspace_list_html(workspaces, None, roles_by_workspace, current_language),
         manageable_workspaces=manageable_workspaces,
-        board_templates=BOARD_TEMPLATES,
+        board_templates=get_translated_board_templates(current_language),
     )
 
 
@@ -3626,7 +3014,7 @@ def use_template():
         pos += 1
 
     db.session.commit()
-    log_activity(user.id, 'Plantilla aplicada', f'Tablero "{board.name}" creado en "{workspace.name}"')
+    log_activity(user.id, 'activity.template_applied', f'Tablero "{board.name}" creado en "{workspace.name}"')
     return redirect(url_for('board_view', board_id=board.id))
 
 
@@ -3731,7 +3119,7 @@ def update_board(board_id):
         board.cover_url = None
 
     db.session.commit()
-    log_activity(user.id, 'Tablero actualizado', f'"{board.name}" en "{workspace.name}"')
+    log_activity(user.id, 'activity.board_updated', f'"{board.name}" en "{workspace.name}"')
     return redirect(url_for('board_view', board_id=board.id))
 
 
@@ -3759,7 +3147,7 @@ def delete_board_cover(board_id):
 
         board.cover_url = None
         db.session.commit()
-        log_activity(user.id, 'Portada elimanada', f'Portada eliminada de "{board.name}"')
+        log_activity(user.id, 'activity.cover_deleted', f'Portada eliminada de "{board.name}"')
 
     return redirect(url_for('board_view', board_id=board.id))
 
@@ -3809,7 +3197,7 @@ def invite_board_member(board_id):
     db.session.commit()
 
     send_board_invitation_email(invitation, board, workspace, user)
-    log_activity(user.id, 'Invitacion enviada', f'{email} invitado a "{board.name}" como {get_role_label(role)}')
+    log_activity(user.id, 'activity.invitation_sent', f'{email} invitado a "{board.name}" como {get_role_label(role)}')
     return redirect(url_for('board_view', board_id=board.id))
 
 
@@ -3923,7 +3311,7 @@ def create_column(board_id):
     new_column = BoardColumn(board_id=board.id, title=title[:120], position=position)
     db.session.add(new_column)
     db.session.commit()
-    log_activity(user.id, 'Columna creada', f'Columna "{new_column.title}" en "{board.name}"')
+    log_activity(user.id, 'activity.column_created', f'Columna "{new_column.title}" en "{board.name}"')
     return redirect(url_for('board_view', board_id=board.id))
 
 
@@ -3948,7 +3336,7 @@ def update_column(column_id):
     column.title = title[:120]
     db.session.commit()
     if board:
-        log_activity(user.id, 'Columna actualizada', f'"{old_title}" paso a "{column.title}" en "{board.name}"')
+        log_activity(user.id, 'activity.column_updated', f'"{old_title}" paso a "{column.title}" en "{board.name}"')
     return redirect(url_for('board_view', board_id=column.board_id))
 
 
@@ -3980,7 +3368,7 @@ def move_column(column_id):
         item.position = position
     db.session.commit()
     if board:
-        log_activity(user.id, 'Columna movida', f'Columna "{column.title}" reorganizada en "{board.name}"')
+        log_activity(user.id, 'activity.column_moved', f'Columna "{column.title}" reorganizada en "{board.name}"')
     return redirect(url_for('board_view', board_id=column.board_id))
 
 
@@ -4017,7 +3405,7 @@ def reorder_columns(board_id):
                 break
 
     db.session.commit()
-    log_activity(user.id, 'Columnas reordenadas', f'Se reorganizaron las columnas en "{board.name}"')
+    log_activity(user.id, 'activity.columns_reordered', f'Se reorganizaron las columnas en "{board.name}"')
     return ('', 204)
 
 
@@ -4042,7 +3430,7 @@ def create_card(column_id):
     db.session.add(new_card)
     db.session.commit()
     if board:
-        log_activity(user.id, 'Tarjeta creada', f'"{new_card.title}" en "{board.name}"')
+        log_activity(user.id, 'activity.card_created', f'"{new_card.title}" en "{board.name}"')
     return redirect(url_for('board_view', board_id=column.board_id))
 
 
@@ -4065,7 +3453,7 @@ def delete_column(column_id):
     db.session.delete(column)
     db.session.commit()
     if board:
-        log_activity(user.id, 'Columna eliminada', f'Columna "{column_title}" en "{board.name}"')
+        log_activity(user.id, 'activity.column_deleted', f'Columna "{column_title}" en "{board.name}"')
     return redirect(url_for('board_view', board_id=board_id))
 
 
@@ -4098,7 +3486,7 @@ def move_card(card_id):
     card.column_id = target_column_id
     db.session.commit()
     if target_board:
-        log_activity(user.id, 'Tarjeta movida', f'"{card_title}" a "{target_column.title}" en "{target_board.name}"')
+        log_activity(user.id, 'activity.card_moved', f'"{card_title}" a "{target_column.title}" en "{target_board.name}"')
     return ('', 204)
 
 
@@ -4123,7 +3511,7 @@ def delete_card(card_id):
     if board_id:
         board = db.session.get(Board, board_id)
         if board:
-            log_activity(user.id, 'Tarjeta eliminada', f'"{card_title}" en "{board.name}"')
+            log_activity(user.id, 'activity.card_deleted', f'"{card_title}" en "{board.name}"')
     if board_id:
         return redirect(url_for('board_view', board_id=board_id))
     return redirect(url_for('home'))
@@ -4174,7 +3562,7 @@ def login():
             if is_ok:
                 session['user_id'] = user.id
                 session['preferred_language'] = normalize_language_code(user.preferred_language)
-                log_activity(user.id, 'Inicio de sesión', 'Acceso correcto a la plataforma')
+                log_activity(user.id, 'activity.login', 'Acceso correcto a la plataforma')
                 if next_url.startswith('/'):
                     return redirect(next_url)
                 return redirect(url_for('landing' if not user.has_seen_inicio else 'home'))
@@ -4210,37 +3598,36 @@ def register():
     """Permite crear una cuenta real y guardarla en la base de datos."""
     next_url = sanitize_text(request.values.get('next') or '', 240)
     prefilled_email = sanitize_text((request.values.get('email') or '').lower(), 100)
+
+    def render_register_error(message, email_val='', lang='es'):
+        return render_template(
+            'register.html',
+            message_html=build_auth_message_html(message),
+            next_url=next_url,
+            prefilled_email=email_val or prefilled_email,
+            register_language_selector=build_register_language_selector(lang),
+        )
+
     if request.method == 'POST':
         email = sanitize_text((request.form.get('email') or '').lower(), 100)
         password = request.form.get('password') or ''
         confirm_password = request.form.get('confirm_password') or ''
         display_name = sanitize_text(request.form.get('display_name') or '', 80)
+        preferred_language = normalize_language_code(request.form.get('preferred_language') or 'es')
         allowed, retry_after = check_rate_limit('register', 5, 3600, email)
         if not allowed:
-            message = build_rate_limit_message(retry_after)
-            return render_template('register.html', message_html=build_auth_message_html(message), next_url=next_url, prefilled_email=email or prefilled_email)
-
+            return render_register_error(build_rate_limit_message(retry_after), email, preferred_language)
         if not email or not password or not confirm_password:
-            message = 'Completa todos los campos obligatorios.'
-            return render_template('register.html', message_html=build_auth_message_html(message), next_url=next_url, prefilled_email=email or prefilled_email)
-
+            return render_register_error('Completa todos los campos obligatorios.', email, preferred_language)
         if not is_valid_email_address(email):
-            message = 'Introduce un correo electronico valido.'
-            return render_template('register.html', message_html=build_auth_message_html(message), next_url=next_url, prefilled_email=email or prefilled_email)
-
+            return render_register_error('Introduce un correo electronico valido.', email, preferred_language)
         if password != confirm_password:
-            message = 'Las contraseñas no coinciden.'
-            return render_template('register.html', message_html=build_auth_message_html(message), next_url=next_url, prefilled_email=email or prefilled_email)
-
+            return render_register_error('Las contraseñas no coinciden.', email, preferred_language)
         password_error = validate_password_strength(password)
         if password_error:
-            message = password_error
-            return render_template('register.html', message_html=build_auth_message_html(message), next_url=next_url, prefilled_email=email or prefilled_email)
-
-        existing_user = User.query.filter_by(email=email).first()
-        if existing_user:
-            message = 'Ese correo ya esta registrado.'
-            return render_template('register.html', message_html=build_auth_message_html(message), next_url=next_url, prefilled_email=email or prefilled_email)
+            return render_register_error(password_error, email, preferred_language)
+        if User.query.filter_by(email=email).first():
+            return render_register_error('Ese correo ya esta registrado.', email, preferred_language)
 
         user = User(
             email=email,
@@ -4248,6 +3635,7 @@ def register():
             email_verified=True,
             verified_at=datetime.utcnow(),
             has_seen_inicio=False,
+            preferred_language=preferred_language,
         )
         db.session.add(user)
         db.session.flush()
@@ -4258,7 +3646,7 @@ def register():
         db.session.add(UserProfile(user_id=user.id, display_name=final_name))
         db.session.commit()
         sent = send_registration_welcome_email(user)
-        log_activity(user.id, 'Registro completado', 'Cuenta creada correctamente')
+        log_activity(user.id, 'activity.registered', 'Cuenta creada correctamente')
         if not sent:
             print(f'[Prodify] No se pudo enviar el correo de bienvenida a {user.email}')
         if next_url.startswith('/'):
@@ -4267,7 +3655,13 @@ def register():
             return redirect(next_url)
         return redirect(url_for('login', registered=1))
 
-    return render_template('register.html', message_html=build_auth_message_html(None), next_url=next_url, prefilled_email=prefilled_email)
+    return render_template(
+        'register.html',
+        message_html=build_auth_message_html(None),
+        next_url=next_url,
+        prefilled_email=prefilled_email,
+        register_language_selector=build_register_language_selector(get_current_language()),
+    )
 
 
 @app.route('/recuperar', methods=['GET', 'POST'])
@@ -4295,7 +3689,7 @@ def forgot_password():
         if user:
             print(f'[Prodify] Cuenta encontrada para recuperacion: {email}', flush=True)
             sent, _ = send_password_reset_email(user)
-            log_activity(user.id, 'Recuperación solicitada', 'Se ha pedido un enlace para cambiar la contraseña')
+            log_activity(user.id, 'activity.recovery_requested', 'Se ha pedido un enlace para cambiar la contrasena')
             if not sent:
                 local_hint = ' Modo local: revisa la terminal del servidor para copiar el enlace.'
         else:
@@ -4356,7 +3750,7 @@ def reset_password(token):
 
         user.password = generate_password_hash(password)
         db.session.commit()
-        log_activity(user.id, 'Contraseña actualizada', 'La contraseña se ha cambiado desde recuperación')
+        log_activity(user.id, 'activity.password_updated', 'La contrasena se ha cambiado desde recuperacion')
         return redirect(url_for('login', reset=1))
 
     return render_template(
@@ -4382,7 +3776,7 @@ def verify_email(token):
         user.email_verified = True
         user.verified_at = datetime.utcnow()
         db.session.commit()
-        log_activity(user.id, 'Correo verificado', 'La cuenta se ha activado correctamente')
+        log_activity(user.id, 'activity.email_verified', 'La cuenta se ha activado correctamente')
         send_verified_confirmation_email(user)
 
     return redirect(url_for('login', verified=1))
@@ -4475,7 +3869,7 @@ def create_workspace():
         db.session.add(BoardColumn(board_id=board.id, title=titles[i], position=i))
 
     db.session.commit()
-    log_activity(user.id, 'Espacio creado', f'"{workspace.name}" con tablero principal')
+    log_activity(user.id, 'activity.workspace_created', f'"{workspace.name}" con tablero principal')
     redirect_url = url_for('board_view', board_id=board.id)
     if request.headers.get('X-Requested-With') == 'fetch':
         return {'redirect_url': redirect_url}
@@ -4508,7 +3902,7 @@ def create_board(workspace_id):
     )
     db.session.add(new_board)
     db.session.commit()
-    log_activity(user.id, 'Tablero creado', f'"{new_board.name}" en "{workspace.name}"')
+    log_activity(user.id, 'activity.board_created', f'"{new_board.name}" en "{workspace.name}"')
     redirect_url = url_for('board_view', board_id=new_board.id)
     if request.headers.get('X-Requested-With') == 'fetch':
         return {'redirect_url': redirect_url}
@@ -4543,7 +3937,7 @@ def delete_workspace(workspace_id):
     Board.query.filter_by(workspace_id=workspace.id).delete()
     db.session.delete(workspace)
     db.session.commit()
-    log_activity(user.id, 'Espacio eliminado', f'"{workspace_name}" y su contenido')
+    log_activity(user.id, 'activity.workspace_deleted', f'"{workspace_name}" y su contenido')
     return redirect(url_for('home'))
 
 
@@ -4567,7 +3961,7 @@ def update_workspace(workspace_id):
     old_name = workspace.name
     workspace.name = new_name[:120]
     db.session.commit()
-    log_activity(user.id, 'Espacio actualizado', f'"{old_name}" paso a llamarse "{workspace.name}"')
+    log_activity(user.id, 'activity.workspace_updated', f'"{old_name}" paso a llamarse "{workspace.name}"')
     return redirect(url_for('workspace_view', workspace_id=workspace.id))
 
 
@@ -4594,7 +3988,7 @@ def delete_board(board_id):
     BoardColumn.query.filter_by(board_id=board.id).delete()
     db.session.delete(board)
     db.session.commit()
-    log_activity(user.id, 'Tablero eliminado', f'"{board_name}"')
+    log_activity(user.id, 'activity.board_deleted', f'"{board_name}"')
     return redirect(url_for('home'))
 
 

@@ -45,7 +45,6 @@
 
             <div class="topbar-right">
                 <button class="theme-toggle btn" id="themeToggle" type="button" aria-label="{{ t('theme.toggle') }}">{{ t('theme.light') }}</button>
-                {{ language_switcher_html }}
                 {{ account_toggle_html }}
                 {{ account_menu_html }}
             </div>
@@ -69,54 +68,54 @@
                 <!-- Hero principal con mensaje de bienvenida y resumen rapido. -->
                 <div class="inicio-hero">
                     <div class="inicio-hero-text">
-                        <span class="eyebrow">Bienvenido a Prodify</span>
-                        <h1>Tu equipo en modo enfoque, cada dia.</h1>
-                        <p>Prodify convierte tus ideas en tableros vivos. Diseña flujos tipo Trello, alinea objetivos y sigue el progreso en tiempo real.</p>
+                        <span class="eyebrow">{{ t('inicio.hero_eyebrow') }}</span>
+                        <h1>{{ t('inicio.hero_title') }}</h1>
+                        <p>{{ t('inicio.hero_description') }}</p>
                         <div class="inicio-actions">
-                            <a class="btn-primary" href="{{ url_for('templates_page') }}">Explorar plantillas</a>
-                            <a class="btn-ghost" href="{{ url_for('home') }}">Ir a tableros</a>
+                            <a class="btn-primary" href="{{ url_for('templates_page') }}">{{ t('inicio.hero_cta_templates') }}</a>
+                            <a class="btn-ghost" href="{{ url_for('home') }}">{{ t('inicio.hero_cta_boards') }}</a>
                         </div>
                         <div class="inicio-stats">
                             <div>
                                 <strong>+18</strong>
-                                <span>Plantillas listas</span>
+                                <span>{{ t('inicio.stat_templates') }}</span>
                             </div>
                             <div>
                                 <strong>4x</strong>
-                                <span>Mas claridad diaria</span>
+                                <span>{{ t('inicio.stat_clarity') }}</span>
                             </div>
                             <div>
                                 <strong>1 solo</strong>
-                                <span>Espacio de trabajo</span>
+                                <span>{{ t('inicio.stat_workspace') }}</span>
                             </div>
                         </div>
                     </div>
                     <div class="inicio-hero-panel">
                         <div class="panel-header">
-                            <span>Resumen de hoy</span>
+                            <span>{{ t('inicio.panel_summary') }}</span>
                             <strong>{{ user_name }}</strong>
                         </div>
                         <div class="panel-body">
                             <div class="panel-card">
                                 <div>
-                                    <h4>Stand-up rapido</h4>
-                                    <p>3 tareas en progreso</p>
+                                    <h4>{{ t('inicio.panel_focus_title') }}</h4>
+                                    <p>{{ t('inicio.panel_focus_body') }}</p>
                                 </div>
-                                <span class="badge">En foco</span>
+                                <span class="badge">{{ t('inicio.panel_focus_badge') }}</span>
                             </div>
                             <div class="panel-card">
                                 <div>
-                                    <h4>Nuevo tablero sugerido</h4>
-                                    <p>Plantilla Marketing</p>
+                                    <h4>{{ t('inicio.panel_suggested_title') }}</h4>
+                                    <p>{{ t('inicio.panel_suggested_body') }}</p>
                                 </div>
-                                <span class="badge alt">Sugerido</span>
+                                <span class="badge alt">{{ t('inicio.panel_suggested_badge') }}</span>
                             </div>
                             <div class="panel-card">
                                 <div>
-                                    <h4>Ultima actividad</h4>
-                                    <p>Actualiza el roadmap</p>
+                                    <h4>{{ t('inicio.panel_activity_title') }}</h4>
+                                    <p>{{ t('inicio.panel_activity_body') }}</p>
                                 </div>
-                                <span class="badge soft">Hoy</span>
+                                <span class="badge soft">{{ t('inicio.panel_activity_badge') }}</span>
                             </div>
                         </div>
                     </div>
@@ -125,30 +124,30 @@
                 <!-- Tarjetas para explicar de forma visual lo que ofrece la app. -->
                 <div class="inicio-grid">
                     <article class="inicio-card">
-                        <h3>Organiza tu dia</h3>
-                        <p>Crea listas claras, asigna prioridades y mueve tareas en segundos.</p>
+                        <h3>{{ t('inicio.card_1_title') }}</h3>
+                        <p>{{ t('inicio.card_1_body') }}</p>
                         <ul>
-                            <li>Columnas personalizables</li>
-                            <li>Etiquetas y prioridades</li>
-                            <li>Filtros rápidos</li>
+                            <li>{{ t('inicio.card_1_item_1') }}</li>
+                            <li>{{ t('inicio.card_1_item_2') }}</li>
+                            <li>{{ t('inicio.card_1_item_3') }}</li>
                         </ul>
                     </article>
                     <article class="inicio-card">
-                        <h3>Colabora sin ruido</h3>
-                        <p>Manten al equipo sincronizado con actualizaciones en tiempo real.</p>
+                        <h3>{{ t('inicio.card_2_title') }}</h3>
+                        <p>{{ t('inicio.card_2_body') }}</p>
                         <ul>
-                            <li>Tableros por area</li>
-                            <li>Revisiones claras</li>
-                            <li>Responsables visibles</li>
+                            <li>{{ t('inicio.card_2_item_1') }}</li>
+                            <li>{{ t('inicio.card_2_item_2') }}</li>
+                            <li>{{ t('inicio.card_2_item_3') }}</li>
                         </ul>
                     </article>
                     <article class="inicio-card">
-                        <h3>Mide tu avance</h3>
-                        <p>Visualiza progreso y detecta bloqueos al instante.</p>
+                        <h3>{{ t('inicio.card_3_title') }}</h3>
+                        <p>{{ t('inicio.card_3_body') }}</p>
                         <ul>
-                            <li>Indicadores de estado</li>
-                            <li>Seguimiento semanal</li>
-                            <li>Insights del equipo</li>
+                            <li>{{ t('inicio.card_3_item_1') }}</li>
+                            <li>{{ t('inicio.card_3_item_2') }}</li>
+                            <li>{{ t('inicio.card_3_item_3') }}</li>
                         </ul>
                     </article>
                 </div>
@@ -156,10 +155,10 @@
                 <!-- Llamada final a la accion para empezar desde una plantilla. -->
                 <div class="inicio-highlight">
                     <div>
-                        <h2>Una presentacion clara de tu pagina</h2>
-                        <p>Convierte el inicio en una experiencia que explica tu propuesta de valor y deja al usuario listo para crear su primer tablero.</p>
+                        <h2>{{ t('inicio.highlight_title') }}</h2>
+                        <p>{{ t('inicio.highlight_body') }}</p>
                     </div>
-                    <a class="btn-primary" href="{{ url_for('templates_page') }}">Crear desde plantilla</a>
+                    <a class="btn-primary" href="{{ url_for('templates_page') }}">{{ t('inicio.highlight_cta') }}</a>
                 </div>
             </section>
         </div>
@@ -184,6 +183,7 @@
 
     <script id="boardCreationWorkspaces" type="application/json">{{ manageable_workspaces|tojson }}</script>
     <script id="boardCreationTemplates" type="application/json">{{ board_templates|tojson }}</script>
+    <script id="i18nData" type="application/json">{{ js_translations|tojson }}</script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

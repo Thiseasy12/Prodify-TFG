@@ -45,7 +45,6 @@
 
             <div class="topbar-right">
                 <button class="theme-toggle btn" id="themeToggle" type="button" aria-label="{{ t('theme.toggle') }}">{{ t('theme.light') }}</button>
-                {{ language_switcher_html }}
                 {{ account_toggle_html }}
                 {{ account_menu_html }}
             </div>
@@ -101,6 +100,7 @@
 
     <script id="boardCreationWorkspaces" type="application/json">{{ manageable_workspaces|tojson }}</script>
     <script id="boardCreationTemplates" type="application/json">{{ board_templates|tojson }}</script>
+    <script id="i18nData" type="application/json">{{ js_translations|tojson }}</script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

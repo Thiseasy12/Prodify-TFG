@@ -1,4 +1,23 @@
-﻿document.addEventListener('DOMContentLoaded', function () {
+﻿var i18n = (function () {
+    var el = document.getElementById('i18nData');
+    if (!el) return {};
+    try { return JSON.parse(el.textContent); } catch (_) { return {}; }
+}());
+
+function t(key, fallback) {
+    return i18n[key] !== undefined ? i18n[key] : fallback;
+}
+
+function getSwalTheme() {
+    const isLight = document.body.classList.contains('theme-light');
+    return {
+        confirmButtonColor: '#2f63ff',
+        background: isLight ? '#f4f8ff' : '#0c1629',
+        color: isLight ? '#14305f' : '#e6eeff',
+    };
+}
+
+document.addEventListener('DOMContentLoaded', function () {
     /*
      * Cojo los elementos principales cuando ya se ha cargado el DOM.
      */
@@ -92,12 +111,7 @@
         en: { dark: 'Turn on dark mode', light: 'Turn on light mode' },
         fr: { dark: 'Activer le mode sombre', light: 'Activer le mode clair' },
         de: { dark: 'Dunklen Modus aktivieren', light: 'Hellen Modus aktivieren' },
-        it: { dark: 'Attiva la modalita scura', light: 'Attiva la modalita chiara' },
-        pt: { dark: 'Ativar modo escuro', light: 'Ativar modo claro' },
-        ar: { dark: 'تفعيل الوضع الداكن', light: 'تفعيل الوضع الفاتح' },
-        hi: { dark: 'डार्क मोड चालू करें', light: 'लाइट मोड चालू करें' },
-        'zh-CN': { dark: '切换到深色模式', light: '切换到浅色模式' },
-        ja: { dark: 'ダークモードに切り替える', light: 'ライトモードに切り替える' }
+        it: { dark: 'Attiva la modalita scura', light: 'Attiva la modalita chiara' }
     };
 
     function getThemeLabels() {
@@ -236,19 +250,19 @@
     }
 
     function buildWorkspaceOptions(selectedWorkspaceId) {
-        const options = ['<option value="">Selecciona un espacio</option>'];
+        const options = ['<option value="">' + t('js.select_workspace', 'Selecciona un espacio') + '</option>'];
         for (let i = 0; i < creationWorkspaces.length; i += 1) {
             const workspace = creationWorkspaces[i];
             const selected = String(selectedWorkspaceId || '') === String(workspace.id) ? ' selected' : '';
             options.push('<option value="' + escapeHtml(workspace.id) + '"' + selected + '>' + escapeHtml(workspace.name) + '</option>');
         }
-        options.push('<option value="__new__">Crear espacio nuevo</option>');
+        options.push('<option value="__new__">' + t('js.create_new_workspace', 'Crear espacio nuevo') + '</option>');
         return options.join('');
     }
 
     function buildTemplatePicker(selectedTemplateId) {
         if (!creationTemplates.length) {
-            return '<div class="board-creator-empty">No hay plantillas disponibles todavía.</div>';
+            return '<div class="board-creator-empty">' + t('js.no_templates', 'No hay plantillas disponibles todav\u00eda.') + '</div>';
         }
 
         const cards = [];
@@ -266,7 +280,7 @@
     }
 
     function buildPreviewColumns(template) {
-        const columns = template && template.columns ? template.columns.slice(0, 3) : ['Pendiente', 'En curso', 'Listo'];
+        const columns = template && template.columns ? template.columns.slice(0, 3) : [t('js.col_pending', 'Pendiente'), t('js.col_in_progress', 'En curso'), t('js.col_done', 'Listo')];
         const items = [];
         for (let i = 0; i < columns.length; i += 1) {
             items.push(
@@ -311,7 +325,7 @@
         if (summary) {
             summary.textContent = mode === 'template' && template
                 ? template.summary
-                : 'Crea un tablero vacio con la estructura base y personalizalo despues.';
+                : t('js.empty_board_summary', 'Crea un tablero vacio con la estructura base y personalizalo despues.');
         }
         if (pickerWrap) {
             pickerWrap.hidden = mode !== 'template';
@@ -320,7 +334,7 @@
             appearanceWrap.hidden = mode !== 'normal';
         }
         if (confirmButton) {
-            confirmButton.textContent = mode === 'template' ? 'Crear tablero con plantilla' : 'Crear tablero';
+            confirmButton.textContent = mode === 'template' ? t('js.create_board_with_template', 'Crear tablero con plantilla') : t('js.create_board', 'Crear tablero');
         }
         applyPreviewBackground(previewShell, mode === 'normal' ? colorValue : '', mode === 'normal' ? fileInput : null);
     }
@@ -346,14 +360,12 @@
         const initialTemplateId = initialTemplate ? initialTemplate.id : '';
 
         Swal.fire({
-            title: initialMode === 'template' ? 'Crear tablero con plantilla' : 'Crear tablero',
+            title: initialMode === 'template' ? t('js.create_board_with_template', 'Crear tablero con plantilla') : t('js.create_board', 'Crear tablero'),
             width: 620,
             showCancelButton: true,
-            cancelButtonText: 'Cancelar',
-            confirmButtonText: initialMode === 'template' ? 'Crear tablero con plantilla' : 'Crear tablero',
-            confirmButtonColor: '#2f63ff',
-            background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
-            color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
+            cancelButtonText: t('js.cancel', 'Cancelar'),
+            confirmButtonText: initialMode === 'template' ? t('js.create_board_with_template', 'Crear tablero con plantilla') : t('js.create_board', 'Crear tablero'),
+            ...getSwalTheme(),
             customClass: {
                 popup: 'board-creator-modal',
                 htmlContainer: 'board-creator-body-wrap',
@@ -364,17 +376,17 @@
                 '<div class="board-creator-body">' +
                     (lockMode ? '' :
                         '<div class="board-creator-mode">' +
-                            '<button type="button" class="board-mode-btn' + (initialMode === 'normal' ? ' is-active' : '') + '" data-mode="normal">Crear normal</button>' +
-                            '<button type="button" class="board-mode-btn' + (initialMode === 'template' ? ' is-active' : '') + '" data-mode="template">Usar plantilla</button>' +
+                            '<button type="button" class="board-mode-btn' + (initialMode === 'normal' ? ' is-active' : '') + '" data-mode="normal">' + t('js.create_normal', 'Crear normal') + '</button>' +
+                            '<button type="button" class="board-mode-btn' + (initialMode === 'template' ? ' is-active' : '') + '" data-mode="template">' + t('js.use_template', 'Usar plantilla') + '</button>' +
                         '</div>'
                     ) +
                     '<div class="board-creator-preview-shell">' +
-                        '<div class="board-creator-preview-top"><span>Vista previa</span><span class="board-creator-preview-icon"></span></div>' +
+                        '<div class="board-creator-preview-top"><span>' + t('js.preview', 'Vista previa') + '</span><span class="board-creator-preview-icon"></span></div>' +
                         '<div class="board-creator-preview" data-board-preview></div>' +
                     '</div>' +
                     '<div class="board-creator-template-copy" data-template-summary></div>' +
                     '<div class="board-creator-appearance" data-appearance-wrap' + (initialMode === 'normal' ? '' : ' hidden') + '>' +
-                        '<div class="board-creator-field board-creator-field-tight"><label>Fondo del tablero</label></div>' +
+                        '<div class="board-creator-field board-creator-field-tight"><label>' + t('js.board_background', 'Fondo del tablero') + '</label></div>' +
                         '<div class="board-color-grid">' +
                             '<button type="button" class="board-color-option is-active" data-color-value="#1d4ed8" style="background:#1d4ed8"></button>' +
                             '<button type="button" class="board-color-option" data-color-value="#0f766e" style="background:#0f766e"></button>' +
@@ -384,25 +396,25 @@
                             '<button type="button" class="board-color-option" data-color-value="#334155" style="background:#334155"></button>' +
                         '</div>' +
                         '<div class="board-cover-upload">' +
-                            '<label for="swal-board-cover" class="board-cover-upload-btn">Subir imagen</label>' +
+                            '<label for="swal-board-cover" class="board-cover-upload-btn">' + t('js.upload_image', 'Subir imagen') + '</label>' +
                             '<input id="swal-board-cover" type="file" accept=".jpg,.jpeg,.png,.svg,.webp,image/jpeg,image/png,image/svg+xml,image/webp">' +
-                            '<span class="board-cover-upload-name" id="swal-board-cover-name">Ningún archivo seleccionado</span>' +
+                            '<span class="board-cover-upload-name" id="swal-board-cover-name">' + t('js.no_file_selected', 'Ning\u00FAn archivo seleccionado') + '</span>' +
                         '</div>' +
                     '</div>' +
                     '<div class="board-creator-field">' +
-                        '<label for="swal-board-title">Titulo del tablero</label>' +
-                        '<input id="swal-board-title" class="swal2-input board-creator-input" value="' + escapeHtml(initialBoardName) + '" placeholder="Ej. Sprint de abril">' +
+                        '<label for="swal-board-title">' + t('js.board_title', 'Titulo del tablero') + '</label>' +
+                        '<input id="swal-board-title" class="swal2-input board-creator-input" value="' + escapeHtml(initialBoardName) + '" placeholder="' + t('js.board_title_placeholder', 'Ej. Sprint de abril') + '">' +
                     '</div>' +
                     '<div class="board-creator-field">' +
-                        '<label for="swal-board-workspace">Espacio de trabajo</label>' +
+                        '<label for="swal-board-workspace">' + t('js.workspace', 'Espacio de trabajo') + '</label>' +
                         '<select id="swal-board-workspace" class="swal2-select board-creator-select">' + buildWorkspaceOptions(initialWorkspaceId) + '</select>' +
                     '</div>' +
                     '<div class="board-creator-field" data-new-workspace-field hidden>' +
-                        '<label for="swal-new-workspace">Nombre del nuevo espacio</label>' +
-                        '<input id="swal-new-workspace" class="swal2-input board-creator-input" value="' + escapeHtml(initialWorkspaceName) + '" placeholder="Ej. Producto Q2">' +
+                        '<label for="swal-new-workspace">' + t('js.new_workspace_name', 'Nombre del nuevo espacio') + '</label>' +
+                        '<input id="swal-new-workspace" class="swal2-input board-creator-input" value="' + escapeHtml(initialWorkspaceName) + '" placeholder="' + t('js.new_workspace_placeholder', 'Ej. Producto Q2') + '">' +
                     '</div>' +
                     '<div class="board-creator-template-wrap" data-template-wrap' + (initialMode === 'template' ? '' : ' hidden') + '>' +
-                        '<div class="board-creator-field board-creator-field-tight"><label>Plantilla</label></div>' +
+                        '<div class="board-creator-field board-creator-field-tight"><label>' + t('js.template', 'Plantilla') + '</label></div>' +
                         '<div class="board-template-grid">' + buildTemplatePicker(initialTemplateId) + '</div>' +
                     '</div>' +
                 '</div>',
@@ -459,7 +471,7 @@
                 if (coverInput) {
                     coverInput.addEventListener('change', function () {
                         if (coverName) {
-                            coverName.textContent = this.files && this.files[0] ? this.files[0].name : 'Ningún archivo seleccionado';
+                            coverName.textContent = this.files && this.files[0] ? this.files[0].name : t('js.no_file_selected', 'Ning\u00FAn archivo seleccionado');
                         }
                         updateBoardCreationPreview(popup, currentMode, currentTemplateId);
                     });
@@ -480,19 +492,19 @@
                 const coverFile = coverInput && coverInput.files && coverInput.files[0] ? coverInput.files[0] : null;
 
                 if (!boardTitle) {
-                    Swal.showValidationMessage('Es necesario indicar el titulo del tablero');
+                    Swal.showValidationMessage(t('js.board_title_required', 'Es necesario indicar el titulo del tablero'));
                     return false;
                 }
                 if (!workspaceValue) {
-                    Swal.showValidationMessage('Selecciona un espacio de trabajo o crea uno nuevo');
+                    Swal.showValidationMessage(t('js.workspace_required', 'Selecciona un espacio de trabajo o crea uno nuevo'));
                     return false;
                 }
                 if (workspaceValue === '__new__' && !newWorkspaceName) {
-                    Swal.showValidationMessage('Escribe el nombre del nuevo espacio');
+                    Swal.showValidationMessage(t('js.new_workspace_required', 'Escribe el nombre del nuevo espacio'));
                     return false;
                 }
                 if (mode === 'template' && !templateId) {
-                    Swal.showValidationMessage('Selecciona una plantilla para continuar');
+                    Swal.showValidationMessage(t('js.template_required', 'Selecciona una plantilla para continuar'));
                     return false;
                 }
 
@@ -520,7 +532,7 @@
                     templateWorkspaceInput.value = '';
                     templateWorkspaceIdInput.value = value.workspaceValue;
                 }
-                window.sessionStorage.setItem('prodify-toast', 'Tablero creado desde plantilla');
+                window.sessionStorage.setItem('prodify-toast', t('js.board_created_from_template', 'Tablero creado desde plantilla'));
                 templateForm.submit();
                 return;
             }
@@ -534,11 +546,11 @@
             }
 
             let endpoint = '';
-            let successToast = 'Tablero creado correctamente';
+            let successToast = t('js.board_created', 'Tablero creado correctamente');
             if (value.workspaceValue === '__new__') {
                 formData.append('workspace_name', value.newWorkspaceName);
                 endpoint = '/workspaces/create';
-                successToast = 'Espacio y tablero creados correctamente';
+                successToast = t('js.workspace_and_board_created', 'Espacio y tablero creados correctamente');
             } else {
                 endpoint = '/workspaces/' + value.workspaceValue + '/boards/create';
             }
@@ -551,7 +563,7 @@
                     'X-Requested-With': 'fetch',
                 },
             }).then(function (response) {
-                if (!response.ok) throw new Error('No se pudo crear el tablero');
+                if (!response.ok) throw new Error(t('js.create_board_failed_title', 'No se pudo crear el tablero'));
                 return response.json();
             }).then(function (data) {
                 window.sessionStorage.setItem('prodify-toast', successToast);
@@ -564,11 +576,9 @@
                 if (!window.Swal) return;
                 Swal.fire({
                     icon: 'error',
-                    title: 'No se pudo crear el tablero',
-                    text: 'Revisa la imagen elegida o vuelve a intentarlo.',
-                    confirmButtonColor: '#2f63ff',
-                    background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
-                    color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
+                    title: t('js.create_board_failed_title', 'No se pudo crear el tablero'),
+                    text: t('js.create_board_failed_text', 'Revisa la imagen elegida o vuelve a intentarlo.'),
+                    ...getSwalTheme(),
                 });
             });
         });
@@ -637,26 +647,24 @@
                 if (!workspaceId) return;
 
                 Swal.fire({
-                    title: 'Configuracion del espacio',
+                    title: t('js.workspace_settings_title', 'Configuracion del espacio'),
                     input: 'text',
-                    inputLabel: 'Nombre del espacio',
+                    inputLabel: t('js.workspace_name', 'Nombre del espacio'),
                     inputValue: workspaceName,
-                    inputPlaceholder: 'Ej. Producto y roadmap',
-                    confirmButtonText: 'Guardar cambios',
+                    inputPlaceholder: t('js.workspace_name_placeholder', 'Ej. Producto y roadmap'),
+                    confirmButtonText: t('js.save_changes', 'Guardar cambios'),
                     showCancelButton: true,
-                    cancelButtonText: 'Cancelar',
-                    confirmButtonColor: '#2f63ff',
-                    background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
-                    color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
+                    cancelButtonText: t('js.cancel', 'Cancelar'),
+                    ...getSwalTheme(),
                     inputValidator: function (value) {
-                        if (!value || !value.trim()) return 'El nombre es obligatorio';
+                        if (!value || !value.trim()) return t('js.field_required', 'El nombre es obligatorio');
                         return undefined;
                     },
                 }).then(function (result) {
                     if (!result.isConfirmed) return;
                     workspaceUpdateForm.action = '/workspaces/' + workspaceId + '/update';
                     workspaceUpdateNameInput.value = result.value.trim();
-                    window.sessionStorage.setItem('prodify-toast', 'Espacio actualizado correctamente');
+                    window.sessionStorage.setItem('prodify-toast', t('js.workspace_updated', 'Espacio actualizado correctamente'));
                     workspaceUpdateForm.submit();
                 });
             });
@@ -690,22 +698,20 @@
             const currentEmail = this.getAttribute('data-current-email') || '';
 
             Swal.fire({
-                title: 'Actualizar email',
+                title: t('js.update_email_title', 'Actualizar email'),
                 input: 'email',
-                inputLabel: 'Nuevo correo electronico',
+                inputLabel: t('js.update_email_label', 'Nuevo correo electronico'),
                 inputValue: currentEmail,
-                inputPlaceholder: 'correo@ejemplo.com',
-                confirmButtonText: 'Guardar email',
+                inputPlaceholder: t('js.update_email_placeholder', 'correo@ejemplo.com'),
+                confirmButtonText: t('js.save_email', 'Guardar email'),
                 showCancelButton: true,
-                cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#2f63ff',
-                background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
-                color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
+                cancelButtonText: t('js.cancel', 'Cancelar'),
+                ...getSwalTheme(),
                 inputValidator: function (value) {
-                    if (!value || !value.trim()) return 'Introduce un correo electronico';
+                    if (!value || !value.trim()) return t('js.email_required', 'Introduce un correo electronico');
                     const emailValue = value.trim();
                     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailPattern.test(emailValue)) return 'Introduce un correo electronico valido';
+                    if (!emailPattern.test(emailValue)) return t('js.email_invalid', 'Introduce un correo electronico valido');
                     return undefined;
                 },
             }).then(function (result) {
@@ -730,18 +736,16 @@
         addColumnButton.addEventListener('click', function () {
             if (!window.Swal) return;
             Swal.fire({
-                title: 'Nueva columna',
+                title: t('js.new_column_title', 'Nueva columna'),
                 input: 'text',
-                inputLabel: 'Nombre de la columna',
-                inputPlaceholder: 'Ej. En revision',
+                inputLabel: t('js.column_name', 'Nombre de la columna'),
+                inputPlaceholder: t('js.column_placeholder', 'Ej. En revision'),
                 showCancelButton: true,
-                confirmButtonText: 'Crear',
-                cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#2f63ff',
-                background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
-                color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
+                confirmButtonText: t('js.create', 'Crear'),
+                cancelButtonText: t('js.cancel', 'Cancelar'),
+                ...getSwalTheme(),
                 inputValidator: function (value) {
-                    if (!value || !value.trim()) return 'El nombre es obligatorio';
+                    if (!value || !value.trim()) return t('js.field_required', 'El nombre es obligatorio');
                     return undefined;
                 },
             }).then(function (result) {
@@ -761,25 +765,23 @@
                 if (!columnId) return;
 
                 Swal.fire({
-                    title: 'Editar columna',
+                    title: t('js.edit_column_title', 'Editar columna'),
                     input: 'text',
                     inputValue: currentTitle,
-                    inputLabel: 'Nuevo nombre de la columna',
+                    inputLabel: t('js.edit_column_label', 'Nuevo nombre de la columna'),
                     showCancelButton: true,
-                    confirmButtonText: 'Guardar columna',
-                    cancelButtonText: 'Cancelar',
-                    confirmButtonColor: '#2f63ff',
-                    background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
-                    color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
+                    confirmButtonText: t('js.edit_column_save', 'Guardar columna'),
+                    cancelButtonText: t('js.cancel', 'Cancelar'),
+                    ...getSwalTheme(),
                     inputValidator: function (value) {
-                        if (!value || !value.trim()) return 'El nombre es obligatorio';
+                        if (!value || !value.trim()) return t('js.field_required', 'El nombre es obligatorio');
                         return undefined;
                     },
                 }).then(function (result) {
                     if (!result.isConfirmed) return;
                     columnUpdateForm.action = '/columns/' + columnId + '/update';
                     columnUpdateTitleInput.value = result.value.trim();
-                    window.sessionStorage.setItem('prodify-toast', 'Columna actualizada');
+                    window.sessionStorage.setItem('prodify-toast', t('js.column_updated', 'Columna actualizada'));
                     columnUpdateForm.submit();
                 });
             });
@@ -801,18 +803,16 @@
                 if (!columnId) return;
 
                 Swal.fire({
-                    title: 'Nueva tarea',
+                    title: t('js.new_task_title', 'Nueva tarea'),
                     input: 'text',
-                    inputLabel: 'Nombre de la tarea',
-                    inputPlaceholder: 'Ej. Revisar copy',
+                    inputLabel: t('js.task_name', 'Nombre de la tarea'),
+                    inputPlaceholder: t('js.task_placeholder', 'Ej. Revisar copy'),
                     showCancelButton: true,
-                    confirmButtonText: 'Crear',
-                    cancelButtonText: 'Cancelar',
-                    confirmButtonColor: '#2f63ff',
-                    background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
-                    color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
+                    confirmButtonText: t('js.create', 'Crear'),
+                    cancelButtonText: t('js.cancel', 'Cancelar'),
+                    ...getSwalTheme(),
                     inputValidator: function (value) {
-                        if (!value || !value.trim()) return 'El nombre es obligatorio';
+                        if (!value || !value.trim()) return t('js.field_required', 'El nombre es obligatorio');
                         return undefined;
                     },
                 }).then(function (result) {
@@ -837,18 +837,17 @@
                 if (!form || !window.Swal) return;
 
                 Swal.fire({
-                    title: 'Eliminar columna?',
-                    text: 'Se borraran tambien todas las tareas.',
+                    title: t('js.delete_column_title', 'Eliminar columna?'),
+                    text: t('js.delete_column_text', 'Se borraran tambien todas las tareas.'),
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Si, eliminar',
-                    cancelButtonText: 'Cancelar',
+                    confirmButtonText: t('js.confirm_delete', 'Si, eliminar'),
+                    cancelButtonText: t('js.cancel', 'Cancelar'),
                     confirmButtonColor: '#c0264f',
-                    background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
-                    color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
+                    ...getSwalTheme(),
                 }).then(function (result) {
                     if (!result.isConfirmed) return;
-                    window.sessionStorage.setItem('prodify-toast', 'Columna eliminada');
+                    window.sessionStorage.setItem('prodify-toast', t('js.column_deleted', 'Columna eliminada'));
                     form.submit();
                 });
             });
@@ -868,18 +867,17 @@
                 if (!form || !window.Swal) return;
 
                 Swal.fire({
-                    title: 'Eliminar tarea?',
-                    text: 'Esta accion no se puede deshacer.',
+                    title: t('js.delete_task_title', 'Eliminar tarea?'),
+                    text: t('js.delete_task_text', 'Esta accion no se puede deshacer.'),
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Si, eliminar',
-                    cancelButtonText: 'Cancelar',
+                    confirmButtonText: t('js.confirm_delete', 'Si, eliminar'),
+                    cancelButtonText: t('js.cancel', 'Cancelar'),
                     confirmButtonColor: '#c0264f',
-                    background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
-                    color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
+                    ...getSwalTheme(),
                 }).then(function (result) {
                     if (!result.isConfirmed) return;
-                    window.sessionStorage.setItem('prodify-toast', 'Tarea eliminada');
+                    window.sessionStorage.setItem('prodify-toast', t('js.task_deleted', 'Tarea eliminada'));
                     form.submit();
                 });
             });
@@ -887,168 +885,225 @@
     }
 
     /*
-     * Elementos necesarios para el drag and drop del kanban.
+     * ── Drag & drop de columnas ───────────────────────────────────────────────
      */
-    const kanbanColumnShells = document.querySelectorAll('.kanban-column[data-column-id]');
-    const columnDragHandles = document.querySelectorAll('.js-column-drag-handle[data-column-id]');
-    const kanbanCards = document.querySelectorAll('.kanban-card[draggable="true"]');
-    const kanbanColumns = document.querySelectorAll('.kanban-cards[data-column-id]');
+    (function () {
+        var columnHandles = document.querySelectorAll('.js-column-drag-handle[data-column-id]');
+        if (!columnHandles.length || !window.PRODIFY_BOARD_ID) return;
 
-    if (kanbanColumnShells.length && columnDragHandles.length && window.PRODIFY_BOARD_ID) {
-        let draggedColumn = null;
+        var draggedColumn = null;
+        var colPlaceholder = null;
 
-        const syncColumnOrder = function () {
-            const orderedIds = [];
-            const orderedColumns = document.querySelectorAll('.kanban-column[data-column-id]');
-            for (let index = 0; index < orderedColumns.length; index += 1) {
-                const columnId = orderedColumns[index].getAttribute('data-column-id');
-                if (columnId) orderedIds.push(columnId);
+        function getGrid() {
+            var c = document.querySelector('.kanban-column[data-column-id]');
+            return c ? c.parentElement : null;
+        }
+
+        function syncColumnOrder() {
+            var cols = document.querySelectorAll('.kanban-column[data-column-id]');
+            var ids = [];
+            for (var i = 0; i < cols.length; i++) {
+                var id = cols[i].getAttribute('data-column-id');
+                if (id) ids.push(id);
             }
-            if (!orderedIds.length) return;
-
+            if (!ids.length) return;
             fetch('/boards/' + window.PRODIFY_BOARD_ID + '/columns/reorder', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRF-Token': csrfToken,
-                },
-                body: 'column_order=' + encodeURIComponent(orderedIds.join(',')),
-            }).catch(function () {
-                window.location.reload();
-            });
-        };
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-Token': csrfToken },
+                body: 'column_order=' + encodeURIComponent(ids.join(',')),
+            }).catch(function () { window.location.reload(); });
+        }
 
-        for (let handleIndex = 0; handleIndex < columnDragHandles.length; handleIndex += 1) {
-            columnDragHandles[handleIndex].addEventListener('dragstart', function (event) {
+        function makePlaceholder(w, h) {
+            var ph = document.createElement('div');
+            ph.className = 'column-drag-placeholder';
+            ph.style.cssText = 'width:' + w + 'px;min-width:' + w + 'px;height:' + h + 'px;' +
+                'border:2px dashed rgba(99,102,241,.6);border-radius:12px;background:rgba(99,102,241,.06);flex-shrink:0;pointer-events:none;';
+            return ph;
+        }
+
+        function removePlaceholder() {
+            if (colPlaceholder && colPlaceholder.parentElement) colPlaceholder.parentElement.removeChild(colPlaceholder);
+            colPlaceholder = null;
+        }
+
+        for (var hi = 0; hi < columnHandles.length; hi++) {
+            columnHandles[hi].addEventListener('dragstart', function (e) {
                 draggedColumn = this.closest('.kanban-column');
                 if (!draggedColumn) return;
-                draggedColumn.classList.add('dragging-column');
-                event.dataTransfer.effectAllowed = 'move';
-                event.dataTransfer.setData('text/plain', draggedColumn.getAttribute('data-column-id') || '');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', draggedColumn.getAttribute('data-column-id') || '');
+                var rect = draggedColumn.getBoundingClientRect();
+                var col = draggedColumn;
+                setTimeout(function () {
+                    col.classList.add('dragging-column');
+                    colPlaceholder = makePlaceholder(rect.width, rect.height);
+                    if (col.parentElement) col.parentElement.insertBefore(colPlaceholder, col);
+                }, 0);
             });
 
-            columnDragHandles[handleIndex].addEventListener('dragend', function () {
-                if (draggedColumn) {
-                    draggedColumn.classList.remove('dragging-column');
-                }
-                for (let columnIndex = 0; columnIndex < kanbanColumnShells.length; columnIndex += 1) {
-                    kanbanColumnShells[columnIndex].classList.remove('drag-over-column');
-                }
+            columnHandles[hi].addEventListener('dragend', function () {
+                if (draggedColumn) draggedColumn.classList.remove('dragging-column');
+                removePlaceholder();
                 draggedColumn = null;
             });
         }
 
-        for (let shellIndex = 0; shellIndex < kanbanColumnShells.length; shellIndex += 1) {
-            kanbanColumnShells[shellIndex].addEventListener('dragover', function (event) {
-                if (!draggedColumn || draggedColumn === this) return;
-                event.preventDefault();
-                this.classList.add('drag-over-column');
+        var grid = getGrid();
+        if (grid) {
+            grid.addEventListener('dragover', function (e) {
+                if (!draggedColumn) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                var cols = Array.prototype.filter.call(
+                    document.querySelectorAll('.kanban-column[data-column-id]'),
+                    function (c) { return c !== draggedColumn; }
+                );
+                var insertBefore = null;
+                for (var i = 0; i < cols.length; i++) {
+                    var r = cols[i].getBoundingClientRect();
+                    if (e.clientX < r.left + r.width / 2) { insertBefore = cols[i]; break; }
+                }
+                if (colPlaceholder) {
+                    if (insertBefore) grid.insertBefore(colPlaceholder, insertBefore);
+                    else grid.appendChild(colPlaceholder);
+                }
             });
 
-            kanbanColumnShells[shellIndex].addEventListener('dragleave', function () {
-                this.classList.remove('drag-over-column');
-            });
-
-            kanbanColumnShells[shellIndex].addEventListener('drop', function (event) {
-                if (!draggedColumn || draggedColumn === this) return;
-                event.preventDefault();
-
-                const kanbanGrid = this.parentElement;
-                if (!kanbanGrid) return;
-
-                this.classList.remove('drag-over-column');
-                const bounds = this.getBoundingClientRect();
-                const insertAfter = event.clientX > bounds.left + (bounds.width / 2);
-                kanbanGrid.insertBefore(draggedColumn, insertAfter ? this.nextSibling : this);
+            grid.addEventListener('drop', function (e) {
+                if (!draggedColumn) return;
+                e.preventDefault();
+                if (colPlaceholder && colPlaceholder.parentElement) {
+                    colPlaceholder.parentElement.insertBefore(draggedColumn, colPlaceholder);
+                    removePlaceholder();
+                }
+                draggedColumn.classList.remove('dragging-column');
+                draggedColumn = null;
                 syncColumnOrder();
             });
         }
-    }
+    }());
 
-    if (kanbanCards.length && kanbanColumns.length) {
-        /*
-         * Guardo la columna origen para comparar luego con la de destino.
-         */
-        let sourceColumnId = null;
+    /*
+     * ── Drag & drop de tarjetas ───────────────────────────────────────────────
+     */
+    (function () {
+        var kanbanCards = document.querySelectorAll('.kanban-card[draggable="true"]');
+        var kanbanColumns = document.querySelectorAll('.kanban-cards[data-column-id]');
+        if (!kanbanCards.length || !kanbanColumns.length) return;
 
-        for (let k = 0; k < kanbanCards.length; k += 1) {
-            kanbanCards[k].addEventListener('dragstart', function (event) {
-                this.classList.add('dragging');
-                const sourceColumn = this.closest('.kanban-cards');
-                sourceColumnId = sourceColumn ? sourceColumn.getAttribute('data-column-id') : null;
-                event.dataTransfer.effectAllowed = 'move';
-                event.dataTransfer.setData('text/plain', this.getAttribute('data-card-id'));
+        var draggedCard = null;
+        var sourceColumnId = null;
+        var cardPlaceholder = null;
+
+        function makeCardPlaceholder(h) {
+            var ph = document.createElement('div');
+            ph.className = 'kanban-card card-drag-placeholder';
+            ph.style.cssText = 'height:' + h + 'px;border:2px dashed rgba(99,102,241,.6);' +
+                'background:rgba(99,102,241,.06);border-radius:8px;pointer-events:none;flex-shrink:0;';
+            return ph;
+        }
+
+        function removeCardPlaceholder() {
+            if (cardPlaceholder && cardPlaceholder.parentElement) cardPlaceholder.parentElement.removeChild(cardPlaceholder);
+            cardPlaceholder = null;
+        }
+
+        function getInsertionPoint(col, clientY) {
+            var cards = Array.prototype.filter.call(
+                col.querySelectorAll('.kanban-card[draggable="true"]'),
+                function (c) { return c !== draggedCard; }
+            );
+            for (var i = 0; i < cards.length; i++) {
+                var r = cards[i].getBoundingClientRect();
+                if (clientY < r.top + r.height / 2) return cards[i];
+            }
+            return null;
+        }
+
+        for (var k = 0; k < kanbanCards.length; k++) {
+            kanbanCards[k].addEventListener('dragstart', function (e) {
+                draggedCard = this;
+                var srcCol = this.closest('.kanban-cards');
+                sourceColumnId = srcCol ? srcCol.getAttribute('data-column-id') : null;
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', this.getAttribute('data-card-id') || '');
+                var rect = this.getBoundingClientRect();
+                var card = this;
+                setTimeout(function () {
+                    card.classList.add('dragging');
+                    cardPlaceholder = makeCardPlaceholder(rect.height);
+                    if (card.parentElement) card.parentElement.insertBefore(cardPlaceholder, card.nextSibling);
+                }, 0);
             });
 
             kanbanCards[k].addEventListener('dragend', function () {
                 this.classList.remove('dragging');
-                for (let j = 0; j < kanbanColumns.length; j += 1) {
-                    kanbanColumns[j].classList.remove('drag-over');
-                }
+                removeCardPlaceholder();
+                draggedCard = null;
+                for (var j = 0; j < kanbanColumns.length; j++) kanbanColumns[j].classList.remove('drag-over');
             });
         }
 
-        /*
-         * Aqui controlo el movimiento entre columnas.
-         */
-        for (let m = 0; m < kanbanColumns.length; m += 1) {
-            kanbanColumns[m].addEventListener('dragover', function (event) {
-                event.preventDefault();
+        for (var m = 0; m < kanbanColumns.length; m++) {
+            kanbanColumns[m].addEventListener('dragover', function (e) {
+                if (!draggedCard) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
                 this.classList.add('drag-over');
+                if (!cardPlaceholder) return;
+                var before = getInsertionPoint(this, e.clientY);
+                var ghost = this.querySelector('.kanban-card.ghost:not(.card-drag-placeholder)');
+                if (before) {
+                    this.insertBefore(cardPlaceholder, before);
+                } else {
+                    this.insertBefore(cardPlaceholder, ghost || null);
+                }
             });
 
-            kanbanColumns[m].addEventListener('dragleave', function () {
+            kanbanColumns[m].addEventListener('dragleave', function (e) {
+                if (e.relatedTarget && this.contains(e.relatedTarget)) return;
                 this.classList.remove('drag-over');
             });
 
-            kanbanColumns[m].addEventListener('drop', function (event) {
-                event.preventDefault();
+            kanbanColumns[m].addEventListener('drop', function (e) {
+                e.preventDefault();
                 this.classList.remove('drag-over');
-
-                const cardId = event.dataTransfer.getData('text/plain');
+                if (!draggedCard) return;
+                var cardId = e.dataTransfer.getData('text/plain');
                 if (!cardId) return;
-                const targetColumnId = this.getAttribute('data-column-id');
+                var targetColumnId = this.getAttribute('data-column-id');
                 if (!targetColumnId) return;
 
-                /*
-                 * Primero muevo la tarjeta en la interfaz.
-                 */
-                const card = document.querySelector('.kanban-card[data-card-id="' + cardId + '"]');
-                if (card) {
-                    const ghostCard = this.querySelector('.kanban-card.ghost');
-                    if (ghostCard) ghostCard.remove();
-                    this.appendChild(card);
+                if (cardPlaceholder && cardPlaceholder.parentElement === this) {
+                    this.insertBefore(draggedCard, cardPlaceholder);
+                    removeCardPlaceholder();
+                } else {
+                    var ghost = this.querySelector('.kanban-card.ghost:not(.card-drag-placeholder)');
+                    this.insertBefore(draggedCard, ghost || null);
                 }
+                draggedCard.classList.remove('dragging');
 
-                if (sourceColumnId && sourceColumnId !== targetColumnId) {
-                    const previousColumn = document.querySelector('.kanban-cards[data-column-id="' + sourceColumnId + '"]');
-                    if (previousColumn && !previousColumn.querySelector('.kanban-card[draggable="true"]')) {
-                        /*
-                         * If the column becomes empty, show the placeholder again.
-                         */
-                        const emptyCard = document.createElement('div');
+                if (sourceColumnId) {
+                    var prevCol = document.querySelector('.kanban-cards[data-column-id="' + sourceColumnId + '"]');
+                    if (prevCol && prevCol !== this && !prevCol.querySelector('.kanban-card[draggable="true"]')) {
+                        var emptyCard = document.createElement('div');
                         emptyCard.className = 'kanban-card ghost';
-                        emptyCard.textContent = 'Sin tareas aun';
-                        previousColumn.appendChild(emptyCard);
+                        emptyCard.textContent = t('js.empty_column', 'Sin tareas aun');
+                        prevCol.appendChild(emptyCard);
                     }
                 }
+                var targetGhost = this.querySelector('.kanban-card.ghost:not(.card-drag-placeholder)');
+                if (targetGhost && this.querySelector('.kanban-card[draggable="true"]')) targetGhost.remove();
 
                 fetch('/cards/' + cardId + '/move', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-CSRF-Token': csrfToken,
-                    },
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-Token': csrfToken },
                     body: 'column_id=' + encodeURIComponent(targetColumnId),
-                }).catch(function () {
-                    /*
-                     * Si falla la peticion, recargo la pagina para evitar desajustes.
-                     */
-                    window.location.reload();
-                });
+                }).catch(function () { window.location.reload(); });
             });
         }
-    }
+    }());
 
     /*
      * Confirmacion para borrar un tablero entero.
@@ -1062,18 +1117,17 @@
                 if (!form || !window.Swal) return;
 
                 Swal.fire({
-                    title: 'Borrar tablero?',
-                    text: 'Esta accion no se puede deshacer.',
+                    title: t('js.delete_board_title', 'Borrar tablero?'),
+                    text: t('js.delete_task_text', 'Esta accion no se puede deshacer.'),
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Si, borrar',
-                    cancelButtonText: 'Cancelar',
+                    confirmButtonText: t('js.confirm_delete_board', 'Si, borrar'),
+                    cancelButtonText: t('js.cancel', 'Cancelar'),
                     confirmButtonColor: '#c0264f',
-                    background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
-                    color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
+                    ...getSwalTheme(),
                 }).then(function (result) {
                     if (!result.isConfirmed) return;
-                    window.sessionStorage.setItem('prodify-toast', 'Tablero eliminado');
+                    window.sessionStorage.setItem('prodify-toast', t('js.board_deleted', 'Tablero eliminado'));
                     form.submit();
                 });
             });
@@ -1083,6 +1137,54 @@
     /*
      * Confirmacion para borrar un espacio con todo lo que tiene dentro.
      */
+    const regLangDropdowns = document.querySelectorAll('.js-reg-lang-dropdown');
+    for (let rli = 0; rli < regLangDropdowns.length; rli += 1) {
+        (function (dropdown) {
+            const trigger = dropdown.querySelector('.js-reg-lang-trigger');
+            const menu = dropdown.querySelector('.topbar-language-menu');
+            const hiddenInput = dropdown.querySelector('input[name="preferred_language"]');
+            const flagEl = dropdown.querySelector('.js-reg-lang-flag');
+            const labelEl = dropdown.querySelector('.js-reg-lang-label');
+            const options = dropdown.querySelectorAll('.js-reg-lang-option');
+            if (!trigger || !menu || !hiddenInput) return;
+
+            trigger.addEventListener('click', function () {
+                const isOpen = !menu.hasAttribute('hidden');
+                if (isOpen) {
+                    menu.setAttribute('hidden', 'hidden');
+                    trigger.setAttribute('aria-expanded', 'false');
+                } else {
+                    menu.removeAttribute('hidden');
+                    trigger.setAttribute('aria-expanded', 'true');
+                }
+            });
+
+            for (let oi = 0; oi < options.length; oi += 1) {
+                options[oi].addEventListener('click', function () {
+                    const value = this.getAttribute('data-language-value') || '';
+                    if (!value) return;
+                    hiddenInput.value = value;
+                    const optFlag = this.querySelector('.topbar-language-option-flag');
+                    const optLabel = this.querySelector('.topbar-language-option-label');
+                    if (flagEl && optFlag) flagEl.innerHTML = optFlag.innerHTML;
+                    if (labelEl && optLabel) labelEl.textContent = optLabel.textContent;
+                    for (let k = 0; k < options.length; k += 1) {
+                        options[k].setAttribute('aria-pressed', options[k] === this ? 'true' : 'false');
+                    }
+                    menu.setAttribute('hidden', 'hidden');
+                    trigger.setAttribute('aria-expanded', 'false');
+                });
+            }
+
+            document.addEventListener('click', function (evt) {
+                if (!dropdown.contains(evt.target)) {
+                    menu.setAttribute('hidden', 'hidden');
+                    trigger.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }(regLangDropdowns[rli]));
+    }
+
     const deleteWorkspaceButtons = document.querySelectorAll('.js-delete-workspace');
     if (deleteWorkspaceButtons.length) {
         for (let w = 0; w < deleteWorkspaceButtons.length; w += 1) {
@@ -1092,18 +1194,17 @@
                 if (!form || !window.Swal) return;
 
                 Swal.fire({
-                    title: 'Borrar espacio de trabajo?',
-                    text: 'Se borraran tambien todos sus tableros.',
+                    title: t('js.delete_workspace_title', 'Borrar espacio de trabajo?'),
+                    text: t('js.delete_workspace_text', 'Se borraran tambien todos sus tableros.'),
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Si, borrar espacio',
-                    cancelButtonText: 'Cancelar',
+                    confirmButtonText: t('js.confirm_delete_workspace', 'Si, borrar espacio'),
+                    cancelButtonText: t('js.cancel', 'Cancelar'),
                     confirmButtonColor: '#c0264f',
-                    background: body.classList.contains('theme-light') ? '#f4f8ff' : '#0c1629',
-                    color: body.classList.contains('theme-light') ? '#14305f' : '#e6eeff',
+                    ...getSwalTheme(),
                 }).then(function (result) {
                     if (!result.isConfirmed) return;
-                    window.sessionStorage.setItem('prodify-toast', 'Espacio eliminado');
+                    window.sessionStorage.setItem('prodify-toast', t('js.workspace_deleted', 'Espacio eliminado'));
                     form.submit();
                 });
             });
