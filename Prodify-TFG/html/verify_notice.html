@@ -1,17 +1,27 @@
+<!-- Pagina de aviso de verificacion de email. Se muestra tras el registro. -->
 {% extends "_auth_base.html" %}
 {% set subtitle = t('auth.verify.subtitle') %}
 
 {% block title %}{{ t('auth.verify.page_title') }} | Prodify{% endblock %}
 
 {% block content %}
+    <!-- Titulo principal del aviso de verificacion. -->
     <h2>{{ t('auth.verify.heading') }}</h2>
+
+    <!-- Zona de mensajes de confirmacion o error al reenviar el correo. -->
     {{ message_html }}
+
+    <!-- Formulario para reenviar el correo de verificacion en caso de no haberlo recibido. -->
     <form action="{{ url_for('resend_verification') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <!-- Precargamos el email que viene de la sesion de registro para comodidad del usuario. -->
         <input type="email" name="email" class="form-control" placeholder="{{ t('auth.email_placeholder') }}" value="{{ email }}" required>
         <button type="submit" class="btn btn-login w-100">{{ t('auth.submit_resend') }}</button>
     </form>
+
     <hr>
+
+    <!-- Opciones de navegacion: volver al login o registrarse con otro correo. -->
     <div class="login-footer">
         <a href="{{ url_for('login') }}">{{ t('auth.back_to_login') }}</a> -
         <a href="{{ url_for('register') }}">{{ t('auth.create_account_link') }}</a>

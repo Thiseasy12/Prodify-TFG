@@ -1,52 +1,78 @@
 <!DOCTYPE html>
+<!-- Vista principal del tablero kanban. Contiene columnas, tarjetas y el panel de configuracion. -->
 <html lang="{{ current_language|default('es') }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Token CSRF para proteger los formularios de columnas, tarjetas y configuracion. -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Prodify | {{ board.name }}</title>
+    <!-- Favicon en SVG con fallback a .ico para navegadores antiguos. -->
     <link rel="icon" type="image/svg+xml" href="{{ url_for('send_favicon_svg') }}">
     <link rel="alternate icon" type="image/x-icon" href="{{ url_for('send_favicon') }}">
+    <!-- Precarga de Google Fonts para reducir el tiempo de bloqueo de renderizado. -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap como base de utilidades de layout. -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Hoja de estilos principal de Prodify. -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
-<body class="boards-page board-page" data-cover-url="{{ board.cover_url or '' }}" data-bg-color="{{ board.background_color or '' }}" data-board-id="{{ board.id }}">
+<!-- data-cover-url y data-bg-color se leen por JS para aplicar el fondo del tablero. -->
+<body class="boards-page board-page"
+      data-cover-url="{{ board.cover_url or '' }}"
+      data-bg-color="{{ board.background_color or '' }}"
+      data-board-id="{{ board.id }}">
 
+    <!-- Barra superior: logo, buscador del tablero y boton de volver al workspace. -->
     <header class="topbar navbar navbar-expand-lg">
         <div class="container-fluid px-3 px-lg-4">
+
+            <!-- Logo y nombre de la aplicacion. -->
             <div class="topbar-left d-flex align-items-center">
                 <div class="brand-pill">
                     <span class="brand-icon">P</span>
                     <span class="brand-text">Prodify</span>
                 </div>
             </div>
+
+            <!-- Centro de la topbar: buscador en el tablero y enlace de retorno al workspace. -->
             <div class="topbar-center d-flex align-items-center">
                 <input class="search-input form-control" type="text" placeholder="{{ t('topbar.search_in_board', name=board.name) }}">
+                <!-- Si el usuario puede abrir el workspace volvemos a el; si no, a la home. -->
                 <a class="create-btn btn" href="{{ url_for('workspace_view', workspace_id=workspace.id) if can_open_workspace else url_for('home') }}">{{ t('topbar.back') }}</a>
             </div>
+
+            <!-- Zona derecha: solo el toggle de tema (el tablero no muestra menu de cuenta para no distraer). -->
             <div class="topbar-right">
                 <button class="theme-toggle btn" id="themeToggle" type="button" aria-label="{{ t('theme.toggle') }}">{{ t('theme.light') }}</button>
             </div>
         </div>
     </header>
 
+    <!-- Layout del tablero: sidebar con el workspace y zona principal del kanban. -->
     <main class="layout container-fluid p-0">
         <div class="row g-0 min-vh-100">
+
+            <!-- Sidebar: navegacion general y nombre del workspace actual. -->
             <aside class="sidebar col-12 col-lg-3 col-xl-2">
+                <!-- Navegacion principal entre secciones de la app. -->
                 {{ side_nav_html }}
                 <div class="workspace-title">{{ t('board.current') }}</div>
+                <!-- Enlace al workspace padre del tablero actual. -->
                 <a class="workspace-item" href="{{ url_for('workspace_view', workspace_id=workspace.id) if can_open_workspace else url_for('home') }}">
                     <span class="workspace-avatar">{{ workspace.name[0]|upper }}</span>
                     <span>{{ workspace.name }}</span>
                 </a>
             </aside>
 
+            <!-- Zona principal: cabecera del tablero y contenedor del kanban. -->
             <section class="content col-12 col-lg-9 col-xl-10">
+
+                <!-- Cabecera del tablero: nombre, rol del usuario y botones de accion. -->
                 <div class="board-header">
                     <div>
                         <span class="eyebrow">{{ t('board.eyebrow') }}</span>
@@ -54,7 +80,9 @@
                         <p class="board-role-copy">{{ t('board.access_current') }}: <strong>{{ workspace_role_label }}</strong></p>
                     </div>
                     <div class="board-header-actions">
+                        <!-- Solo mostramos los botones de edicion si el usuario tiene permiso. -->
                         {% if can_edit_board %}
+                        <!-- Boton de ajustes que abre el panel lateral de configuracion. -->
                         <button
                             class="board-settings-toggle"
                             type="button"
@@ -64,17 +92,22 @@
                             title="{{ t('board.settings') }}">
                             <span class="gear-icon">⚙</span>
                         </button>
+                        <!-- Boton para agregar una nueva columna al tablero via SweetAlert2. -->
                         <button class="btn-primary js-add-column" type="button">{{ t('board.create_column') }}</button>
                         {% else %}
+                        <!-- Badge de solo lectura para usuarios sin permisos de edicion. -->
                         <span class="board-readonly-badge">{{ t('board.readonly') }}</span>
                         {% endif %}
                     </div>
                 </div>
 
+                <!-- Shell del layout del kanban con scroll horizontal para las columnas. -->
                 <div class="board-layout-shell">
                     <div class="kanban-board-wrap">
+                        <!-- Las columnas y tarjetas se renderizan desde Python con board_columns_html. -->
                         <div class="kanban">{{ board_columns_html }}</div>
                     </div>
+                    <!-- Aviso de debug visible solo en desarrollo cuando el usuario no puede editar. -->
                     {% if not can_edit_board %}
                     <div style="position: fixed; top: 100px; right: 20px; background: rgba(255, 107, 107, 0.8); color: white; padding: 12px; border-radius: 8px; font-size: 12px; max-width: 300px; z-index: 999;">
                         ⚠️ Permiso insuficiente: can_edit_board = False. Tu rol es: {{ workspace_role_label }}
@@ -85,12 +118,15 @@
         </div>
     </main>
 
-    {# ===== PANEL DE CONFIGURACIÓN DESPLEGABLE (dropdown desde la rueda ⚙) ===== #}
+    <!-- Panel lateral de configuracion del tablero. Se desliza desde la derecha al pulsar la rueda. -->
 
+    <!-- Fondo semitransparente que oscurece el tablero mientras el panel esta abierto. -->
     <div class="bcp-backdrop" id="bcpBackdrop"></div>
 
+    <!-- Panel de configuracion con pestanas: Fondo, Miembros y Zona Peligrosa. -->
     <div class="board-config-panel" id="boardConfigPanel" aria-hidden="true" role="dialog">
 
+        <!-- Cabecera del panel con icono, nombre del tablero y boton de cerrar. -->
         <div class="bcp-header">
             <div class="bcp-header-info">
                 <div class="bcp-header-icon">⚙</div>
@@ -102,24 +138,30 @@
             <button class="bcp-close" id="bcpClose" type="button" aria-label="{{ t('common.close') }}">&times;</button>
         </div>
 
+        <!-- Pestanas de navegacion del panel: Fondo, Miembros y Zona Peligrosa. -->
         <div class="bcp-tabs" role="tablist">
             <button class="bcp-tab is-active" data-bcp-tab="fondo"    role="tab" aria-selected="true">  <span class="bcp-tab-icon">🎨</span> {{ t('board.settings_tab_background') }} </button>
             <button class="bcp-tab"           data-bcp-tab="miembros" role="tab" aria-selected="false"> <span class="bcp-tab-icon">👥</span> {{ t('board.settings_tab_members') }} </button>
             <button class="bcp-tab"           data-bcp-tab="peligro"  role="tab" aria-selected="false"> <span class="bcp-tab-icon">⚠</span>  {{ t('board.settings_tab_danger') }} </button>
         </div>
 
+        <!-- Cuerpo del panel con el contenido de cada pestana. -->
         <div class="bcp-body">
 
-            {# ── FONDO ── #}
+            <!-- Pestana de fondo: selector de color y subida de imagen de portada. -->
             <div class="bcp-section is-active" data-bcp-section="fondo">
                 <div class="bcp-block">
                     <strong class="bcp-block-title">{{ t('board.background_color_label') }}</strong>
                     <span class="bcp-block-desc">{{ t('board.background_color_help') }}</span>
+                    <!-- Formulario que actualiza el color o la portada del tablero. -->
                     <form action="{{ url_for('update_board', board_id=board.id) }}" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="board_name" value="{{ board.name }}">
+                        <!-- El valor de color se actualiza por JavaScript al pulsar un boton de color. -->
                         <input type="hidden" name="board_background" value="{{ board.background_color or '#1d4ed8' }}" id="bcpBgInput">
+                        <!-- Grid de colores predefinidos para el fondo del tablero. -->
                         <div class="bcp-color-grid">
                             {% for c in ['#1d4ed8','#0f766e','#be185d','#7c3aed','#ea580c','#334155','#b45309','#065f46','#0e7490','#6d28d9','#9d174d','#1e40af'] %}
+                            <!-- js-bcp-color marca este boton para el listener de seleccion de color. -->
                             <button type="button"
                                 class="bcp-color-btn js-bcp-color{% if c.lower() == (board.background_color or '#1d4ed8').lower() %} is-active{% endif %}"
                                 data-color="{{ c }}" title="{{ c }}"></button>
@@ -127,11 +169,14 @@
                         </div>
                         <strong class="bcp-block-title">{{ t('board.cover_image_label') }}</strong>
                         <span class="bcp-block-desc">{{ t('board.cover_image_help') }}</span>
+                        <!-- Fila de subida de imagen: boton visible + input oculto + nombre del archivo. -->
                         <div class="bcp-upload-row">
                             <label for="bcpCoverFile" class="bcp-upload-btn">📷 {{ t('js.upload_image') }}</label>
                             <input id="bcpCoverFile" class="js-bcp-cover-input" type="file" name="board_cover_file"
                                 accept=".jpg,.jpeg,.png,.svg,.webp,image/jpeg,image/png,image/svg+xml,image/webp">
+                            <!-- El nombre del archivo se actualiza por JavaScript al seleccionar uno. -->
                             <span class="bcp-upload-name js-bcp-cover-name">{{ board.cover_url or t('js.no_file_selected') }}</span>
+                            <!-- Solo mostramos el boton de eliminar portada si ya hay una subida. -->
                             {% if board.cover_url %}
                             <form action="{{ url_for('delete_board_cover', board_id=board.id) }}" method="POST" class="bcp-delete-cover-form">
                                 <button type="submit" class="bcp-delete-cover-btn" title="{{ t('board.delete_cover_btn_title') }}">🗑</button>
@@ -143,11 +188,12 @@
                 </div>
             </div>
 
-            {# ── MIEMBROS ── #}
+            <!-- Pestana de miembros: lista de miembros y formulario de invitacion. -->
             <div class="bcp-section" data-bcp-section="miembros">
-                {#  board_settings_html contiene el bloque de permisos/invitaciones generado por Python  #}
+                <!-- El bloque de permisos e invitaciones lo genera Python en board_settings_html. -->
                 {{ board_settings_html }}
 
+                <!-- Formulario de invitacion de nuevo miembro, solo visible si el usuario puede editar. -->
                 {% if can_edit_board %}
                 <div class="bcp-block bcp-block--bordered">
                     <strong class="bcp-block-title">{{ t('board.invite_title') }}</strong>
@@ -155,6 +201,7 @@
                     <form class="bcp-invite-form" action="{{ url_for('invite_board_member', board_id=board.id) }}" method="POST">
                         <div class="bcp-invite-row">
                             <input type="email" name="member_email" class="bcp-invite-input" placeholder="{{ t('workspace.member_email_placeholder') }}" required>
+                            <!-- Selector de rol para el miembro invitado. -->
                             <select name="role" class="bcp-invite-select">
                                 <option value="lector">{{ t('role.reader') }}</option>
                                 <option value="editor">{{ t('role.editor') }}</option>
@@ -167,15 +214,17 @@
                 {% endif %}
             </div>
 
-            {# ── ZONA PELIGROSA ── #}
+            <!-- Pestana de zona peligrosa: eliminar el tablero de forma irreversible. -->
             <div class="bcp-section" data-bcp-section="peligro">
                 <div class="bcp-block">
                     <strong class="bcp-block-title">{{ t('board.danger_zone_title') }}</strong>
                     <span class="bcp-block-desc">{{ t('board.danger_zone_help') }}</span>
                     <div class="bcp-danger-box">
                         <p class="bcp-danger-text">{{ t('board.danger_zone_warning') }}</p>
+                        <!-- Solo mostramos el boton de eliminar si el usuario tiene permiso. -->
                         {% if can_edit_board %}
                         <form action="{{ url_for('delete_board', board_id=board.id) }}" method="POST" class="inline-form">
+                            <!-- js-delete-board lanza un dialogo de confirmacion antes de enviar el form. -->
                             <button type="submit" class="bcp-danger-btn js-delete-board">🗑 {{ t('board.delete') }}</button>
                         </form>
                         {% else %}
@@ -185,35 +234,47 @@
                 </div>
             </div>
 
-        </div>{# /bcp-body #}
-    </div>{# /board-config-panel #}
+        </div><!-- /bcp-body -->
+    </div><!-- /board-config-panel -->
 
-    {# Formularios ocultos para JS #}
+    <!-- Formularios ocultos que JavaScript rellena y envia para gestionar columnas y tarjetas. -->
+
+    <!-- Formulario para crear una nueva columna en el tablero. -->
     <form id="columnCreateForm" action="{{ url_for('create_column', board_id=board.id) }}" method="POST" hidden>
         <input type="text" name="column_title" id="columnTitleInput">
     </form>
+
+    <!-- Formulario para renombrar una columna existente (action se asigna por JS). -->
     <form id="columnUpdateForm" action="" method="POST" hidden>
         <input type="text" name="column_title" id="columnUpdateTitleInput">
     </form>
+
+    <!-- Formulario para crear una nueva tarjeta en una columna (action se asigna por JS). -->
     <form id="cardCreateForm" action="" method="POST" hidden>
         <input type="text" name="card_title" id="cardTitleInput">
     </form>
 
+    <!-- Exponemos el ID del tablero al scope global para que los scripts inline puedan usarlo. -->
     <script>window.PRODIFY_BOARD_ID = document.body.getAttribute('data-board-id');</script>
+
+    <!-- Script inline: aplica el fondo del tablero (portada o color) antes del primer pintado. -->
     <script>
         (function() {
             const coverUrl = document.body.getAttribute('data-cover-url');
             const bgColor = document.body.getAttribute('data-bg-color');
             const body = document.body;
-            
+
+            /* Si hay portada, la usamos con un degradado oscuro encima para que el texto sea legible. */
             if (coverUrl && coverUrl.trim()) {
                 body.style.backgroundImage = 'linear-gradient(rgba(5,7,13,.82), rgba(5,7,13,.92)), url(\'' + coverUrl + '\')';
                 body.style.backgroundSize = 'cover';
                 body.style.backgroundPosition = 'center';
             } else if (bgColor && bgColor.trim()) {
+                /* Si hay color de fondo, lo mezclamos con el negro base para suavizarlo. */
                 body.style.background = 'linear-gradient(180deg, color-mix(in srgb, ' + bgColor + ' 22%, #05070d), #05070d 68%)';
             }
-            
+
+            /* Pintamos cada boton de color con su color real para el selector del panel. */
             const colorBtns = document.querySelectorAll('.bcp-color-btn');
             colorBtns.forEach(btn => {
                 const color = btn.getAttribute('data-color');
@@ -223,25 +284,30 @@
             });
         })();
     </script>
+
+    <!-- Datos JSON de traducciones para los dialogos de JavaScript. -->
     <script id="i18nData" type="application/json">{{ js_translations|tojson }}</script>
+
+    <!-- SweetAlert2 para los dialogos de creacion de columnas, tarjetas y confirmaciones. -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Bootstrap JS para los componentes de layout interactivos. -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Script principal de Prodify con la logica de kanban, drag & drop e i18n. -->
     <script src="{{ url_for('js_static', filename='script.js') }}"></script>
 
+    <!-- Script de debug: verifica en consola que los botones de accion se han renderizado. -->
     <script>
-    /* Debug: Verificar que los botones están presentes */
     (function() {
         document.addEventListener('DOMContentLoaded', function() {
             const addCardBtns = document.querySelectorAll('.js-add-card');
             const delColBtns = document.querySelectorAll('.js-delete-column');
             const delCardBtns = document.querySelectorAll('.js-delete-card');
-            
+
             console.log('Botones encontrados:');
             console.log('+ Agregar tarea:', addCardBtns.length);
             console.log('🗑 Eliminar columna:', delColBtns.length);
             console.log('× Eliminar tarea:', delCardBtns.length);
-            
-            // Si no hay botones, verificar si es por permisos
+
             if (addCardBtns.length === 0 && delColBtns.length === 0) {
                 console.warn('⚠️ No se encontraron botones de edición. Verifica tus permisos.');
             }
@@ -249,10 +315,8 @@
     })();
     </script>
 
+    <!-- Script inline: logica de apertura/cierre del panel de configuracion y sus tabs. -->
     <script>
-    /* ============================================================
-       Panel de configuración del tablero — lógica inline
-       ============================================================ */
     (function () {
         'use strict';
 
@@ -261,7 +325,7 @@
         var backdrop = document.getElementById('bcpBackdrop');
         var closeBtn = document.getElementById('bcpClose');
 
-        /* Abrir y cerrar */
+        /* Abre el panel añadiendo la clase is-open al panel, backdrop y trigger. */
         function openPanel() {
             if (!panel) return;
             panel.classList.add('is-open');
@@ -270,6 +334,7 @@
             if (trigger) { trigger.classList.add('is-open'); trigger.setAttribute('aria-expanded', 'true'); }
         }
 
+        /* Cierra el panel quitando la clase is-open. */
         function closePanel() {
             if (!panel) return;
             panel.classList.remove('is-open');
@@ -278,14 +343,16 @@
             if (trigger) { trigger.classList.remove('is-open'); trigger.setAttribute('aria-expanded', 'false'); }
         }
 
+        /* Toggle al pulsar la rueda de ajustes. */
         if (trigger) trigger.addEventListener('click', function () {
             panel && panel.classList.contains('is-open') ? closePanel() : openPanel();
         });
         if (closeBtn)  closeBtn.addEventListener('click', closePanel);
         if (backdrop)  backdrop.addEventListener('click', closePanel);
+        /* Cerrar con Escape para accesibilidad. */
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePanel(); });
 
-        /* Tabs */
+        /* Logica de tabs: activa la seccion correspondiente al pulsar una pestana. */
         if (panel) {
             var tabs     = panel.querySelectorAll('.bcp-tab');
             var sections = panel.querySelectorAll('.bcp-section');
@@ -302,7 +369,7 @@
                 });
             }
 
-            /* Selector de color */
+            /* Selector de color: actualiza el input oculto con el color elegido. */
             var colorBtns = panel.querySelectorAll('.js-bcp-color');
             var bgInput   = document.getElementById('bcpBgInput');
             for (var ci = 0; ci < colorBtns.length; ci++) {
@@ -313,7 +380,7 @@
                 });
             }
 
-            /* Preview nombre archivo de portada */
+            /* Preview del nombre de archivo de portada al seleccionar uno. */
             var coverInput = panel.querySelector('.js-bcp-cover-input');
             var coverName  = panel.querySelector('.js-bcp-cover-name');
             if (coverInput && coverName) {

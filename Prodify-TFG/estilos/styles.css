@@ -1,3 +1,5 @@
+
+/* Variables globales de color, tipografia y superficies que compartimos en todo el proyecto */
 :root {
     --font: "Plus Jakarta Sans", "Segoe UI", sans-serif;
     --bg: #05070d;
@@ -16,18 +18,13 @@
     --danger-line: #7a2941;
 }
 
-/*
- * Ajustes basicos que afectan a toda la pagina.
- */
+/* Estilos base del documento: fuente y margen cero */
 body {
     margin: 0;
     font-family: var(--font);
 }
 
-/*
- * Variante del tema claro.
- * Aqui cambio solo las variables para que el resto se adapte solo.
- */
+/* Sobreescribimos las variables CSS para el tema claro, sin tocar los componentes */
 .theme-light {
     --bg: #edf3ff;
     --bg-grad-a: rgba(120, 170, 255, .22);
@@ -47,10 +44,7 @@ body {
     --hero-c: #f4f7ff;
 }
 
-/*
- * Estilos generales de las vistas principales:
- * topbar, sidebar, tarjetas, menu de cuenta y zonas comunes.
- */
+/* Layout raiz de la aplicacion con el fondo degradado radial que diseñamos */
 .boards-page {
     min-height: 100vh;
     color: var(--text);
@@ -60,10 +54,12 @@ body {
         linear-gradient(180deg, color-mix(in srgb, var(--bg) 90%, #0a1220) 0%, var(--bg) 100%);
 }
 
+/* En tema claro el fondo pasa a blanco solido */
 .theme-light.boards-page {
     background: #ffffff !important;
 }
 
+/* Textos que en modo oscuro necesitan mayor contraste */
 .boards-page:not(.theme-light) .workspace-title,
 .boards-page:not(.theme-light) .inicio-hero-text p,
 .boards-page:not(.theme-light) .inicio-stats span,
@@ -77,6 +73,7 @@ body {
     color: rgba(255, 255, 255, .82);
 }
 
+/* Barra de navegacion superior fija con efecto de desenfoque */
 .topbar {
     position: relative;
     height: 60px;
@@ -86,6 +83,7 @@ body {
     backdrop-filter: blur(8px);
 }
 
+/* Logo de marca: icono + texto Prodify */
 .brand-pill {
     display: inline-flex;
     align-items: center;
@@ -94,6 +92,7 @@ body {
     color: var(--text);
 }
 
+/* Icono cuadrado del logo con gradiente azul */
 .brand-icon {
     width: 28px;
     height: 28px;
@@ -110,6 +109,7 @@ body {
     font-size: 18px;
 }
 
+/* Zona central de la topbar que alberga el buscador */
 .topbar-center {
     width: min(760px, 56vw);
     display: flex;
@@ -117,6 +117,7 @@ body {
     gap: 10px;
 }
 
+/* Campo de busqueda y formulario de cuenta comparten estos estilos base */
 .search-input.form-control,
 .account-form input {
     height: 38px;
@@ -132,6 +133,7 @@ body {
     box-shadow: 0 0 0 3px rgba(61, 115, 255, .2);
 }
 
+/* Grupo de botones de accion reutilizados en la topbar y sidebars */
 .create-btn,
 .theme-toggle,
 .workspace-actions .btn,
@@ -150,6 +152,7 @@ body {
     font-weight: 600;
 }
 
+/* Boton principal de crear con gradiente azul */
 .create-btn {
     height: 38px;
     padding: 0 14px;
@@ -159,10 +162,12 @@ body {
     font-weight: 700;
 }
 
+/* Contenedor relativo del menu desplegable de crear */
 .create-menu-wrap {
     position: relative;
 }
 
+/* Menu flotante que aparece al pulsar el boton crear */
 .create-dropdown {
     position: absolute;
     top: calc(100% + 10px);
@@ -220,6 +225,7 @@ body {
     filter: brightness(1.06);
 }
 
+/* Boton de alternancia entre tema oscuro y claro */
 .theme-toggle {
     width: auto;
     min-width: auto;
@@ -254,6 +260,7 @@ body {
     color: #12233f;
 }
 
+/* Modales de gestion de miembros construidos con SweetAlert2 */
 .swal-members {
     text-align: left;
 }
@@ -274,6 +281,7 @@ body {
     opacity: .8;
 }
 
+/* Avatar circular del usuario en la esquina superior derecha */
 .user-badge {
     width: 34px;
     height: 34px;
@@ -309,6 +317,7 @@ body {
     background: linear-gradient(145deg, #183672, #2252c9);
 }
 
+/* Zona derecha de la topbar: idioma, usuario */
 .topbar-right {
     position: relative;
     display: flex;
@@ -316,6 +325,7 @@ body {
     gap: 8px;
 }
 
+/* Selector de idioma adaptado para la pantalla de registro */
 .register-language-selector {
     position: relative;
     width: 100%;
@@ -349,6 +359,7 @@ body {
     justify-content: center;
 }
 
+/* Boton disparador del selector de idioma */
 .topbar-language-trigger {
     height: 38px;
     min-width: 148px;
@@ -429,6 +440,7 @@ body {
     box-shadow: 0 0 0 3px rgba(61, 115, 255, .18);
 }
 
+/* Menu desplegable de seleccion de idioma */
 .topbar-language-menu {
     position: absolute;
     top: calc(100% + 8px);
@@ -442,6 +454,7 @@ body {
     z-index: 170;
 }
 
+/* Grid de opciones de idioma dentro del menu */
 .topbar-language-options {
     display: grid;
     gap: 4px;
@@ -474,6 +487,7 @@ body {
     text-overflow: ellipsis;
 }
 
+/* Menu flotante de cuenta de usuario con animacion de entrada */
 .account-menu {
     position: absolute;
     right: 0;
@@ -498,6 +512,7 @@ body {
     margin: 6px 4px 8px;
 }
 
+/* Cabecera del menu de cuenta: avatar, nombre y plan */
 .account-hero {
     display: flex;
     align-items: center;
@@ -548,6 +563,7 @@ body {
     color: color-mix(in srgb, var(--text) 70%, #8cc0ff);
 }
 
+/* Lista de enlaces de navegacion dentro del menu de cuenta */
 .account-links {
     display: flex;
     flex-direction: column;
@@ -581,6 +597,7 @@ body {
     text-decoration: none;
 }
 
+/* Animacion de entrada del menu de cuenta */
 @keyframes accountPop {
     from {
         opacity: 0;
@@ -593,6 +610,7 @@ body {
     }
 }
 
+/* Variante con borde del enlace de cuenta */
 .account-link-ghost {
     margin: 6px 0;
     border: 1px solid var(--line);
@@ -614,12 +632,14 @@ body {
     font-size: 16px;
 }
 
+/* Separador horizontal dentro del menu de cuenta */
 .account-divider {
     height: 1px;
     background: color-mix(in srgb, var(--line) 90%, #2b3f68);
     margin: 12px 0;
 }
 
+/* Seccion agrupada dentro del menu de cuenta */
 .account-section {
     padding: 10px;
     border-radius: 12px;
@@ -627,6 +647,7 @@ body {
     border: 1px solid var(--line);
 }
 
+/* Formulario de edicion de perfil dentro del menu de cuenta */
 .account-form {
     display: flex;
     flex-direction: column;
@@ -647,6 +668,7 @@ body {
     letter-spacing: .01em;
 }
 
+/* Campo de subida de imagen de avatar */
 .account-file-field {
     display: flex;
     flex-direction: column;
@@ -696,6 +718,7 @@ body {
     font-size: 13px;
 }
 
+/* Checkbox con estilos propios del formulario de cuenta */
 .account-check {
     display: flex;
     align-items: center;
@@ -709,6 +732,7 @@ body {
     margin: 0;
 }
 
+/* Zona del boton de cerrar sesion */
 .account-logout {
     margin-top: 10px;
 }
@@ -721,6 +745,8 @@ body {
 .account-head span,
 .workspace-title,
 .account-form label,
+
+/* Nota de lista vacia con borde discontinuo */
 .empty-note {
     color: var(--muted);
     font-size: 12px;
@@ -731,16 +757,19 @@ body {
     margin-top: 10px;
 }
 
+/* Layout de dos columnas: sidebar izquierda y contenido principal */
 .layout {
     min-height: calc(100vh - 60px);
 }
 
+/* Barra lateral izquierda con degradado sutil */
 .sidebar {
     padding: 16px 12px;
     border-right: 1px solid var(--line);
     background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 80%, #0d1628), color-mix(in srgb, var(--bg) 88%, #0a1220));
 }
 
+/* Navegacion principal dentro de la sidebar */
 .side-nav {
     gap: 6px;
 }
@@ -764,6 +793,7 @@ body {
     border: 1px solid color-mix(in srgb, var(--brand) 40%, var(--line));
 }
 
+/* Titulo de seccion en mayusculas dentro de la sidebar */
 .workspace-title {
     margin: 20px 10px 8px;
     font-size: 11px;
@@ -772,6 +802,7 @@ body {
     text-transform: uppercase;
 }
 
+/* Elemento de workspace en la lista de la sidebar */
 .workspace-item {
     display: flex;
     align-items: center;
@@ -798,9 +829,12 @@ body {
     background: linear-gradient(180deg, color-mix(in srgb, var(--brand) 20%, transparent), color-mix(in srgb, var(--brand) 12%, transparent));
 }
 
+/* Badges de rol reutilizados en workspace, miembros y tableros */
 .workspace-role-badge,
 .workspace-role-label,
 .member-role,
+
+/* Badge de tablero en modo solo lectura */
 .board-readonly-badge {
     display: inline-flex;
     align-items: center;
@@ -818,6 +852,7 @@ body {
     margin-left: auto;
 }
 
+/* Sidebar de plantillas con grupos colapsables */
 .template-sidebar {
     margin-top: 12px;
     display: flex;
@@ -871,6 +906,7 @@ body {
     color: var(--text);
 }
 
+/* Avatar cuadrado del workspace en la sidebar */
 .workspace-avatar {
     width: 28px;
     height: 28px;
@@ -885,6 +921,7 @@ body {
     background: linear-gradient(135deg, var(--brand), var(--brand-2));
 }
 
+/* Area de contenido principal a la derecha de la sidebar */
 .content {
     padding: 24px 30px 30px;
     max-width: 100%;
@@ -919,10 +956,12 @@ body {
     margin-top: 30px;
 }
 
+/* Fila del grid de tarjetas de tablero */
 .boards-row {
     margin-bottom: 16px;
 }
 
+/* Tarjeta individual de tablero con previsualización de portada */
 .board-card {
     position: relative;
     border-radius: 12px;
@@ -966,6 +1005,7 @@ body {
     color: var(--text);
 }
 
+/* Boton de eliminar tablero superpuesto sobre la tarjeta */
 .board-delete-form {
     position: absolute;
     top: 8px;
@@ -1001,6 +1041,7 @@ body {
     line-height: 1;
 }
 
+/* Tarjeta especial para crear un nuevo tablero */
 .board-create {
     display: flex;
     align-items: center;
@@ -1017,6 +1058,7 @@ body {
     padding: 0 18px;
 }
 
+/* Bloque de workspace en la vista de listado de tableros */
 .workspace-block {
     margin-bottom: 20px;
 }
@@ -1055,6 +1097,7 @@ body {
     margin: 0;
 }
 
+/* Boton de eliminar workspace con colores de peligro */
 .workspace-delete-btn {
     border-color: var(--danger-line) !important;
     background: var(--danger-bg) !important;
@@ -1069,11 +1112,7 @@ body {
     margin-top: 8px;
 }
 
-/* Login */
-/*
- * Pantalla de login.
- * Lleva su propio fondo, caja principal y botones de acceso.
- */
+/* Pagina de login y registro: fondo oscuro animado con esferas de luz */
 .login-body {
     min-height: 100vh;
     display: flex;
@@ -1113,6 +1152,7 @@ body {
     background: radial-gradient(circle, rgba(30, 167, 255, .24), transparent);
 }
 
+/* Contenedor centrado del formulario de login */
 .login-container {
     position: relative;
     width: min(430px, calc(100% - 24px));
@@ -1138,6 +1178,7 @@ body {
     line-height: 1.35;
 }
 
+/* Caja de login con efecto glassmorfismo y borde iluminado */
 .login-box {
     background: linear-gradient(180deg, rgba(13, 21, 36, .9), rgba(8, 13, 25, .94));
     border: 1px solid #263b65;
@@ -1198,6 +1239,7 @@ body {
     color: #d8e8ff;
 }
 
+/* Inputs del formulario de login */
 .login-box .form-control {
     height: 45px;
     margin-bottom: 12px;
@@ -1235,6 +1277,7 @@ body {
     transform: translateY(-1px);
 }
 
+/* Boton principal de enviar formulario de login */
 .btn-login {
     height: 45px;
     border: 0;
@@ -1251,6 +1294,7 @@ body {
     border-top: 1px solid #22365f;
 }
 
+/* Pie del formulario de login con enlaces de registro */
 .login-footer {
     font-size: 12px;
     text-align: center;
@@ -1266,6 +1310,7 @@ body {
     text-decoration: underline;
 }
 
+/* Pista de credenciales de demo mostrada en desarrollo */
 .login-hint {
     margin: 12px 0 0;
     text-align: center;
@@ -1273,15 +1318,12 @@ body {
     font-size: 12px;
 }
 
-/* Templates */
-/*
- * Bloque de plantillas.
- * Aqui van el hero, la rejilla y las tarjetas de cada plantilla.
- */
+/* Pagina de plantillas: ampliamos el maximo del contenido */
 .templates-page .content {
     max-width: 100%;
 }
 
+/* Etiqueta decorativa de seccion en mayusculas con borde */
 .eyebrow {
     display: inline-flex;
     align-items: center;
@@ -1294,6 +1336,7 @@ body {
     margin-bottom: 10px;
 }
 
+/* Seccion hero de la pagina de plantillas con gradiente */
 .templates-hero {
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
@@ -1318,6 +1361,7 @@ body {
     font-size: 14px;
 }
 
+/* Tarjeta previa de tablero dentro del hero de plantillas */
 .templates-hero-card {
     border-radius: 16px;
     padding: 16px;
@@ -1358,6 +1402,7 @@ body {
     color: var(--muted);
 }
 
+/* Barra de filtros y chips de categorias de plantillas */
 .templates-toolbar {
     display: flex;
     align-items: center;
@@ -1386,13 +1431,14 @@ body {
     color: var(--text);
 }
 
+/* Grid de tarjetas de plantilla */
 .templates-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 22px;
 }
 
-/* Variables de acento por plantilla */
+/* Variantes de color de acento para las tarjetas de plantilla */
 .template-accent-blue {
     --t-h: 220;
     --t-s: 90%;
@@ -1429,6 +1475,7 @@ body {
     --t-l: 54%;
 }
 
+/* Tarjeta individual de plantilla con efecto hover */
 .template-card {
     position: relative;
     overflow: hidden;
@@ -1451,6 +1498,7 @@ body {
         0 0 0 1px hsla(var(--t-h), var(--t-s), var(--t-l), .18);
 }
 
+/* Poster visual superior de la tarjeta de plantilla */
 .template-poster {
     position: relative;
     height: 220px;
@@ -1477,7 +1525,6 @@ body {
             transparent 68%);
 }
 
-/* Segunda orbe en esquina opuesta para profundidad */
 .template-poster::after {
     content: '';
     position: absolute;
@@ -1492,6 +1539,7 @@ body {
             transparent 70%);
 }
 
+/* Zona superior del poster con categoria y conteo */
 .template-poster-top {
     position: absolute;
     top: 14px;
@@ -1532,7 +1580,7 @@ body {
     padding: 0;
 }
 
-/* ── Shell del tablero — ocupa todo el ancho desde arriba (con offset del badge) */
+/* Shell de previsualización del tablero dentro de la tarjeta */
 .template-board-shell {
     position: absolute;
     bottom: 0;
@@ -1547,6 +1595,7 @@ body {
     z-index: 1;
 }
 
+/* Chrome decorativo del navegador en la previsualización */
 .template-board-chrome {
     display: flex;
     align-items: center;
@@ -1572,7 +1621,7 @@ body {
     background: hsla(var(--t-h), calc(var(--t-s) - 20%), calc(var(--t-l) + 5%), .5);
 }
 
-/* ── Columnas de la preview — la parte clave ── */
+/* Contenedor de las columnas de la previsualización del tablero */
 .template-preview {
     display: flex;
     gap: 6px;
@@ -1628,6 +1677,7 @@ body {
     opacity: .38;
 }
 
+/* Pie de la previsualización del tablero */
 .template-board-footer {
     display: flex;
     align-items: center;
@@ -1637,6 +1687,7 @@ body {
     background: rgba(255, 255, 255, .02);
 }
 
+/* Pildora de columna mostrada en el footer de la previsualización */
 .board-pill {
     height: 5px;
     width: 24px;
@@ -1650,6 +1701,7 @@ body {
     opacity: .5;
 }
 
+/* Stack superpuesto de avatares de miembros */
 .board-avatar-stack {
     display: inline-flex;
     margin-left: auto;
@@ -1675,10 +1727,7 @@ body {
     background: rgba(255, 255, 255, .18);
 }
 
-/* Los colores de preview-card se generan via --t-h/--t-s/--t-l de cada acento */
-
-/* Los fondos del poster se generan via --t-h/--t-s/--t-l de cada acento */
-
+/* Cabecera de texto de la tarjeta de plantilla */
 .template-head {
     display: flex;
     justify-content: space-between;
@@ -1702,6 +1751,7 @@ body {
     line-height: 1.55;
 }
 
+/* Boton de accion de la tarjeta de plantilla */
 .template-action {
     flex-shrink: 0;
     height: auto;
@@ -1737,6 +1787,7 @@ body {
     transform: scale(1.05);
 }
 
+/* Etiquetas de categoria de la plantilla */
 .template-tags {
     display: flex;
     flex-wrap: wrap;
@@ -1755,11 +1806,7 @@ body {
     letter-spacing: .04em;
 }
 
-/* Inicio */
-/*
- * Pagina de inicio o landing interna.
- * Tiene hero, stats, tarjetas informativas y llamada a la accion.
- */
+/* Pagina de inicio: seccion hero con texto y panel lateral */
 .inicio-hero {
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
@@ -1783,6 +1830,7 @@ body {
     font-size: 15px;
 }
 
+/* Botones de accion del hero de inicio */
 .inicio-actions {
     display: flex;
     flex-wrap: wrap;
@@ -1790,6 +1838,7 @@ body {
     margin-bottom: 16px;
 }
 
+/* Botones primario y fantasma reutilizados en varias paginas */
 .btn-primary,
 .btn-ghost {
     display: inline-flex;
@@ -1820,6 +1869,7 @@ body {
     filter: brightness(1.05);
 }
 
+/* Estadisticas numericas debajo del hero de inicio */
 .inicio-stats {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1843,6 +1893,7 @@ body {
     color: var(--muted);
 }
 
+/* Panel lateral del hero con tarjetas de actividad reciente */
 .inicio-hero-panel {
     border-radius: 16px;
     padding: 16px;
@@ -1893,6 +1944,7 @@ body {
     color: var(--muted);
 }
 
+/* Badges de estado usados en el panel del hero */
 .badge {
     padding: 4px 8px;
     border-radius: 999px;
@@ -1911,6 +1963,7 @@ body {
     color: #d5ddee;
 }
 
+/* Grid de tarjetas de caracteristicas de la pagina de inicio */
 .inicio-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -1948,6 +2001,7 @@ body {
     margin-bottom: 6px;
 }
 
+/* Seccion de resaltado al final de la pagina de inicio */
 .inicio-highlight {
     border-radius: 18px;
     padding: 18px;
@@ -1959,7 +2013,7 @@ body {
     gap: 12px;
 }
 
-/* Light mode refinements for templates + inicio */
+/* Overrides del tema claro para las secciones hero de inicio y plantillas */
 .theme-light .templates-hero,
 .theme-light .inicio-hero {
     background: linear-gradient(135deg, var(--hero-a), var(--hero-b));
@@ -2046,10 +2100,7 @@ body {
     font-size: 13px;
 }
 
-/*
- * Zona del tablero y seccion de cuenta.
- * Aqui empiezo con los estilos mas especificos de esas vistas.
- */
+/* Ajuste del contenido en la vista de tablero individual */
 .board-page .content {
     max-width: 100%;
     overflow: hidden;
@@ -2060,13 +2111,14 @@ body {
     margin: 0;
 }
 
-/* Account pages */
+/* Pagina de cuenta de usuario */
 .account-page {
     display: flex;
     flex-direction: column;
     gap: 18px;
 }
 
+/* Hero de la pagina de cuenta con avatar y estadisticas */
 .account-page-hero {
     display: flex;
     align-items: center;
@@ -2085,6 +2137,7 @@ body {
     gap: 10px;
 }
 
+/* Chips de habilidades o etiquetas en el hero de cuenta */
 .hero-chips {
     display: flex;
     flex-wrap: wrap;
@@ -2100,12 +2153,14 @@ body {
     color: var(--text);
 }
 
+/* Stack de tarjetas de estadistica en el hero de cuenta */
 .account-hero-stack {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
+/* Tarjeta de estadistica dentro del hero de cuenta */
 .account-hero-card {
     min-width: 180px;
     padding: 12px 14px;
@@ -2131,6 +2186,7 @@ body {
     color: var(--muted);
 }
 
+/* Etiqueta de rol en la cabecera de cuenta */
 .account-hero-tag {
     font-size: 10px;
     letter-spacing: .12em;
@@ -2138,12 +2194,14 @@ body {
     color: color-mix(in srgb, var(--text) 70%, #8cc0ff);
 }
 
+/* Grid de dos columnas para las tarjetas de la pagina de cuenta */
 .account-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 16px;
 }
 
+/* Tarjeta de seccion dentro de la pagina de cuenta */
 .account-page-card {
     padding: 16px;
     border-radius: 16px;
@@ -2169,7 +2227,7 @@ body {
     align-items: start;
 }
 
-/* ── Settings redesign ──────────────────────────────── */
+/* Pagina de ajustes: contenedor principal con descripcion y secciones */
 .stg-wrap {
     display: flex;
     flex-direction: column;
@@ -2183,6 +2241,7 @@ body {
     margin: 0 0 18px;
 }
 
+/* Etiqueta de seccion en la pagina de ajustes */
 .stg-section-label {
     font-size: 10px;
     font-weight: 700;
@@ -2192,6 +2251,7 @@ body {
     padding: 14px 4px 6px;
 }
 
+/* Lista de filas dentro de una seccion de ajustes */
 .stg-list {
     display: flex;
     flex-direction: column;
@@ -2201,6 +2261,7 @@ body {
     margin-bottom: 4px;
 }
 
+/* Fila individual de un ajuste con icono, texto y badge */
 .stg-row {
     display: flex;
     align-items: center;
@@ -2218,6 +2279,7 @@ body {
     background: var(--surface-3);
 }
 
+/* Icono de la fila de ajuste con fondo de acento */
 .stg-icon {
     flex: 0 0 auto;
     width: 36px;
@@ -2231,6 +2293,7 @@ body {
     font-size: 16px;
 }
 
+/* Bloque de texto (titulo + descripcion) de la fila de ajuste */
 .stg-copy {
     flex: 1 1 0;
     min-width: 0;
@@ -2252,6 +2315,7 @@ body {
     line-height: 1.45;
 }
 
+/* Badge de estado en la fila de ajuste */
 .stg-badge {
     flex: 0 0 auto;
     padding: 5px 12px;
@@ -2262,6 +2326,7 @@ body {
     white-space: nowrap;
 }
 
+/* Badge de estado activo (verde) */
 .stg-badge--on {
     background: color-mix(in srgb, #22c55e 15%, transparent);
     color: #16a34a;
@@ -2272,18 +2337,21 @@ body {
     color: #15803d;
 }
 
+/* Badge de estado inactivo (rojo) */
 .stg-badge--off {
     background: color-mix(in srgb, var(--muted) 12%, transparent);
     color: var(--muted);
     border: 1px solid color-mix(in srgb, var(--muted) 25%, transparent);
 }
 
+/* Badge de estado neutral (muted) */
 .stg-badge--neutral {
     background: color-mix(in srgb, var(--accent) 15%, transparent);
     color: var(--accent);
     border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
+/* Tarjeta de resumen de actividad en la pagina de cuenta */
 .activity-overview-card {
     gap: 18px;
 }
@@ -2292,6 +2360,7 @@ body {
     gap: 18px;
 }
 
+/* Grid de metricas de resumen de actividad */
 .activity-overview-metrics {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2304,6 +2373,7 @@ body {
     gap: 12px;
 }
 
+/* Metrica individual de resumen: icono, valor y etiqueta */
 .overview-metric {
     padding: 16px 18px;
     border-radius: 18px;
@@ -2335,6 +2405,7 @@ body {
     font-size: 12px;
 }
 
+/* Cabecera del panel de ajustes con titulo */
 .panel-head {
     display: flex;
     align-items: flex-start;
@@ -2342,16 +2413,19 @@ body {
     gap: 10px;
 }
 
+/* Sidebar de navegacion dentro de la pagina de ajustes */
 .settings-sidebar-card {
     gap: 16px;
 }
 
+/* Lista de navegacion de ajustes */
 .settings-nav {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
+/* Item de navegacion de ajustes con icono y descripcion */
 .settings-nav-item {
     padding: 14px 16px;
     border-radius: 16px;
@@ -2378,6 +2452,7 @@ body {
     font-size: 12px;
 }
 
+/* Nota informativa dentro de la seccion de ajustes */
 .settings-note {
     padding: 14px 16px;
     border-radius: 14px;
@@ -2387,10 +2462,12 @@ body {
     line-height: 1.5;
 }
 
+/* Tarjeta principal del panel de ajustes */
 .settings-panel-card {
     gap: 18px;
 }
 
+/* Seccion de ajustes con cabecera, etiqueta y filas */
 .settings-section {
     display: flex;
     flex-direction: column;
@@ -2422,6 +2499,7 @@ body {
     text-transform: uppercase;
 }
 
+/* Lista de filas de ajustes e integraciones */
 .settings-list,
 .settings-integration-list {
     display: flex;
@@ -2429,6 +2507,7 @@ body {
     gap: 10px;
 }
 
+/* Fila de ajuste e integracion con icono y acciones */
 .settings-row,
 .integration-row {
     display: flex;
@@ -2441,6 +2520,7 @@ body {
     background: linear-gradient(180deg, rgba(17, 28, 48, .96), rgba(12, 20, 34, .92));
 }
 
+/* Bloque de texto de la fila de ajuste */
 .settings-row-copy {
     min-width: 0;
     display: flex;
@@ -2459,6 +2539,7 @@ body {
     line-height: 1.5;
 }
 
+/* Metadatos secundarios de la fila de ajuste */
 .settings-row-meta {
     display: flex;
     flex-direction: column;
@@ -2474,6 +2555,7 @@ body {
     letter-spacing: .08em;
 }
 
+/* Boton de accion dentro de la fila de ajuste */
 .settings-action-btn {
     min-width: 152px;
     height: 40px;
@@ -2481,6 +2563,7 @@ body {
     background: linear-gradient(180deg, color-mix(in srgb, var(--surface-2) 84%, #1a2d4f), color-mix(in srgb, var(--surface) 92%, #10192b));
 }
 
+/* Tarjeta de subida de foto de perfil con previsualización */
 .profile-upload-card {
     padding: 24px;
 }
@@ -2518,6 +2601,7 @@ body {
     color: var(--muted);
 }
 
+/* Fila de informacion de dos columnas en la pagina de cuenta */
 .account-page-row {
     display: flex;
     align-items: center;
@@ -2529,12 +2613,14 @@ body {
     color: var(--muted);
 }
 
+/* Fila horizontal de pildoras de habilidades */
 .pill-row {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
+/* Pildora de habilidad o etiqueta */
 .pill {
     padding: 6px 10px;
     border-radius: 999px;
@@ -2548,12 +2634,14 @@ body {
     box-shadow: 0 0 12px rgba(47, 99, 255, .35);
 }
 
+/* Lista de botones de accion de la pagina de cuenta */
 .action-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
+/* Boton de accion con icono en la pagina de cuenta */
 .action-btn {
     height: 36px;
     border-radius: 10px;
@@ -2567,6 +2655,7 @@ body {
     width: 100%;
 }
 
+/* Previsualización del perfil con nombre y email */
 .profile-preview {
     display: flex;
     align-items: center;
@@ -2583,6 +2672,7 @@ body {
     font-size: 12px;
 }
 
+/* Avatar grande del perfil de usuario */
 .profile-avatar {
     width: 48px;
     height: 48px;
@@ -2609,12 +2699,14 @@ body {
     font-family: var(--font);
 }
 
+/* Lista de toggles de preferencias de notificaciones */
 .toggle-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
+/* Item de toggle con label y pildora interactiva */
 .toggle-item {
     display: flex;
     align-items: center;
@@ -2632,6 +2724,7 @@ body {
     color: var(--muted);
 }
 
+/* Pildora de toggle activo/inactivo */
 .toggle-pill {
     padding: 4px 8px;
     border-radius: 999px;
@@ -2640,18 +2733,21 @@ body {
     font-size: 11px;
 }
 
+/* Lista de entradas de actividad en la pagina de cuenta */
 .activity-list {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
+/* Feed de actividad con scroll */
 .activity-feed {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
+/* Paginacion de la lista de actividad */
 .activity-pagination {
     margin-top: 4px;
     display: flex;
@@ -2677,6 +2773,7 @@ body {
     gap: 8px;
 }
 
+/* Boton de pagina de la paginacion de actividad */
 .activity-page-btn {
     min-width: 88px;
     height: 36px;
@@ -2704,6 +2801,7 @@ body {
     padding: 0 4px;
 }
 
+/* Entrada individual de actividad con punto y cuerpo de texto */
 .activity-entry {
     display: grid;
     grid-template-columns: 12px minmax(0, 1fr) auto;
@@ -2759,6 +2857,7 @@ body {
     white-space: nowrap;
 }
 
+/* Item de actividad en la vista del tablero kanban */
 .activity-item {
     display: grid;
     grid-template-columns: 16px 1fr auto;
@@ -2781,6 +2880,7 @@ body {
     font-size: 12px;
 }
 
+/* Punto de color de la actividad */
 .activity-dot {
     width: 10px;
     height: 10px;
@@ -2789,6 +2889,7 @@ body {
     box-shadow: 0 0 16px rgba(47, 99, 255, .7);
 }
 
+/* Timeline de actividad en la pagina de cuenta */
 .timeline {
     display: flex;
     flex-direction: column;
@@ -2799,6 +2900,7 @@ body {
     gap: 10px;
 }
 
+/* Fila del timeline de actividad */
 .timeline-row {
     display: grid;
     grid-template-columns: 12px minmax(0, 1fr) auto;
@@ -2810,6 +2912,7 @@ body {
     background: color-mix(in srgb, var(--surface-2) 88%, #111c31);
 }
 
+/* Tarjeta de resumen de estado de actividad */
 .activity-status-card {
     gap: 18px;
 }
@@ -2820,6 +2923,7 @@ body {
     gap: 10px;
 }
 
+/* Linea de estado con barra de progreso */
 .status-line {
     display: flex;
     align-items: center;
@@ -2840,6 +2944,7 @@ body {
     font-size: 18px;
 }
 
+/* Item del timeline de actividad */
 .timeline-item {
     display: flex;
     align-items: center;
@@ -2881,6 +2986,7 @@ body {
     box-shadow: 0 0 10px rgba(47, 99, 255, .6);
 }
 
+/* Grid de estadisticas numericas de la cuenta */
 .stat-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2891,6 +2997,7 @@ body {
     grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+/* Tarjeta de estadistica individual */
 .stat-card {
     padding: 10px;
     border-radius: 12px;
@@ -2909,7 +3016,7 @@ body {
     color: var(--muted);
 }
 
-/* ── Cards page redesign ─────────────────────────────── */
+/* Pagina de tarjetas: layout principal con sidebar y lista */
 .cards-page-wrap {
     display: flex;
     flex-direction: column;
@@ -2917,13 +3024,14 @@ body {
     max-width: 900px;
 }
 
-/* Stats strip */
+/* Franja superior de estadisticas de tarjetas */
 .cards-stats-strip {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
 }
 
+/* Estadistica individual en la franja de tarjetas */
 .cstat {
     display: flex;
     align-items: center;
@@ -2962,7 +3070,7 @@ body {
 .cstat--done .cstat-icon { color: #4ade80; opacity: .5; }
 .cstat--open .cstat-icon { color: #60a5fa; opacity: .5; }
 
-/* Layout */
+/* Grid de dos columnas de la pagina de tarjetas */
 .cards-main-grid {
     display: grid;
     grid-template-columns: 1fr 210px;
@@ -2970,6 +3078,7 @@ body {
     align-items: start;
 }
 
+/* Cabecera de seccion en la pagina de tarjetas */
 .cards-section-head {
     display: flex;
     align-items: center;
@@ -2997,7 +3106,7 @@ body {
     color: var(--muted);
 }
 
-/* Task list */
+/* Lista de tareas agrupadas en la pagina de tarjetas */
 .ctask-list {
     display: flex;
     flex-direction: column;
@@ -3006,6 +3115,7 @@ body {
     overflow: hidden;
 }
 
+/* Fila individual de tarea en la lista */
 .ctask-row {
     display: flex;
     align-items: center;
@@ -3019,6 +3129,7 @@ body {
 .ctask-row:hover { background: var(--surface-3); }
 .ctask-row + .ctask-row { border-top: 1px solid var(--line); }
 
+/* Barra lateral de color de prioridad de la tarea */
 .ctask-accent {
     position: absolute;
     left: 0; top: 0; bottom: 0;
@@ -3030,6 +3141,7 @@ body {
 .ctask-row--med  .ctask-accent { background: #fbbf24; }
 .ctask-row--low  .ctask-accent { background: #34d399; }
 
+/* Punto de prioridad con efecto glow */
 .ctask-dot {
     flex: 0 0 auto;
     width: 8px; height: 8px;
@@ -3041,6 +3153,7 @@ body {
 .ctask-dot--med  { background: #fbbf24; box-shadow: 0 0 6px rgba(251,191, 36,.5); }
 .ctask-dot--low  { background: #34d399; box-shadow: 0 0 6px rgba( 52,211,153,.5); }
 
+/* Cuerpo de la tarea: titulo, tablero y badges */
 .ctask-body {
     flex: 1 1 0;
     min-width: 0;
@@ -3063,10 +3176,12 @@ body {
     color: var(--muted);
 }
 
+/* Nombre del tablero al que pertenece la tarea */
 .ctask-board {
     color: color-mix(in srgb, var(--muted) 70%, var(--text));
 }
 
+/* Badge de prioridad de la tarea */
 .ctask-badge {
     flex: 0 0 auto;
     padding: 3px 10px;
@@ -3080,13 +3195,14 @@ body {
 .ctask-badge--med  { background: rgba(251,191, 36,.12); color: #fbbf24; border: 1px solid rgba(251,191, 36,.25); }
 .ctask-badge--low  { background: rgba( 52,211,153,.12); color: #34d399; border: 1px solid rgba( 52,211,153,.25); }
 
-/* Filters */
+/* Lista horizontal de filtros de tarjetas */
 .cfilter-list {
     display: flex;
     flex-direction: column;
     gap: 5px;
 }
 
+/* Boton de filtro de tarjetas */
 .cfilter-btn {
     display: flex;
     align-items: center;
@@ -3105,6 +3221,7 @@ body {
 
 .cfilter-btn:hover { background: var(--surface-3); }
 
+/* Punto de color dentro del filtro */
 .cfilter-dot {
     width: 7px; height: 7px;
     border-radius: 50%;
@@ -3115,6 +3232,7 @@ body {
 .cfilter-dot--high { background: #f87171; }
 .cfilter-dot--time { background: #60a5fa; }
 
+/* Estado activo del filtro */
 .cfilter-btn--active {
     border-color: var(--accent);
     background: color-mix(in srgb, var(--accent) 10%, var(--surface-2));
@@ -3127,12 +3245,14 @@ body {
     color: #f87171;
 }
 
+/* Mini kanban en la vista de cuenta para previsualizar tareas */
 .kanban-mini {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
 }
 
+/* Columna del mini kanban */
 .kanban-mini-col {
     padding: 8px;
     border-radius: 10px;
@@ -3143,6 +3263,7 @@ body {
     gap: 6px;
 }
 
+/* Titulo de columna del mini kanban */
 .kanban-mini-title {
     font-size: 10px;
     font-weight: 700;
@@ -3151,6 +3272,7 @@ body {
     letter-spacing: .05em;
 }
 
+/* Tarjeta del mini kanban */
 .kanban-mini-card {
     padding: 6px 7px;
     border-radius: 7px;
@@ -3161,12 +3283,14 @@ body {
     line-height: 1.3;
 }
 
+/* Lista de tareas del backlog en la cuenta */
 .backlog-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
+/* Item de backlog con nombre y prioridad */
 .backlog-item {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -3182,6 +3306,7 @@ body {
     color: var(--muted);
 }
 
+/* Indicador de nivel de prioridad: alto, medio, bajo */
 .priority {
     padding: 4px 8px;
     border-radius: 999px;
@@ -3204,6 +3329,7 @@ body {
     color: #34d399;
 }
 
+/* Tarjeta de firma del autor del proyecto */
 .signature-card {
     display: grid;
     grid-template-columns: auto 1fr auto;
@@ -3225,6 +3351,7 @@ body {
     color: var(--muted);
 }
 
+/* Avatar del autor en la tarjeta de firma */
 .signature-avatar {
     width: 46px;
     height: 46px;
@@ -3249,6 +3376,7 @@ body {
     text-transform: uppercase;
 }
 
+/* Badges de tecnologias en la tarjeta de firma */
 .signature-badges {
     display: flex;
     flex-direction: column;
@@ -3262,12 +3390,14 @@ body {
     font-size: 11px;
 }
 
+/* Lista de recursos y referencias utiles */
 .resource-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
+/* Item de recurso con icono y enlace */
 .resource-item {
     padding: 10px 12px;
     border-radius: 12px;
@@ -3276,6 +3406,7 @@ body {
     background: color-mix(in srgb, var(--surface-2) 80%, #17223b);
 }
 
+/* Cabecera dividida con titulo y accion */
 .split-head {
     display: flex;
     align-items: center;
@@ -3283,6 +3414,7 @@ body {
     gap: 10px;
 }
 
+/* Badge suave para estados dentro del tablero */
 .badge-soft {
     padding: 4px 8px;
     border-radius: 999px;
@@ -3291,6 +3423,7 @@ body {
     font-size: 11px;
 }
 
+/* Responsivo: tablet y pantallas medianas */
 @media (max-width: 991.98px) {
     .account-page-hero {
         flex-direction: column;
@@ -3325,6 +3458,7 @@ body {
     }
 }
 
+/* Responsivo: movil, reorganizamos el layout en columna */
 @media (max-width: 767.98px) {
 
     .activity-entry,
@@ -3376,15 +3510,14 @@ body {
     }
 }
 
-/*
- * Tarjetas de ayuda y recursos extra dentro de la cuenta.
- */
+/* Grid de tarjetas de ayuda */
 .help-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 10px;
 }
 
+/* Tarjeta de ayuda con icono y descripcion */
 .help-card {
     padding: 12px;
     border-radius: 12px;
@@ -3400,10 +3533,7 @@ body {
     color: var(--muted);
 }
 
-/*
- * Estilos propios del kanban:
- * cabecera del tablero, columnas, tarjetas y botones de borrar.
- */
+/* Cabecera del tablero kanban con titulo y acciones */
 .board-header {
     display: flex;
     align-items: center;
@@ -3417,12 +3547,14 @@ body {
     font-size: 30px;
 }
 
+/* Copia del rol del usuario en el tablero */
 .board-role-copy {
     margin: 8px 0 0;
     color: color-mix(in srgb, var(--text) 74%, #9eb8e9);
     font-size: 14px;
 }
 
+/* Acciones de la cabecera del tablero */
 .board-header-actions {
     display: inline-flex;
     align-items: center;
@@ -3430,10 +3562,12 @@ body {
     flex-wrap: wrap;
 }
 
+/* Boton toggle para abrir el panel de configuracion del tablero */
 .board-settings-toggle {
     display: none;
 }
 
+/* Layout shell del tablero kanban */
 .board-layout-shell {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -3441,6 +3575,7 @@ body {
     align-items: start;
 }
 
+/* Wrapper scrollable del tablero kanban */
 .kanban-board-wrap {
     min-width: 0;
     overflow-x: auto;
@@ -3466,10 +3601,12 @@ body {
     background: transparent;
 }
 
+/* Panel lateral de ajustes del tablero (sidebar derecha) */
 .board-settings-panel {
     display: none;
 }
 
+/* Shell interno del panel de ajustes del tablero */
 .board-settings-shell {
     border-radius: 18px;
     border: 1px solid color-mix(in srgb, var(--line) 82%, #29406a);
@@ -3484,6 +3621,7 @@ body {
     scrollbar-width: none;
 }
 
+/* Cabecera del panel de ajustes del tablero */
 .board-settings-head {
     display: flex;
     align-items: flex-start;
@@ -3530,6 +3668,7 @@ body {
     line-height: 1.5;
 }
 
+/* Metricas numericas en el panel de ajustes del tablero */
 .board-settings-metrics {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3558,6 +3697,7 @@ body {
     line-height: 1;
 }
 
+/* Seccion de contenido dentro del panel de ajustes */
 .board-settings-section {
     display: flex;
     flex-direction: column;
@@ -3578,6 +3718,7 @@ body {
     gap: 4px;
 }
 
+/* Formulario de ajustes del tablero */
 .board-settings-form {
     display: flex;
     flex-direction: column;
@@ -3620,6 +3761,7 @@ body {
     min-width: 170px;
 }
 
+/* Lista de permisos y miembros del tablero */
 .board-permissions-list,
 .board-pending-list {
     display: flex;
@@ -3627,6 +3769,7 @@ body {
     gap: 10px;
 }
 
+/* Fila de miembro en el panel de ajustes del tablero */
 .board-member-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -3681,12 +3824,14 @@ body {
     flex: 0 0 auto;
 }
 
+/* Lista de columnas dentro de los ajustes del tablero */
 .board-settings-column-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
+/* Fila de columna en los ajustes del tablero */
 .board-settings-column-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -3698,6 +3843,7 @@ body {
     background: color-mix(in srgb, var(--surface-2) 88%, #111c31);
 }
 
+/* Copia de texto de la fila de columna */
 .board-settings-column-copy {
     min-width: 0;
     display: grid;
@@ -3737,6 +3883,7 @@ body {
     font-size: 12px;
 }
 
+/* Acciones de la columna en los ajustes */
 .board-settings-column-actions {
     display: inline-flex;
     align-items: center;
@@ -3751,6 +3898,7 @@ body {
     padding: 0 12px;
 }
 
+/* Zona de peligro en los ajustes del tablero */
 .board-settings-danger .workspace-delete-btn {
     min-width: 170px;
 }
@@ -3759,13 +3907,17 @@ body {
     min-height: 36px;
 }
 
+/* Grid de la pagina de gestion de miembros */
 .members-grid {
     display: grid;
     gap: 20px;
     grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
 }
 
+/* Panel de miembros y tarjeta de cabecera de la pagina */
 .members-panel,
+
+/* Tarjeta de cabecera de la pagina de miembros */
 .members-header-card {
     border: 1px solid var(--line);
     border-radius: 18px;
@@ -3796,11 +3948,13 @@ body {
     color: color-mix(in srgb, var(--text) 74%, #9eb8e9);
 }
 
+/* Acciones de la cabecera de la pagina de miembros */
 .members-header-actions {
     display: flex;
     gap: 8px;
 }
 
+/* Cabecera del panel de miembros */
 .members-panel-head {
     display: flex;
     align-items: center;
@@ -3817,11 +3971,13 @@ body {
     margin-bottom: 18px;
 }
 
+/* Contador de miembros del equipo */
 .members-counter {
     color: color-mix(in srgb, var(--text) 70%, #9fbaf0);
     font-size: 13px;
 }
 
+/* Aviso informativo en la pagina de miembros */
 .members-notice {
     margin-bottom: 16px;
     border-radius: 12px;
@@ -3847,6 +4003,7 @@ body {
     color: #d8e8ff;
 }
 
+/* Formularios de gestion de miembros: agregar, cambiar rol */
 .member-add-form,
 .member-role-form,
 .member-actions {
@@ -3875,11 +4032,13 @@ body {
     min-width: min(100%, 320px);
 }
 
+/* Lista de filas de miembros del workspace */
 .members-list {
     display: grid;
     gap: 12px;
 }
 
+/* Fila de miembro con avatar, identidad y acciones */
 .member-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -3898,6 +4057,7 @@ body {
     justify-items: start;
 }
 
+/* Bloque de identidad del miembro: nombre, email, rol */
 .member-identity {
     display: flex;
     align-items: center;
@@ -3934,6 +4094,7 @@ body {
     overflow-wrap: break-word;
 }
 
+/* Avatar del miembro con soporte de imagen y fallback */
 .member-avatar {
     width: 42px;
     height: 42px;
@@ -3983,6 +4144,7 @@ body {
     transform: translateY(-1px);
 }
 
+/* Badge especial para el propietario del workspace */
 .member-role-owner {
     border-color: color-mix(in srgb, #f0b24c 75%, var(--line));
     background: rgba(240, 178, 76, .14);
@@ -3998,6 +4160,7 @@ body {
     padding: 14px 2px 4px;
 }
 
+/* Responsivo: pantallas medianas, el grid de miembros pasa a una sola columna */
 @media (max-width: 980px) {
     .members-grid {
         grid-template-columns: 1fr;
@@ -4014,6 +4177,7 @@ body {
     }
 }
 
+/* Tablero kanban: contenedor principal de columnas */
 .kanban {
     display: grid;
     grid-template-columns: repeat(auto-fill, 320px);
@@ -4021,6 +4185,7 @@ body {
     align-items: start;
 }
 
+/* Columna del tablero kanban */
 .kanban-column {
     border-radius: 16px;
     padding: 14px;
@@ -4035,6 +4200,7 @@ body {
     box-shadow: 0 14px 28px rgba(3, 10, 24, .18);
 }
 
+/* Cabecera de la columna: nombre, contador y grip de arrastre */
 .kanban-title {
     display: flex;
     align-items: flex-start;
@@ -4058,6 +4224,7 @@ body {
     font-weight: 700;
 }
 
+/* Nombre editable de la columna */
 .kanban-column-name {
     margin: 0;
     padding: 0;
@@ -4075,6 +4242,7 @@ body {
     color: color-mix(in srgb, var(--text) 84%, #7fb2ff);
 }
 
+/* Icono de agarre para arrastrar la columna */
 .kanban-drag-grip {
     color: var(--muted);
     font-size: 18px;
@@ -4087,6 +4255,7 @@ body {
     font-size: 12px;
 }
 
+/* Boton para agregar una nueva tarjeta a la columna */
 .add-card-btn {
     display: inline-flex !important;
     visibility: visible !important;
@@ -4121,6 +4290,7 @@ body {
     transform: translateY(0) !important;
 }
 
+/* Barra de acciones del footer de la columna */
 .kanban-actions {
     display: inline-flex !important;
     visibility: visible !important;
@@ -4135,6 +4305,7 @@ body {
     margin-bottom: 8px;
 }
 
+/* Footer de la columna del kanban */
 .kanban-footer {
     display: flex;
     align-items: center;
@@ -4142,6 +4313,7 @@ body {
     margin-top: 12px;
 }
 
+/* Zona de eliminar columna en el footer */
 .kanban-col-delete {
     display: inline-flex;
     margin: 0;
@@ -4154,6 +4326,7 @@ body {
     padding: 0;
 }
 
+/* Boton icono de accion en la columna */
 .column-icon-btn {
     min-width: 30px;
     height: 30px;
@@ -4173,7 +4346,7 @@ body {
     filter: brightness(1.08);
 }
 
-/* Botón Eliminar columna — texto en lugar de icono papelera */
+/* Boton de eliminar columna con estilos de peligro */
 .delete-col-btn {
     display: inline-flex !important;
     visibility: visible !important;
@@ -4202,7 +4375,6 @@ body {
     color: #ffffff !important;
 }
 
-/* Modo claro: fondo rojo, texto negro */
 .theme-light .delete-col-btn {
     background: #dc2626 !important;
     color: #000000 !important;
@@ -4219,6 +4391,7 @@ body {
     padding: 0;
 }
 
+/* Estado de la tarjeta mientras se arrastra */
 .kanban-card.dragging {
     opacity: .35;
     transform: scale(.97);
@@ -4231,6 +4404,7 @@ body {
     pointer-events: none;
 }
 
+/* Zona receptora de tarjeta durante el arrastre */
 .kanban-cards.drag-over {
     background: rgba(99, 102, 241, .06);
     border-radius: 12px;
@@ -4238,6 +4412,7 @@ body {
     outline-offset: 3px;
 }
 
+/* Contenedor de tarjetas dentro de una columna */
 .kanban-cards {
     display: flex;
     flex-direction: column;
@@ -4245,7 +4420,7 @@ body {
     min-height: 100px;
 }
 
-/* ── Kanban card ── */
+/* Tarjeta del kanban con estilos de prioridad */
 .kanban-card {
     position: relative;
     border-radius: 10px;
@@ -4266,7 +4441,7 @@ body {
     font-size: 12px;
 }
 
-/* Formulario absolutamente posicionado, top fijo para que no baile */
+/* Formulario y boton de eliminar tarjeta */
 .card-delete-form {
     position: absolute;
     top: 0;
@@ -4279,7 +4454,6 @@ body {
     padding-right: 8px;
 }
 
-/* Botón X — limpio, centrado, aparece solo al hover de la tarjeta */
 .card-delete-btn {
     position: static !important;
     transform: none !important;
@@ -4304,7 +4478,6 @@ body {
     flex-shrink: 0 !important;
 }
 
-/* Mostrar al hacer hover sobre la tarjeta */
 .kanban-card:hover .card-delete-btn {
     opacity: 1 !important;
 }
@@ -4324,6 +4497,7 @@ body {
     display: none !important;
 }
 
+/* Etiqueta de campo en modales SweetAlert2 */
 .swal-label {
     display: block;
     text-align: left;
@@ -4332,6 +4506,7 @@ body {
     margin: 6px 0 4px;
 }
 
+/* Modal de creacion de nuevo tablero */
 .board-creator-modal {
     border-radius: 24px;
     padding: 18px 18px 16px;
@@ -4348,6 +4523,7 @@ body {
     text-align: left;
 }
 
+/* Selector de modo de creacion: manual o desde plantilla */
 .board-creator-mode {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4371,6 +4547,7 @@ body {
     box-shadow: 0 10px 22px rgba(28, 71, 180, .32);
 }
 
+/* Previsualización del tablero en el modal de creacion */
 .board-creator-preview-shell {
     border-radius: 18px;
     padding: 14px;
@@ -4401,6 +4578,7 @@ body {
     gap: 10px;
 }
 
+/* Columna de la previsualización en el modal de creacion */
 .board-creator-col {
     min-height: 104px;
     border-radius: 14px;
@@ -4437,18 +4615,21 @@ body {
     width: 64%;
 }
 
+/* Copia de texto de la plantilla seleccionada */
 .board-creator-template-copy {
     font-size: 13px;
     line-height: 1.45;
     color: var(--muted);
 }
 
+/* Seccion de apariencia: color y portada del tablero */
 .board-creator-appearance {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
+/* Grid de colores de portada del tablero */
 .board-color-grid {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -4467,6 +4648,7 @@ body {
     box-shadow: 0 0 0 2px rgba(61, 115, 255, .45);
 }
 
+/* Zona de subida de imagen de portada */
 .board-cover-upload {
     display: flex;
     align-items: center;
@@ -4500,6 +4682,7 @@ body {
     color: var(--muted);
 }
 
+/* Campo del formulario de creacion de tablero */
 .board-creator-field {
     display: flex;
     flex-direction: column;
@@ -4534,18 +4717,21 @@ body {
     box-shadow: 0 0 0 3px rgba(61, 115, 255, .2) !important;
 }
 
+/* Wrapper de seleccion de plantillas en el modal */
 .board-creator-template-wrap {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
+/* Grid de opciones de plantilla en el modal */
 .board-template-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
 }
 
+/* Opcion de plantilla seleccionable en el modal */
 .board-template-option {
     min-height: 72px;
     padding: 12px 14px;
@@ -4583,6 +4769,7 @@ body {
     background: linear-gradient(180deg, rgba(30, 65, 160, .94), rgba(17, 38, 91, .96));
 }
 
+/* Botones de confirmar y cancelar la creacion del tablero */
 .board-creator-confirm,
 .board-creator-cancel {
     border-radius: 14px !important;
@@ -4590,6 +4777,7 @@ body {
     font-weight: 700 !important;
 }
 
+/* Estado vacio cuando no hay plantillas disponibles */
 .board-creator-empty {
     border-radius: 16px;
     padding: 14px;
@@ -4598,6 +4786,7 @@ body {
     text-align: center;
 }
 
+/* Overrides del tema claro para el modal de creacion de tablero */
 .theme-light .board-mode-btn {
     background: #edf4ff;
 }
@@ -4615,6 +4804,7 @@ body {
     color: #5771a4;
 }
 
+/* Responsivo: movil pequeno, el modal de crear tablero se reorganiza en columna */
 @media (max-width: 640px) {
 
     .board-creator-mode,
@@ -4624,9 +4814,7 @@ body {
     }
 }
 
-/*
- * Animacion sencilla para que algunos bloques entren con un poco de vida.
- */
+/* Animacion de entrada del login: sube y aparece */
 @keyframes loginRise {
     from {
         opacity: 0;
@@ -4639,10 +4827,7 @@ body {
     }
 }
 
-/* ============================================================
-   KANBAN — Columnas con color de acento (data-accent en cada columna)
-   ============================================================ */
-
+/* Overrides de tema claro para multiples componentes compartidos */
 .theme-light .board-settings-metric,
 .theme-light .board-settings-column-row,
 .theme-light .board-member-row,
@@ -4679,6 +4864,7 @@ body {
     border-color: var(--border-light);
 }
 
+/* Acentos de color personalizados en las columnas del kanban */
 .kanban-column[data-accent="blue"] {
     --col-h: 220;
     --col-s: 90%;
@@ -4715,7 +4901,7 @@ body {
     --col-l: 54%;
 }
 
-/* Línea superior coloreada en cada columna */
+/* Barra superior de acento de color en la columna */
 .kanban-column[data-accent]::before {
     content: '';
     display: block;
@@ -4727,12 +4913,11 @@ body {
     margin: -12px -12px 8px;
 }
 
-/* Título de columna con tono del acento */
+/* Titulo de columna con acento de color */
 .kanban-column[data-accent] .kanban-title h3 {
     color: hsl(var(--col-h), calc(var(--col-s) - 20%), 80%);
 }
 
-/* Botón + Tarea con color del acento */
 .kanban-column[data-accent] .add-card-btn {
     color: hsl(var(--col-h), calc(var(--col-s) - 14%), 74%);
     border-color: hsla(var(--col-h), var(--col-s), var(--col-l), .3);
@@ -4745,14 +4930,11 @@ body {
     filter: none;
 }
 
-/* Borde izquierdo de cada tarjeta con el color de la columna */
 .kanban-column[data-accent] .kanban-card:not(.ghost) {
     border-left: 2.5px solid hsla(var(--col-h), var(--col-s), var(--col-l), .5);
 }
 
-/*
- * Ajustes responsive para tablet y portatiles pequenos.
- */
+/* Responsivo: tablet, la sidebar se reorganiza y el kanban se adapta */
 @media (max-width: 991.98px) {
     .sidebar {
         border-right: 0;
@@ -4817,9 +4999,7 @@ body {
     }
 }
 
-/*
- * Ajustes responsive para movil.
- */
+/* Responsivo: movil, comprimimos la topbar y el tablero kanban */
 @media (max-width: 560px) {
     .topbar {
         padding-inline: 10px;
@@ -4887,12 +5067,6 @@ body {
     }
 }
 
-/* ============================================================
-   PRODIFY — PANEL DE CONFIGURACIÓN DEL TABLERO (DROPDOWN)
-   Abre al clicar la rueda ⚙ en la cabecera del tablero
-   ============================================================ */
-
-/* ── Rueda de configuración mejorada ── */
 .board-settings-toggle {
     display: inline-flex !important;
     align-items: center;
@@ -4933,7 +5107,7 @@ body {
     transform: rotate(90deg);
 }
 
-/* ── Backdrop oscuro (click fuera cierra) ── */
+/* Fondo semitransparente que aparece detras del panel de configuracion */
 .bcp-backdrop {
     position: fixed;
     inset: 0;
@@ -4951,7 +5125,7 @@ body {
     pointer-events: auto;
 }
 
-/* ── Panel principal (posición fija, dropdown desde el header) ── */
+/* Panel lateral de configuracion del tablero (desliza desde la derecha) */
 .board-config-panel {
     position: fixed;
     top: 70px;
@@ -4970,7 +5144,7 @@ body {
     flex-direction: column;
     overflow: hidden;
 
-    /* Animación entrada */
+    
     opacity: 0;
     transform: translateY(-14px) scale(0.97);
     pointer-events: none;
@@ -4985,7 +5159,7 @@ body {
     pointer-events: auto;
 }
 
-/* ── Header del panel ── */
+/* Cabecera del panel de configuracion con icono y nombre del tablero */
 .bcp-header {
     display: flex;
     align-items: center;
@@ -5002,6 +5176,7 @@ body {
     gap: 10px;
 }
 
+/* Icono decorativo en la cabecera del panel */
 .bcp-header-icon {
     width: 34px;
     height: 34px;
@@ -5030,6 +5205,7 @@ body {
     margin-top: 1px;
 }
 
+/* Boton de cerrar el panel de configuracion */
 .bcp-close {
     width: 30px;
     height: 30px;
@@ -5053,7 +5229,7 @@ body {
     color: #ef4444;
 }
 
-/* ── Tabs del panel ── */
+/* Pestanas de navegacion del panel de configuracion */
 .bcp-tabs {
     display: flex;
     gap: 2px;
@@ -5068,6 +5244,7 @@ body {
     display: none;
 }
 
+/* Pestana individual del panel de configuracion */
 .bcp-tab {
     display: flex;
     align-items: center;
@@ -5103,7 +5280,7 @@ body {
     font-size: 13px;
 }
 
-/* ── Cuerpo scrolleable del panel ── */
+/* Cuerpo scrollable del panel de configuracion */
 .bcp-body {
     flex: 1;
     overflow-y: auto;
@@ -5125,7 +5302,7 @@ body {
     border-radius: 4px;
 }
 
-/* ── Secciones de tabs ── */
+/* Seccion de contenido dentro del panel */
 .bcp-section {
     display: none;
     flex-direction: column;
@@ -5140,7 +5317,7 @@ body {
     padding-bottom: 20px;
 }
 
-/* ── Métricas del tablero ── */
+/* Fila de metricas del tablero en el panel */
 .bcp-metrics {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -5149,6 +5326,7 @@ body {
     border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
 }
 
+/* Metrica individual: icono, valor y etiqueta */
 .bcp-metric {
     padding: 10px;
     border-radius: 12px;
@@ -5173,7 +5351,7 @@ body {
     color: var(--text);
 }
 
-/* ── Bloques de configuración ── */
+/* Bloque de contenido del panel con titulo y descripcion */
 .bcp-block {
     padding: 16px;
     border-bottom: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
@@ -5183,6 +5361,7 @@ body {
     border-bottom: none;
 }
 
+/* Cabecera del bloque del panel */
 .bcp-block-head {
     display: flex;
     align-items: flex-start;
@@ -5206,7 +5385,7 @@ body {
     line-height: 1.4;
 }
 
-/* ── Colores de fondo del tablero ── */
+/* Grid de seleccion de color de portada del tablero */
 .bcp-color-grid {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -5214,6 +5393,7 @@ body {
     margin-bottom: 12px;
 }
 
+/* Boton de color en el grid de colores */
 .bcp-color-btn {
     height: 32px;
     border-radius: 9px;
@@ -5233,7 +5413,7 @@ body {
     transform: scale(1.08);
 }
 
-/* ── Upload de imagen de fondo ── */
+/* Fila de subida de imagen de portada del tablero */
 .bcp-upload-row {
     display: flex;
     align-items: center;
@@ -5241,6 +5421,7 @@ body {
     flex-wrap: wrap;
 }
 
+/* Boton de subida de portada */
 .bcp-upload-btn {
     display: inline-flex;
     align-items: center;
@@ -5272,6 +5453,7 @@ body {
     flex: 1;
 }
 
+/* Formulario de eliminar portada del tablero */
 .bcp-delete-cover-form {
     margin: 0;
     display: inline-flex;
@@ -5298,6 +5480,7 @@ body {
     border-color: rgba(239, 68, 68, 0.65);
 }
 
+/* Boton de guardar configuracion del tablero */
 .bcp-save-btn {
     display: inline-flex;
     align-items: center;
@@ -5337,12 +5520,14 @@ body {
     margin-bottom: 14px;
 }
 
+/* Bloque del panel con borde visible */
 .bcp-block--bordered {
     border-top: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
     padding-top: 16px;
     margin-top: 0;
 }
 
+/* Caja de zona de peligro dentro del panel */
 .bcp-danger-box {
     padding: 14px;
     border-radius: 14px;
@@ -5363,13 +5548,14 @@ body {
     margin: 0;
 }
 
-/* ── Lista de columnas ── */
+/* Lista de columnas dentro del panel de configuracion */
 .bcp-column-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
+/* Fila de columna en el panel de configuracion */
 .bcp-column-row {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
@@ -5386,6 +5572,7 @@ body {
     border-color: color-mix(in srgb, var(--brand) 35%, var(--line));
 }
 
+/* Numero de orden de la columna */
 .bcp-column-num {
     width: 28px;
     height: 28px;
@@ -5401,6 +5588,7 @@ body {
     flex-shrink: 0;
 }
 
+/* Informacion de nombre y descripcion de la columna */
 .bcp-column-info {
     min-width: 0;
 }
@@ -5422,6 +5610,7 @@ body {
     margin-top: 1px;
 }
 
+/* Acciones de la columna en el panel de configuracion */
 .bcp-column-actions {
     display: inline-flex;
     align-items: center;
@@ -5429,6 +5618,7 @@ body {
     flex-shrink: 0;
 }
 
+/* Boton de accion de columna dentro del panel */
 .bcp-col-btn {
     width: 28px;
     height: 28px;
@@ -5459,7 +5649,7 @@ body {
     border-color: rgba(239, 68, 68, 0.65);
 }
 
-/* ── Miembros del tablero ── */
+/* Lista de miembros dentro del panel de configuracion */
 .bcp-members-list {
     display: flex;
     flex-direction: column;
@@ -5467,6 +5657,7 @@ body {
     margin-bottom: 14px;
 }
 
+/* Fila de miembro dentro del panel de configuracion */
 .bcp-member-row {
     display: grid;
     grid-template-columns: 34px minmax(0, 1fr) auto;
@@ -5483,6 +5674,7 @@ body {
     background: rgba(240, 178, 76, 0.07);
 }
 
+/* Avatar del miembro dentro del panel de configuracion */
 .bcp-member-avatar {
     width: 34px;
     height: 34px;
@@ -5498,6 +5690,7 @@ body {
     text-transform: uppercase;
 }
 
+/* Informacion del miembro en el panel de configuracion */
 .bcp-member-info {
     min-width: 0;
 }
@@ -5520,6 +5713,7 @@ body {
     text-overflow: ellipsis;
 }
 
+/* Badge de rol del miembro: owner, admin, editor, lector */
 .bcp-role-badge {
     display: inline-flex;
     align-items: center;
@@ -5558,7 +5752,7 @@ body {
     color: #c8d3e8;
 }
 
-/* Selector de rol inline */
+/* Selector de rol dentro del panel de configuracion */
 .bcp-role-select {
     height: 30px;
     border-radius: 8px;
@@ -5569,7 +5763,7 @@ body {
     font-size: 11px;
 }
 
-/* ── Formulario de invitación ── */
+/* Formulario de invitacion de nuevo miembro al tablero */
 .bcp-invite-form {
     display: flex;
     flex-direction: column;
@@ -5582,6 +5776,7 @@ body {
     flex-wrap: wrap;
 }
 
+/* Input de email en el formulario de invitacion */
 .bcp-invite-input {
     flex: 1 1 150px;
     height: 36px;
@@ -5599,6 +5794,7 @@ body {
     box-shadow: 0 0 0 3px rgba(61, 115, 255, 0.18);
 }
 
+/* Selector de rol en el formulario de invitacion */
 .bcp-invite-select {
     height: 36px;
     border-radius: 10px;
@@ -5610,6 +5806,7 @@ body {
     flex: 0 0 auto;
 }
 
+/* Boton de enviar invitacion */
 .bcp-invite-submit {
     height: 36px;
     padding: 0 14px;
@@ -5634,7 +5831,7 @@ body {
     pointer-events: none;
 }
 
-/* ── Invitaciones pendientes ── */
+/* Titulo de la lista de invitaciones pendientes */
 .bcp-pending-title {
     font-size: 11px;
     font-weight: 700;
@@ -5644,6 +5841,7 @@ body {
     margin: 12px 0 8px;
 }
 
+/* Fila de invitacion pendiente */
 .bcp-pending-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -5656,6 +5854,7 @@ body {
     margin-bottom: 6px;
 }
 
+/* Email de la invitacion pendiente */
 .bcp-pending-email {
     font-size: 12px;
     color: var(--text);
@@ -5664,6 +5863,7 @@ body {
     text-overflow: ellipsis;
 }
 
+/* Boton de cancelar invitacion pendiente */
 .bcp-pending-cancel {
     width: 24px;
     height: 24px;
@@ -5683,11 +5883,12 @@ body {
     background: rgba(239, 68, 68, 0.22);
 }
 
-/* ── Zona peligrosa ── */
+/* Zona de peligro al final del panel de configuracion */
 .bcp-danger-zone {
     padding: 14px 16px;
 }
 
+/* Boton de accion peligrosa dentro del panel */
 .bcp-danger-btn {
     display: inline-flex;
     align-items: center;
@@ -5710,14 +5911,10 @@ body {
     border-color: rgba(239, 68, 68, 0.8);
 }
 
-/* ── Mejoras visuales generales del tablero ── */
-
-/* Kanban board: scroll horizontal suave */
 .kanban-board-wrap {
     padding-bottom: 16px;
 }
 
-/* Columnas del kanban más premium */
 .kanban-column {
     border-radius: 18px;
     transition: box-shadow 0.2s ease, transform 0.2s ease;
@@ -5727,7 +5924,6 @@ body {
     box-shadow: 0 18px 40px rgba(3, 10, 24, 0.28);
 }
 
-/* Tarjetas más bonitas */
 .kanban-card:not(.ghost) {
     border-radius: 12px;
     background: color-mix(in srgb, var(--surface-2) 90%, #141f34);
@@ -5742,7 +5938,6 @@ body {
     border-color: color-mix(in srgb, var(--brand) 28%, var(--line-soft));
 }
 
-/* Drag handle visible */
 .kanban-drag-grip {
     cursor: grab;
     opacity: 0.45;
@@ -5753,14 +5948,12 @@ body {
     opacity: 0.9;
 }
 
-/* Column header mejorado */
 .kanban-title {
     padding-bottom: 6px;
     border-bottom: 1px solid color-mix(in srgb, var(--line) 50%, transparent);
     margin-bottom: 6px;
 }
 
-/* Badge contador de tareas */
 .kanban-card-count {
     display: inline-flex;
     align-items: center;
@@ -5775,7 +5968,6 @@ body {
     font-weight: 700;
 }
 
-/* Modo light del panel */
 .theme-light .board-config-panel {
     background: linear-gradient(180deg, #ffffff, var(--bg));
     border-color: var(--line);
@@ -5821,7 +6013,7 @@ body {
     box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
 }
 
-/* ── Responsive ── */
+/* Responsivo: movil, el panel de configuracion ocupa todo el ancho */
 @media (max-width: 560px) {
     .board-config-panel {
         right: 8px;
@@ -5840,7 +6032,7 @@ body {
     }
 }
 
-/* ── js-delete-card — alias del servidor, mismo comportamiento que .card-delete-btn ── */
+/* Boton de eliminar tarjeta manejado por JavaScript */
 .js-delete-card {
     position: static !important;
     transform: none !important;
@@ -5898,19 +6090,12 @@ body {
     display: none !important;
 }
 
-/* ============================================================
-   LIGHT MODE — CORRECCIONES COMPLETAS DE VISIBILIDAD
-   Todas las reglas van bajo .theme-light para no afectar
-   al modo oscuro.
-   ============================================================ */
-
-/* ── Variables extra para modo claro ── */
+/* Overrides globales del tema claro para todos los componentes de la aplicacion */
 .theme-light {
     --brand: #1d4ed8;
     --brand-2: #0284c7;
 }
 
-/* ── Topbar ── */
 .theme-light .topbar {
     background: color-mix(in srgb, #edf3ff 90%, #c8d9f8);
     border-bottom-color: var(--border-light);
@@ -5948,7 +6133,6 @@ body {
     background: rgba(47, 99, 255, .08);
 }
 
-/* ── Sidebar ── */
 .theme-light .sidebar {
     background: linear-gradient(180deg, #e4eeff, #eaf1ff);
     border-right-color: var(--border-light);
@@ -5977,7 +6161,6 @@ body {
     color: #1d4ed8;
 }
 
-/* ── Account menu ── */
 .theme-light .account-menu {
     background: #ffffff;
     border-color: var(--border-light);
@@ -6007,7 +6190,6 @@ body {
     background: var(--border-light);
 }
 
-/* ── Buttons ── */
 .theme-light .theme-toggle,
 .theme-light .workspace-actions .btn,
 .theme-light .closed-btn,
@@ -6036,7 +6218,6 @@ body {
     background: #ffd6e2 !important;
 }
 
-/* ── Board cards (index) ── */
 .theme-light .board-card {
     background: #ffffff;
     border-color: var(--border-light);
@@ -6047,7 +6228,6 @@ body {
     background: var(--bg);
 }
 
-/* ── Create dropdown ── */
 .theme-light .create-dropdown {
     background: #ffffff;
     border-color: var(--border-light);
@@ -6058,15 +6238,11 @@ body {
     background: #f0f6ff;
 }
 
-/* ── Empty note ── */
 .theme-light .empty-note {
     color: var(--muted);
     border-color: var(--border-light);
 }
 
-/* ── Templates sidebar ── */
-
-/* ── Template card (modo claro completo) ── */
 .theme-light .template-card {
     background: #ffffff;
     border-color: #c8d7f5;
@@ -6091,7 +6267,6 @@ body {
     color: #475569;
 }
 
-/* ── Kanban ── */
 .theme-light .kanban-column {
     background: #ffffff !important;
     border-color: #d4dfe8 !important;
@@ -6187,8 +6362,6 @@ body {
     color: #1d4ed8;
 }
 
-/* ── Members page ── */
-
 .theme-light .members-notice-success {
     background: rgba(21, 128, 61, .1);
     border-color: #86efac;
@@ -6213,7 +6386,6 @@ body {
     border-color: rgba(217, 119, 6, .35);
 }
 
-/* ── Account / Settings pages ── */
 .theme-light .account-page-hero {
     background: linear-gradient(140deg, #e8f1ff, #f0f7ff);
     border-color: var(--border-light);
@@ -6253,7 +6425,6 @@ body {
     color: var(--text);
 }
 
-
 .theme-light .settings-note {
     border-color: var(--border-light);
     color: var(--muted);
@@ -6291,7 +6462,6 @@ body {
     color: var(--text);
 }
 
-/* ── Activity / timeline ── */
 .theme-light .activity-entry,
 .theme-light .timeline-row {
     background: #ffffff;
@@ -6304,8 +6474,6 @@ body {
     border-color: var(--border-light);
     color: var(--text);
 }
-
-/* ── Stat / backlog / kanban-mini ── */
 
 .theme-light .kanban-mini-card {
     background: rgba(29, 78, 216, .08);
@@ -6337,26 +6505,22 @@ body {
     color: #1d4ed8;
 }
 
-/* ── Board creator modal (SweetAlert) ── */
 .theme-light .board-mode-btn {
     background: #f0f6ff;
     border-color: var(--border-light);
     color: var(--muted);
 }
 
-/* ── Eyebrow ── */
 .theme-light .eyebrow {
     color: #1d4ed8;
 }
 
-/* ── Resource items ── */
 .theme-light .resource-item {
     background: var(--bg);
     border-color: var(--border-light);
     color: var(--text);
 }
 
-/* ── SweetAlert en modo claro — texto visible ── */
 .theme-light .swal2-popup {
     background: #ffffff !important;
     color: var(--text) !important;
@@ -6367,7 +6531,6 @@ body {
     color: var(--text) !important;
 }
 
-/* ── Scroll & misc ── */
 .theme-light .kanban-board-wrap {
     scrollbar-color: rgba(29, 78, 216, .25) transparent;
 }

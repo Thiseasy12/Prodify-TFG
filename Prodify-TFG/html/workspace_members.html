@@ -1,23 +1,34 @@
 <!DOCTYPE html>
+<!-- Pagina de gestion de miembros de un workspace. Permite invitar, cambiar roles y eliminar miembros. -->
 <html lang="{{ current_language|default('es') }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Token CSRF para proteger todos los formularios de gestion de miembros. -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Prodify | {{ t('workspace.members') }} {{ workspace.name }}</title>
+    <!-- Favicon en SVG con fallback a .ico para navegadores antiguos. -->
     <link rel="icon" type="image/svg+xml" href="{{ url_for('send_favicon_svg') }}">
     <link rel="alternate icon" type="image/x-icon" href="{{ url_for('send_favicon') }}">
+    <!-- Precarga de Google Fonts para reducir el tiempo de bloqueo de renderizado. -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap como base de utilidades de layout. -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Hoja de estilos principal de Prodify. -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
+<!-- members-page activa los ajustes de layout especificos para esta pagina. -->
 <body class="boards-page members-page">
+
+    <!-- Barra superior: logo, buscador de miembros y boton de volver al workspace. -->
     <header class="topbar navbar navbar-expand-lg">
         <div class="container-fluid px-3 px-lg-4">
+
+            <!-- Logo y nombre de la aplicacion. -->
             <div class="topbar-left d-flex align-items-center">
                 <div class="brand-pill">
                     <span class="brand-icon">P</span>
@@ -25,11 +36,13 @@
                 </div>
             </div>
 
+            <!-- Centro de la topbar: buscador y boton de retorno. -->
             <div class="topbar-center d-flex align-items-center">
                 <input class="search-input form-control" type="text" placeholder="{{ t('topbar.search_members') }}">
                 <a class="create-btn btn members-back-btn" href="{{ url_for('workspace_view', workspace_id=workspace.id) }}">{{ t('workspace.back') }}</a>
             </div>
 
+            <!-- Zona derecha: toggle de tema y menu de cuenta. -->
             <div class="topbar-right">
                 <button class="theme-toggle btn" id="themeToggle" type="button" aria-label="{{ t('theme.toggle') }}">{{ t('theme.light') }}</button>
                 {{ account_toggle_html }}
@@ -38,15 +51,23 @@
         </div>
     </header>
 
+    <!-- Layout de dos columnas: sidebar izquierda y contenido principal. -->
     <main class="layout container-fluid p-0">
         <div class="row g-0 min-vh-100">
+
+            <!-- Sidebar: navegacion lateral y lista de workspaces del usuario. -->
             <aside class="sidebar col-12 col-lg-3 col-xl-2">
+                <!-- Navegacion principal entre secciones de la app. -->
                 {{ side_nav_html }}
                 <div class="workspace-title">{{ t('workspace.title') }}</div>
+                <!-- Lista de todos los workspaces accesibles por el usuario. -->
                 {{ workspace_list_html }}
             </aside>
 
+            <!-- Contenido principal: cabecera del workspace y paneles de miembros. -->
             <section class="content col-12 col-lg-9 col-xl-10">
+
+                <!-- Cabecera con nombre del workspace, rol del usuario y enlace de vuelta a tableros. -->
                 <div class="members-header-card">
                     <div>
                         <span class="eyebrow">{{ t('workspace.members_title') }}</span>
@@ -58,11 +79,15 @@
                     </div>
                 </div>
 
+                <!-- Aviso de exito, error o informacion tras realizar una accion. -->
                 {% if notice %}
                 <div class="members-notice members-notice-{{ notice_tone }}">{{ notice }}</div>
                 {% endif %}
 
+                <!-- Grid con dos paneles: propietario a la izquierda y equipo a la derecha. -->
                 <div class="members-grid">
+
+                    <!-- Panel del propietario del workspace. Solo muestra, no permite edicion. -->
                     <article class="members-panel members-panel-owner">
                         <div class="members-panel-head members-panel-head-owner">
                             <div>
@@ -71,8 +96,10 @@
                             </div>
                         </div>
 
+                        <!-- Fila del propietario: avatar, nombre, email y badge de rol. -->
                         <div class="member-row owner-row">
                             <div class="member-identity">
+                                <!-- Mostramos imagen de avatar si existe, o la inicial del nombre si no. -->
                                 {% if owner_avatar_url %}
                                 <img src="{{ owner_avatar_url }}" alt="Avatar de {{ owner_name }}" class="member-avatar avatar-image">
                                 {% else %}
@@ -87,18 +114,22 @@
                         </div>
                     </article>
 
+                    <!-- Panel del equipo: lista de miembros con sus roles y acciones de gestion. -->
                     <article class="members-panel">
                         <div class="members-panel-head">
                             <div>
                                 <span class="eyebrow">{{ t('workspace.team') }}</span>
                                 <h2>{{ t('workspace.users_with_access') }}</h2>
                             </div>
+                            <!-- Contador total de personas en el workspace, incluido el propietario. -->
                             <span class="members-counter">{{ t('workspace.people_count', count=member_rows|length + 1) }}</span>
                         </div>
 
+                        <!-- Formulario para agregar un nuevo miembro, solo visible si el usuario puede gestionar. -->
                         {% if can_manage_members %}
                         <form class="member-add-form" action="{{ url_for('add_workspace_member', workspace_id=workspace.id) }}" method="POST">
                             <input type="email" name="member_email" placeholder="correo@ejemplo.com" required>
+                            <!-- Selector de rol para el nuevo miembro: las opciones vienen del servidor. -->
                             <select name="role">
                                 {% for role in role_options %}
                                 <option value="{{ role }}">{{ role_labels[role] }}</option>
@@ -107,14 +138,18 @@
                             <button type="submit" class="create-btn btn">{{ t('workspace.add_member') }}</button>
                         </form>
                         {% else %}
+                        <!-- Nota informativa si el usuario no tiene permisos para gestionar miembros. -->
                         <div class="members-readonly-note">{{ t('workspace.readonly_note') }}</div>
                         {% endif %}
 
+                        <!-- Lista de miembros actuales del workspace, sin incluir al propietario. -->
                         <div class="members-list">
                             {% if member_rows %}
                                 {% for member in member_rows %}
+                                <!-- Fila de cada miembro con su avatar, identidad y controles de gestion. -->
                                 <div class="member-row">
                                     <div class="member-identity">
+                                        <!-- Avatar del miembro: imagen de perfil o inicial del nombre. -->
                                         {% if member.avatar_url %}
                                         <img src="{{ member.avatar_url }}" alt="Avatar de {{ member.name }}" class="member-avatar avatar-image">
                                         {% else %}
@@ -123,14 +158,17 @@
                                         <div>
                                             <strong>{{ member.name }}</strong>
                                             <span>{{ member.email }}</span>
+                                            <!-- Indicamos visualmente si esta fila corresponde al usuario actual. -->
                                             {% if member.is_current_user %}
                                             <small>{{ t('workspace.you') }}</small>
                                             {% endif %}
                                         </div>
                                     </div>
 
+                                    <!-- Si el usuario puede gestionar: mostramos el formulario de cambio de rol y el boton de expulsar. -->
                                     {% if can_manage_members %}
                                     <div class="member-actions">
+                                        <!-- Formulario para cambiar el rol del miembro sin recargar la pagina completa. -->
                                         <form class="member-role-form" action="{{ url_for('update_workspace_member_role', workspace_id=workspace.id, member_id=member.id) }}" method="POST">
                                             <select name="role">
                                                 {% for role in role_options %}
@@ -139,6 +177,7 @@
                                             </select>
                                             <button type="submit" class="btn btn-sm">{{ t('workspace.save') }}</button>
                                         </form>
+                                        <!-- Formulario para expulsar al miembro o abandonar el workspace si es uno mismo. -->
                                         <form action="{{ url_for('remove_workspace_member', workspace_id=workspace.id, member_id=member.id) }}" method="POST">
                                             <button type="submit" class="workspace-delete-btn btn btn-sm">
                                                 {% if member.is_current_user %}{{ t('workspace.leave') }}{% else %}{{ t('workspace.remove') }}{% endif %}
@@ -146,6 +185,7 @@
                                         </form>
                                     </div>
                                     {% else %}
+                                    <!-- Si el usuario no puede gestionar: solo muestra el rol y el boton de abandonar para si mismo. -->
                                     <div class="member-actions">
                                         <span class="member-role">{{ member.role_label }}</span>
                                         {% if member.is_current_user %}
@@ -158,6 +198,7 @@
                                 </div>
                                 {% endfor %}
                             {% else %}
+                            <!-- Mensaje cuando el workspace no tiene miembros adicionales aparte del propietario. -->
                             <div class="members-empty">{{ t('workspace.empty_members') }}</div>
                             {% endif %}
                         </div>
@@ -167,8 +208,11 @@
         </div>
     </main>
 
+    <!-- SweetAlert2 para los dialogos de confirmacion de acciones destructivas. -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Bootstrap JS para los componentes interactivos de layout. -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Script principal de Prodify con toda la logica de interaccion. -->
     <script src="{{ url_for('js_static', filename='script.js') }}"></script>
 </body>
 

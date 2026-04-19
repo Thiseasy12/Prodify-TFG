@@ -1,19 +1,30 @@
+<!-- Pagina de inicio de sesion. Extiende la plantilla base de autenticacion. -->
 {% extends "_auth_base.html" %}
 {% set subtitle = t('auth.login.subtitle') %}
 
 {% block title %}{{ t('auth.login.page_title') }} | Prodify{% endblock %}
 
 {% block content %}
+    <!-- Titulo principal del formulario de login. -->
     <h2>{{ t('auth.login.heading') }}</h2>
+
+    <!-- Zona de mensajes de error o exito enviados desde el servidor. -->
     {{ message_html }}
+
+    <!-- Formulario POST de login con proteccion CSRF. -->
     <form action="{{ url_for('login') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <!-- Guardamos la URL de destino para redirigir al usuario tras el login. -->
         <input type="hidden" name="next" value="{{ next_url or '' }}">
+        <!-- Precargamos el email si viene de un flujo de registro o recuperacion. -->
         <input type="email" name="email" class="form-control" placeholder="{{ t('auth.email_placeholder') }}" value="{{ prefilled_email or '' }}" required>
         <input type="password" name="password" class="form-control" placeholder="{{ t('auth.password_placeholder') }}" required>
         <button type="submit" class="btn btn-login w-100">{{ t('auth.submit_login') }}</button>
     </form>
+
     <hr>
+
+    <!-- Enlaces de navegacion hacia recuperacion de contrasena y registro. -->
     <div class="login-footer">
         <a href="{{ url_for('forgot_password') }}">{{ t('auth.forgot_password_link') }}</a> -
         <a href="{{ url_for('register', next=next_url or '', email=prefilled_email or '') }}">{{ t('auth.register_link') }}</a>

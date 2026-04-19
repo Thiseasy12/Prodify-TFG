@@ -1,24 +1,34 @@
 <!DOCTYPE html>
+<!-- Catalogo de plantillas de tablero. Permite explorar y usar plantillas predefinidas. -->
 <html lang="{{ current_language|default('es') }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Token CSRF para proteger los formularios de creacion desde plantilla. -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Prodify | {{ t('templates.title') }}</title>
+    <!-- Favicon en SVG con fallback a .ico para navegadores antiguos. -->
     <link rel="icon" type="image/svg+xml" href="{{ url_for('send_favicon_svg') }}">
     <link rel="alternate icon" type="image/x-icon" href="{{ url_for('send_favicon') }}">
+    <!-- Precarga de Google Fonts para reducir el tiempo de bloqueo de renderizado. -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap como base de utilidades de layout. -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Hoja de estilos principal de Prodify. -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
+<!-- templates-page activa los estilos especificos del catalogo de plantillas. -->
 <body class="boards-page templates-page">
-    <!-- Header de la vista de plantillas. -->
+
+    <!-- Barra superior: logo, buscador, menu de crear y acceso a la cuenta. -->
     <header class="topbar navbar navbar-expand-lg">
         <div class="container-fluid px-3 px-lg-4">
+
+            <!-- Logo y nombre de la aplicacion. -->
             <div class="topbar-left d-flex align-items-center">
                 <div class="brand-pill">
                     <span class="brand-icon">P</span>
@@ -26,8 +36,10 @@
                 </div>
             </div>
 
+            <!-- Centro de la topbar: buscador de plantillas y menu de creacion. -->
             <div class="topbar-center d-flex align-items-center">
                 <input class="search-input form-control" type="text" placeholder="{{ t('topbar.search_templates') }}">
+                <!-- Menu desplegable para crear workspace, tablero o usar una plantilla. -->
                 <div class="create-menu-wrap">
                     <button class="create-btn js-create-workspace btn" type="button" aria-haspopup="true" aria-expanded="false">{{ t('common.create') }}</button>
                     <div class="create-dropdown" id="createDropdown" hidden>
@@ -43,6 +55,7 @@
                 </div>
             </div>
 
+            <!-- Zona derecha: toggle de tema, avatar de usuario y menu de cuenta. -->
             <div class="topbar-right">
                 <button class="theme-toggle btn" id="themeToggle" type="button" aria-label="{{ t('theme.toggle') }}">{{ t('theme.light') }}</button>
                 {{ account_toggle_html }}
@@ -51,30 +64,35 @@
         </div>
     </header>
 
-    <!-- Distribucion principal con sidebar y catalogo de plantillas. -->
+    <!-- Layout de dos columnas: sidebar con categorias y grid principal de plantillas. -->
     <main class="layout container-fluid p-0">
         <div class="row g-0 min-vh-100">
+
+            <!-- Sidebar: navegacion principal, lista de workspaces y categorias de plantillas. -->
             <aside class="sidebar col-12 col-lg-3 col-xl-2">
-                <!-- Navegacion lateral del proyecto. -->
+                <!-- Navegacion principal entre secciones de la app. -->
                 {{ side_nav_html }}
 
                 <div class="workspace-title">{{ t('workspace.title') }}</div>
-
-                <!-- Espacios disponibles del usuario. -->
+                <!-- Lista de workspaces accesibles por el usuario. -->
                 {{ workspace_list_html }}
 
+                <!-- Grupos de plantillas por categoria para filtrar rapidamente. -->
                 <div class="workspace-title">{{ t('nav.templates') }}</div>
                 <div class="template-sidebar">{{ templates_sidebar_html }}</div>
             </aside>
 
+            <!-- Contenido principal: hero, barra de filtros y grid de tarjetas de plantilla. -->
             <section class="content col-12 col-lg-9 col-xl-10">
-                <!-- Zona principal de introduccion a las plantillas. -->
+
+                <!-- Seccion hero con descripcion del catalogo y ejemplo de flujo de trabajo. -->
                 <div class="templates-hero">
                     <div>
                         <span class="eyebrow">{{ t('templates.hero_eyebrow') }}</span>
                         <h1>{{ t('templates.hero_title') }}</h1>
                         <p>{{ t('templates.hero_body') }}</p>
                     </div>
+                    <!-- Tarjeta visual que muestra un flujo de trabajo de ejemplo. -->
                     <div class="templates-hero-card">
                         <div class="hero-label">{{ t('templates.recommended_flow') }}</div>
                         <div class="hero-cols">
@@ -90,9 +108,10 @@
                     </div>
                 </div>
 
-                <!-- Barra con numero de plantillas y categorias destacadas. -->
+                <!-- Barra de herramientas con contador de plantillas y chips de categoria. -->
                 <div class="templates-toolbar">
                     <div class="templates-count">{{ t('templates.available_count', count=templates_count) }}</div>
+                    <!-- Chips de categoria para filtrar visualmente el catalogo. -->
                     <div class="templates-chips">
                         <span>{{ t('templates.chip_product') }}</span>
                         <span>{{ t('templates.chip_marketing') }}</span>
@@ -101,32 +120,43 @@
                     </div>
                 </div>
 
+                <!-- Grid de tarjetas de plantilla generadas dinámicamente desde Python. -->
                 <div class="templates-grid">{{ templates_grid_html }}</div>
             </section>
         </div>
     </main>
 
-    <!-- Formularios ocultos para crear espacios y tableros desde una plantilla. -->
+    <!-- Formularios ocultos que JavaScript rellena y envia al usar una plantilla. -->
+
+    <!-- Formulario para crear un nuevo workspace con un tablero desde plantilla. -->
     <form id="workspaceCreateForm" action="{{ url_for('create_workspace') }}" method="POST" hidden>
         <input type="text" name="workspace_name" id="workspaceNameInput">
         <input type="text" name="board_name" id="workspaceBoardNameInput">
     </form>
 
+    <!-- Formulario para crear un tablero en un workspace existente. -->
     <form id="boardCreateForm" action="" method="POST" hidden>
         <input type="text" name="board_name" id="boardNameInput">
     </form>
 
+    <!-- Formulario principal para crear un tablero a partir de la plantilla seleccionada. -->
     <form id="templateCreateForm" action="{{ url_for('use_template') }}" method="POST" hidden>
         <input type="text" name="workspace_name" id="templateWorkspaceInput">
         <input type="hidden" name="workspace_id" id="templateWorkspaceIdInput">
         <input type="text" name="board_name" id="templateBoardInput">
         <input type="hidden" name="template_id" id="templateIdInput">
     </form>
+
+    <!-- Datos JSON que necesita JavaScript: workspaces gestionables, plantillas y traducciones. -->
     <script id="boardCreationWorkspaces" type="application/json">{{ manageable_workspaces|tojson }}</script>
     <script id="boardCreationTemplates" type="application/json">{{ board_templates|tojson }}</script>
     <script id="i18nData" type="application/json">{{ js_translations|tojson }}</script>
+
+    <!-- SweetAlert2 para los dialogos de seleccion de workspace y nombre del tablero. -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Bootstrap JS para los componentes de layout interactivos. -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Script principal de Prodify con toda la logica de interaccion. -->
     <script src="{{ url_for('js_static', filename='script.js') }}"></script>
 </body>
 

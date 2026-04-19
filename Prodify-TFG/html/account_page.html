@@ -1,24 +1,34 @@
 <!DOCTYPE html>
+<!-- Pagina de cuenta de usuario. Sirve como shell para perfil, ajustes, tarjetas y actividad. -->
+<!-- El contenido central lo inyecta Python con account_content_html segun la subpagina activa. -->
 <html lang="{{ current_language|default('es') }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Token CSRF para proteger los formularios de actualizacion de cuenta. -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Prodify | {{ page_title }}</title>
+    <!-- Favicon en SVG con fallback a .ico para navegadores antiguos. -->
     <link rel="icon" type="image/svg+xml" href="{{ url_for('send_favicon_svg') }}">
     <link rel="alternate icon" type="image/x-icon" href="{{ url_for('send_favicon') }}">
+    <!-- Precarga de Google Fonts para reducir el tiempo de bloqueo de renderizado. -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap como base de utilidades de layout. -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Hoja de estilos principal de Prodify. -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body class="boards-page">
-    <!-- Header reutilizado en las paginas de cuenta y ajustes. -->
+
+    <!-- Barra superior: logo, buscador de ajustes y boton de volver a los tableros. -->
     <header class="topbar navbar navbar-expand-lg">
         <div class="container-fluid px-3 px-lg-4">
+
+            <!-- Logo y nombre de la aplicacion. -->
             <div class="topbar-left d-flex align-items-center">
                 <div class="brand-pill">
                     <span class="brand-icon">P</span>
@@ -26,11 +36,13 @@
                 </div>
             </div>
 
+            <!-- Centro de la topbar: buscador de ajustes y enlace de retorno. -->
             <div class="topbar-center d-flex align-items-center">
                 <input class="search-input form-control" type="text" placeholder="{{ t('topbar.search_settings') }}">
                 <a class="create-btn btn" href="{{ url_for('home') }}">{{ t('topbar.back') }}</a>
             </div>
 
+            <!-- Zona derecha: toggle de tema, avatar de usuario y menu de cuenta. -->
             <div class="topbar-right">
                 <button class="theme-toggle btn" id="themeToggle" type="button" aria-label="{{ t('theme.toggle') }}">{{ t('theme.light') }}</button>
                 {{ account_toggle_html }}
@@ -39,35 +51,44 @@
         </div>
     </header>
 
-    <!-- Estructura general con menu lateral y zona principal. -->
+    <!-- Layout de dos columnas: sidebar izquierda y contenido de la subpagina activa. -->
     <main class="layout container-fluid p-0">
         <div class="row g-0 min-vh-100">
+
+            <!-- Sidebar: navegacion principal y lista de workspaces del usuario. -->
             <aside class="sidebar col-12 col-lg-3 col-xl-2">
-                <!-- Navegacion lateral del proyecto. -->
+                <!-- Navegacion principal entre secciones de la app. -->
                 {{ side_nav_html }}
-
                 <div class="workspace-title">{{ t('workspace.title') }}</div>
-
-                <!-- Lista simple de espacios disponibles. -->
+                <!-- Lista de workspaces accesibles por el usuario. -->
                 {{ workspace_list_html }}
             </aside>
 
+            <!-- Zona de contenido: aviso opcional y bloque central inyectado por Python. -->
             <section class="content col-12 col-lg-9 col-xl-10">
+                <!-- Aviso de exito o error tras realizar una accion (cambiar email, etc.). -->
                 {% if notice %}
                 <div class="members-notice members-notice-{{ notice_tone }}">{{ notice }}</div>
                 {% endif %}
+                <!-- Contenido principal de la subpagina: perfil, ajustes, tarjetas o actividad. -->
                 {{ account_content_html }}
             </section>
         </div>
     </main>
 
+    <!-- Formulario oculto para actualizar el email desde SweetAlert2 sin recargar la pagina. -->
     <form id="accountEmailForm" action="{{ url_for('update_account_email') }}" method="POST" hidden>
         <input type="text" name="email" id="accountEmailInput">
     </form>
 
+    <!-- Datos JSON de traducciones para que JavaScript pueda internacionalizar los dialogos. -->
     <script id="i18nData" type="application/json">{{ js_translations|tojson }}</script>
+
+    <!-- SweetAlert2 para los dialogos de confirmacion y edicion de datos de cuenta. -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Bootstrap JS para los componentes de layout interactivos. -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Script principal de Prodify con toda la logica de interaccion. -->
     <script src="{{ url_for('js_static', filename='script.js') }}"></script>
 </body>
 

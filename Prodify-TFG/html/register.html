@@ -1,27 +1,41 @@
+<!-- Pagina de registro de nueva cuenta. Extiende la plantilla base de autenticacion. -->
 {% extends "_auth_base.html" %}
 {% set subtitle = t('auth.register.subtitle') %}
 
 {% block title %}{{ t('auth.register.page_title') }} | Prodify{% endblock %}
 
 {% block extra_head %}
+    <!-- Cargamos script.js aqui porque el registro usa el selector de idioma interactivo. -->
     <script src="{{ url_for('js_static', filename='script.js') }}" defer></script>
 {% endblock %}
 
 {% block content %}
+    <!-- Titulo principal del formulario de registro. -->
     <h2>{{ t('auth.register.heading') }}</h2>
+
+    <!-- Zona de mensajes de error o exito enviados desde el servidor. -->
     {{ message_html }}
+
+    <!-- Formulario POST de registro con validacion de campos requeridos. -->
     <form action="{{ url_for('register') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <!-- Guardamos la URL de destino para redirigir al usuario tras el registro. -->
         <input type="hidden" name="next" value="{{ next_url or '' }}">
         <input type="text" name="display_name" class="form-control" placeholder="{{ t('auth.display_name_placeholder') }}">
+        <!-- Precargamos el email si viene de un flujo previo. -->
         <input type="email" name="email" class="form-control" placeholder="{{ t('auth.email_placeholder') }}" value="{{ prefilled_email or '' }}" required>
         <input type="password" name="password" class="form-control" placeholder="{{ t('auth.password_placeholder') }}" minlength="8" required>
+        <!-- Pista de requisito de longitud minima para la contrasena. -->
         <p class="login-helper">{{ t('auth.password_helper') }}</p>
         <input type="password" name="confirm_password" class="form-control" placeholder="{{ t('auth.confirm_password_placeholder') }}" minlength="8" required>
+        <!-- Selector de idioma preferido del usuario en el momento del registro. -->
         <div style="margin-top: 8px;">{{ register_language_selector }}</div>
         <button type="submit" class="btn btn-login w-100" style="margin-top: 14px;">{{ t('auth.submit_register') }}</button>
     </form>
+
     <hr>
+
+    <!-- Enlaces de navegacion hacia login y recuperacion de contrasena. -->
     <div class="login-footer">
         <a href="{{ url_for('login', next=next_url or '', email=prefilled_email or '') }}">{{ t('auth.login_link') }}</a> -
         <a href="{{ url_for('forgot_password') }}">{{ t('auth.recover_access_link') }}</a>
