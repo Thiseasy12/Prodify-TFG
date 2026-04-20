@@ -34,7 +34,7 @@ DB_NAME=prodify_db
 PUBLIC_BASE_URL=http://127.0.0.1:5000
 ```
 
-Si quieres que funcione el envio de correos (verificacion, recuperar contraseña) rellena tambien la parte de SMTP. Si lo dejas vacio la app funciona igual pero sin correos.
+Si se requiere que funcione el envio de correos (verificacion, recuperar contraseña) rellena tambien la parte de SMTP. Si se deja vacio la app funciona igual pero sin correos.
 
 **5. Arranca la app**
 
