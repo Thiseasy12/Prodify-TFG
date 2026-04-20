@@ -1446,6 +1446,65 @@ def get_accessible_workspaces(user_id):
     return workspaces, roles_by_workspace
 
 
+# Palabras clave que identifican una columna como "terminada".
+# No hay campo completed en la BD, asi que se deduce por el nombre de la columna.
+_DONE_KEYWORDS = {'hecho', 'done', 'completado', 'terminado', 'finished', 'complete', 'cerrado', 'closed', 'listo', 'resuelto', 'resolved'}
+
+def get_user_card_stats(workspaces):
+    """Calcula estadisticas reales de tareas para los espacios accesibles del usuario.
+
+    Recibe la lista de workspaces ya cargados para evitar una consulta extra.
+    Devuelve un dict con: total, completed, in_progress, recent_title, recent_board.
+    """
+    if not workspaces:
+        return {'total': 0, 'completed': 0, 'in_progress': 0, 'recent_title': None, 'recent_board': None}
+
+    # Recogemos todos los tableros de los espacios accesibles por el usuario.
+    workspace_ids = [w.id for w in workspaces]
+    boards = Board.query.filter(Board.workspace_id.in_(workspace_ids)).all()
+    if not boards:
+        return {'total': 0, 'completed': 0, 'in_progress': 0, 'recent_title': None, 'recent_board': None}
+
+    board_ids = [b.id for b in boards]
+    board_name_by_id = {b.id: b.name for b in boards}
+
+    # Cargamos todas las columnas de esos tableros de una sola consulta.
+    all_columns = BoardColumn.query.filter(BoardColumn.board_id.in_(board_ids)).all()
+    if not all_columns:
+        return {'total': 0, 'completed': 0, 'in_progress': 0, 'recent_title': None, 'recent_board': None}
+
+    column_ids = [c.id for c in all_columns]
+    # Mapa columna → tablero, para saber a que tablero pertenece cada tarjeta.
+    column_board_id = {c.id: c.board_id for c in all_columns}
+    # Columnas cuyo titulo contiene una palabra de finalizacion (ej. "Hecho", "Done").
+    done_column_ids = {c.id for c in all_columns if any(kw in c.title.lower() for kw in _DONE_KEYWORDS)}
+
+    # Traemos todas las tarjetas ordenadas de mas reciente a mas antigua.
+    all_cards = Card.query.filter(Card.column_id.in_(column_ids)).order_by(Card.created_at.desc()).all()
+
+    total = len(all_cards)
+    # Una tarjeta se considera completada si esta en una columna de tipo "done".
+    completed = sum(1 for c in all_cards if c.column_id in done_column_ids)
+    in_progress = total - completed
+
+    # La tarea mas reciente es la primera de la lista (ya viene ordenada desc).
+    recent_title = None
+    recent_board = None
+    if all_cards:
+        recent = all_cards[0]
+        recent_title = recent.title
+        bid = column_board_id.get(recent.column_id)
+        recent_board = board_name_by_id.get(bid, '')
+
+    return {
+        'total': total,
+        'completed': completed,
+        'in_progress': in_progress,
+        'recent_title': recent_title,
+        'recent_board': recent_board,
+    }
+
+
 def get_workspace_role(workspace, user_id):
     """Devuelve el rol del usuario dentro de un espacio o None si no tiene acceso."""
     if not workspace:
@@ -2257,7 +2316,7 @@ def ensure_runtime_schema():
 ensure_runtime_schema()
 
 
-def build_account_content_html(page_key, page_title, page_description, user_name, user_initial, user_email, avatar_url, activities, activity_pagination=None, language_code=None):
+def build_account_content_html(page_key, page_title, page_description, user_name, user_initial, user_email, avatar_url, activities, activity_pagination=None, language_code=None, cards_data=None):
     """Genera el contenido principal de la pagina de cuenta."""
     tr = lambda key, **kwargs: translate_text(key, language_code or get_current_language(), **kwargs)
     profile_avatar_html = build_avatar_html(user_initial, avatar_url, 'profile-avatar', tr('account.avatar_of', name=user_name))
@@ -2321,7 +2380,7 @@ def build_account_content_html(page_key, page_title, page_description, user_name
         timeline_html = []
         activity_pagination = activity_pagination or {}
         recent_total = len(activities)
-        week_cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+        week_cutoff = datetime.utcnow() - timedelta(days=7)
         weekly_total = 0
         board_flow_total = 0
         account_total = 0
@@ -2339,7 +2398,7 @@ def build_account_content_html(page_key, page_title, page_description, user_name
 
         if activities:
             for item in activities:
-                created_at = item.created_at or datetime.now(timezone.utc)
+                created_at = item.created_at or datetime.utcnow()
                 created_label = created_at.strftime("%d/%m %H:%M")
                 active_days.add(created_at.date())
                 if created_at >= week_cutoff:
@@ -2427,28 +2486,78 @@ def build_account_content_html(page_key, page_title, page_description, user_name
             '</div>'
         )
     elif page_key == 'cards':
-        ph = escape(tr('account.priority_high'))
-        pm = escape(tr('account.priority_med'))
-        pl = escape(tr('account.priority_low'))
-        def task_row(priority_cls, title, team, board, badge):
+        # Recuperamos los datos reales calculados en render_account_page.
+        cd = cards_data or {}
+        stats = cd.get('stats', {'total': 0, 'completed': 0, 'in_progress': 0})
+        recent_cards = cd.get('recent_cards', [])
+        boards_summary = cd.get('boards_summary', [])
+
+        # Genera una fila de tarjeta real con los datos de la BD.
+        color_cycle = ['high', 'med', 'low']
+        def task_row(idx, title, col_name, board_name, rel_time):
+            cls = color_cycle[idx % 3]
+            col_label = escape(col_name[:14] + ('…' if len(col_name) > 14 else ''))
             return (
-                f'<div class="ctask-row ctask-row--{priority_cls}">'
+                f'<div class="ctask-row ctask-row--{cls}">'
                 f'<div class="ctask-accent"></div>'
-                f'<div class="ctask-dot ctask-dot--{priority_cls}"></div>'
+                f'<div class="ctask-dot ctask-dot--{cls}"></div>'
                 '<div class="ctask-body">'
-                f'<strong>{title}</strong>'
-                f'<span>{team} <span class="ctask-board">{board}</span></span>'
+                f'<strong>{escape(title)}</strong>'
+                f'<span>{escape(board_name)} <span class="ctask-board">· {escape(rel_time)}</span></span>'
                 '</div>'
-                f'<span class="ctask-badge ctask-badge--{priority_cls}">{badge}</span>'
+                f'<span class="ctask-badge ctask-badge--{cls}">{col_label}</span>'
                 '</div>'
             )
+
+        # Calcula tiempo relativo en texto corto.
+        def rel_time_label(created_at):
+            if not created_at:
+                return '—'
+            diff = datetime.utcnow() - created_at
+            mins = int(diff.total_seconds() // 60)
+            if mins < 60:
+                return f'{mins}min'
+            hours = mins // 60
+            if hours < 24:
+                return f'{hours}h'
+            days = hours // 24
+            if days < 7:
+                return f'{days}d'
+            return f'{days // 7}sem'
+
+        rows_html = ''
+        if recent_cards:
+            for i, card in enumerate(recent_cards):
+                rows_html += task_row(
+                    i,
+                    card['title'],
+                    card['col_name'],
+                    card['board_name'],
+                    rel_time_label(card['created_at']),
+                )
+        else:
+            rows_html = f'<div class="ctask-empty">{escape(tr("account.no_cards_yet"))}</div>'
+
+        # Columna lateral: resumen de tareas por tablero.
+        side_rows = ''
+        for b in boards_summary[:6]:
+            side_rows += (
+                f'<div class="cfilter-btn">'
+                f'<span class="cfilter-dot"></span>'
+                f'{escape(b["name"][:20])} '
+                f'<span class="ctask-board">({b["count"]})</span>'
+                f'</div>'
+            )
+        if not side_rows:
+            side_rows = f'<span class="ctask-empty">{escape(tr("account.no_boards_yet"))}</span>'
+
         hero.append(
             '<div class="cards-page-wrap">'
 
             '<div class="cards-stats-strip">'
-            f'<div class="cstat"><div class="cstat-inner"><span class="cstat-num">12</span><span class="cstat-label">{escape(tr("account.cards_total"))}</span></div><div class="cstat-icon cstat-icon--total">◈</div></div>'
-            f'<div class="cstat cstat--done"><div class="cstat-inner"><span class="cstat-num">8</span><span class="cstat-label">{escape(tr("account.cards_completed"))}</span></div><div class="cstat-icon cstat-icon--done">✓</div></div>'
-            f'<div class="cstat cstat--open"><div class="cstat-inner"><span class="cstat-num">4</span><span class="cstat-label">{escape(tr("account.cards_open"))}</span></div><div class="cstat-icon cstat-icon--open">◎</div></div>'
+            f'<div class="cstat"><div class="cstat-inner"><span class="cstat-num">{stats["total"]}</span><span class="cstat-label">{escape(tr("account.cards_total"))}</span></div><div class="cstat-icon cstat-icon--total">◈</div></div>'
+            f'<div class="cstat cstat--done"><div class="cstat-inner"><span class="cstat-num">{stats["completed"]}</span><span class="cstat-label">{escape(tr("account.cards_completed"))}</span></div><div class="cstat-icon cstat-icon--done">✓</div></div>'
+            f'<div class="cstat cstat--open"><div class="cstat-inner"><span class="cstat-num">{stats["in_progress"]}</span><span class="cstat-label">{escape(tr("account.cards_open"))}</span></div><div class="cstat-icon cstat-icon--open">◎</div></div>'
             '</div>'
 
             '<div class="cards-main-grid">'
@@ -2456,27 +2565,16 @@ def build_account_content_html(page_key, page_title, page_description, user_name
             '<div class="cards-col-main">'
             '<div class="cards-section-head">'
             f'<strong>{escape(tr("account.cards_recent"))}</strong>'
-            f'<span class="csection-pill">{escape(tr("account.cards_sorted"))}</span>'
+            f'<span class="csection-pill">{escape(tr("account.cards_sorted_date"))}</span>'
             '</div>'
-            '<div class="ctask-list">'
-            + task_row('high', 'Revisar onboarding',   'UX Team',   '· 2d',      ph)
-            + task_row('high', 'Documentar API',        'Dev',       '· 3d',      ph)
-            + task_row('med',  'Optimizar reports',     'Ops',       '· 5d',      pm)
-            + task_row('med',  'Revisar landing page',  'Marketing', '· 1w',      pm)
-            + task_row('low',  'Actualizar etiquetas',  'General',   '· 1w',      pl) +
-            '</div>'
+            f'<div class="ctask-list">{rows_html}</div>'
             '</div>'
 
             '<div class="cards-col-side">'
             '<div class="cards-section-head">'
-            f'<strong>{escape(tr("account.cards_filters"))}</strong>'
+            f'<strong>{escape(tr("account.cards_by_board"))}</strong>'
             '</div>'
-            '<div class="cfilter-list">'
-            f'<button class="cfilter-btn cfilter-btn--active"><span class="cfilter-dot"></span>{escape(tr("account.my_tasks"))}</button>'
-            f'<button class="cfilter-btn cfilter-btn--high"><span class="cfilter-dot cfilter-dot--high"></span>{escape(tr("account.high_priority"))}</button>'
-            f'<button class="cfilter-btn"><span class="cfilter-dot cfilter-dot--time"></span>{escape(tr("account.due_today"))}</button>'
-            '</div>'
-
+            f'<div class="cfilter-list">{side_rows}</div>'
             '</div>'
 
             '</div>'
@@ -2885,6 +2983,7 @@ def render_account_page(page_key):
 
     activities = []
     activity_pagination = {}
+    cards_data = None
     notice = sanitize_text(request.args.get('notice') or '', 160)
     notice_tone = sanitize_text(request.args.get('tone') or 'info', 20)
     # Solo cargamos el historial cuando estamos en la pagina de actividad (no en las demas)
@@ -2920,6 +3019,59 @@ def render_account_page(page_key):
             'end_index': end_index,
         }
 
+    # Cargamos datos reales de tarjetas solo cuando se entra a esta seccion.
+    if page_key == 'cards':
+        stats = get_user_card_stats(workspaces)
+        board_ids = []
+        if workspaces:
+            ws_ids = [w.id for w in workspaces]
+            boards_all = Board.query.filter(Board.workspace_id.in_(ws_ids)).all()
+            board_ids = [b.id for b in boards_all]
+            board_name_by_id = {b.id: b.name for b in boards_all}
+        else:
+            boards_all = []
+            board_name_by_id = {}
+
+        # Obtenemos las 10 tarjetas mas recientes con su columna y tablero.
+        recent_cards = []
+        if board_ids:
+            all_cols = BoardColumn.query.filter(BoardColumn.board_id.in_(board_ids)).all()
+            col_name_by_id = {c.id: c.title for c in all_cols}
+            col_board_by_id = {c.id: c.board_id for c in all_cols}
+            col_ids = [c.id for c in all_cols]
+            if col_ids:
+                raw_cards = (
+                    Card.query
+                    .filter(Card.column_id.in_(col_ids))
+                    .order_by(Card.created_at.desc())
+                    .limit(10)
+                    .all()
+                )
+                for rc in raw_cards:
+                    bid = col_board_by_id.get(rc.column_id)
+                    recent_cards.append({
+                        'title': rc.title,
+                        'col_name': col_name_by_id.get(rc.column_id, ''),
+                        'board_name': board_name_by_id.get(bid, ''),
+                        'created_at': rc.created_at,
+                    })
+
+        # Resumen de tareas por tablero para la columna lateral.
+        boards_summary = []
+        if board_ids:
+            for b in boards_all:
+                b_cols = [c for c in all_cols if c.board_id == b.id]
+                b_col_ids = [c.id for c in b_cols]
+                count = Card.query.filter(Card.column_id.in_(b_col_ids)).count() if b_col_ids else 0
+                boards_summary.append({'name': b.name, 'count': count})
+            boards_summary.sort(key=lambda x: x['count'], reverse=True)
+
+        cards_data = {
+            'stats': stats,
+            'recent_cards': recent_cards,
+            'boards_summary': boards_summary,
+        }
+
     return render_template(
         'account_page.html',
         user=user,
@@ -2945,6 +3097,7 @@ def render_account_page(page_key):
             activities,
             activity_pagination,
             current_language,
+            cards_data,
         ),
     )
 
@@ -3063,6 +3216,7 @@ def landing():
     user_display = get_user_display_data(user, profile)
     workspaces, roles_by_workspace = get_accessible_workspaces(user.id)
     manageable_workspaces = build_manageable_workspaces_data(workspaces, roles_by_workspace)
+    card_stats = get_user_card_stats(workspaces)
 
     return render_template(
         'inicio.html',
@@ -3077,6 +3231,7 @@ def landing():
         workspace_list_html=build_workspace_list_html(workspaces, None, roles_by_workspace, current_language),
         manageable_workspaces=manageable_workspaces,
         board_templates=get_translated_board_templates(current_language),
+        card_stats=card_stats,
     )
 
 

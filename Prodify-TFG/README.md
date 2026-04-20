@@ -1,31 +1,33 @@
-# Prodify
+## Requisitos
 
-Aplicacion web de gestion de proyectos con tableros Kanban. Hecha con Flask, MySQL y JavaScript vanilla.
+- Python 3.x instalado
+- XAMPP instalado (para MySQL)
 
-## Lo que necesitas
+## Instalacion
 
-- Python instalado
-- XAMPP instalado (para la base de datos)
+### 1. Enciende MySQL desde XAMPP
 
-## Como instalarlo
+Abre el panel de XAMPP y pulsa **Start** en MySQL.
 
-**1. Enciende MySQL desde XAMPP**
+### 2. Instala las dependencias
 
-**2. Instala las dependencias**
-
-```bash
+bash
+# bash / cmd
 python -m pip install -r requirements.txt
-```
 
-**3. Importa la base de datos**
+# PowerShell
+py -m pip install -r requirements.txt
 
-Abre phpMyAdmin en `http://localhost/phpmyadmin` e importa el archivo `prodify database.sql`
 
-**4. Crea el archivo .env**
+### 3. Importa la base de datos
+
+Abre phpMyAdmin en http://localhost/phpmyadmin e importa el archivo prodify database.sql
+
+### 4. Crea el archivo .env
 
 Copia `.env.example`, renombralo a `.env` y rellena tus datos:
 
-```
+```env
 SECRET_KEY=pon_aqui_cualquier_texto_largo
 DB_USER=root
 DB_PASSWORD=
@@ -34,19 +36,23 @@ DB_NAME=prodify_db
 PUBLIC_BASE_URL=http://127.0.0.1:5000
 ```
 
-Si se requiere que funcione el envio de correos (verificacion, recuperar contraseña) rellena tambien la parte de SMTP. Si se deja vacio la app funciona igual pero sin correos.
+Si necesitas envio de correos (verificacion de cuenta, recuperar contrasena) rellena tambien la seccion SMTP del `.env`. Si se deja vacio la app funciona igual pero sin correos.
 
-**5. Arranca la app**
+### 5. Arranca la app
 
-```bash
+bash
+# bash / cmd
 python app.py
-```
 
-Y abre `http://127.0.0.1:5000/login` en el navegador.
+# PowerShell
+py app.py
 
-## Si algo falla
 
-- Que MySQL este encendido en XAMPP
-- Que hayas importado el archivo SQL
-- Que el `.env` exista y tenga `DB_NAME=prodify_db`
-- Que hayas instalado las dependencias
+Abre http://127.0.0.1:5000/login en el navegador.
+
+## Solucion de problemas
+
+- Error de conexion a la BD** — comprueba que MySQL esta encendido en XAMPP
+- Tablas no encontradas** — importa `prodify database.sql` desde phpMyAdmin
+- Error de variables de entorno** — asegurate de que el archivo `.env` existe y tiene `DB_NAME=prodify_db`
+- Modulos no encontrados** — ejecuta `py -m pip install -r requirements.txt`
