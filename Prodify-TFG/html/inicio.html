@@ -110,36 +110,48 @@
                         </div>
                     </div>
 
-                    <!-- Panel lateral del hero con tarjetas de resumen de actividad. -->
+                    <!-- Panel lateral del hero con estadisticas reales del usuario. -->
                     <div class="inicio-hero-panel">
                         <div class="panel-header">
                             <span>{{ t('inicio.panel_summary') }}</span>
                             <strong>{{ user_name }}</strong>
                         </div>
                         <div class="panel-body">
-                            <!-- Tarjeta de enfoque actual del usuario. -->
+                            <!-- Tareas en progreso (no completadas). -->
                             <div class="panel-card">
                                 <div>
                                     <h4>{{ t('inicio.panel_focus_title') }}</h4>
-                                    <p>{{ t('inicio.panel_focus_body') }}</p>
+                                    {% if card_stats.in_progress > 0 %}
+                                        <p>{{ card_stats.in_progress }} {{ t('inicio.panel_focus_body') }}</p>
+                                    {% else %}
+                                        <p>{{ t('inicio.panel_no_tasks') }}</p>
+                                    {% endif %}
                                 </div>
-                                <span class="badge">{{ t('inicio.panel_focus_badge') }}</span>
+                                <span class="badge">{{ card_stats.in_progress }}</span>
                             </div>
-                            <!-- Tarjeta de sugerencia de accion. -->
+                            <!-- Tareas completadas. -->
                             <div class="panel-card">
                                 <div>
-                                    <h4>{{ t('inicio.panel_suggested_title') }}</h4>
-                                    <p>{{ t('inicio.panel_suggested_body') }}</p>
+                                    <h4>{{ t('inicio.panel_done_title') }}</h4>
+                                    {% if card_stats.completed > 0 %}
+                                        <p>{{ card_stats.completed }} {{ t('inicio.panel_done_body') }}</p>
+                                    {% else %}
+                                        <p>{{ t('inicio.panel_none_done') }}</p>
+                                    {% endif %}
                                 </div>
-                                <span class="badge alt">{{ t('inicio.panel_suggested_badge') }}</span>
+                                <span class="badge alt">{{ card_stats.completed }}</span>
                             </div>
-                            <!-- Tarjeta de resumen de actividad reciente. -->
+                            <!-- Tarea creada mas recientemente. -->
                             <div class="panel-card">
                                 <div>
                                     <h4>{{ t('inicio.panel_activity_title') }}</h4>
-                                    <p>{{ t('inicio.panel_activity_body') }}</p>
+                                    {% if card_stats.recent_title %}
+                                        <p title="{{ card_stats.recent_title }}">{{ card_stats.recent_title[:40] }}{% if card_stats.recent_title|length > 40 %}…{% endif %}</p>
+                                    {% else %}
+                                        <p>{{ t('inicio.panel_no_recent') }}</p>
+                                    {% endif %}
                                 </div>
-                                <span class="badge soft">{{ t('inicio.panel_activity_badge') }}</span>
+                                <span class="badge soft">{% if card_stats.recent_board %}{{ card_stats.recent_board[:12] }}{% if card_stats.recent_board|length > 12 %}…{% endif %}{% else %}—{% endif %}</span>
                             </div>
                         </div>
                     </div>
