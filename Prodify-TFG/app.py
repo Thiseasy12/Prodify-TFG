@@ -2536,7 +2536,18 @@ def build_account_content_html(page_key, page_title, page_description, user_name
                     rel_time_label(card['created_at']),
                 )
         else:
-            rows_html = f'<div class="ctask-empty">{escape(tr("account.no_cards_yet"))}</div>'
+            no_cards_label = tr("account.no_cards_yet")
+            rows_html = (
+                '<div class="ctask-empty-state">'
+                '<svg class="ctask-empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
+                '<rect x="3" y="3" width="18" height="18" rx="3"/>'
+                '<line x1="9" y1="9" x2="15" y2="9"/>'
+                '<line x1="9" y1="12" x2="13" y2="12"/>'
+                '</svg>'
+                f'<strong>{escape(no_cards_label)}</strong>'
+                f'<span>{escape(tr("account.no_cards_hint"))}</span>'
+                '</div>'
+            )
 
         # Columna lateral: resumen de tareas por tablero.
         side_rows = ''
