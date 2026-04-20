@@ -2100,7 +2100,7 @@ def build_board_columns_html(columns, cards_by_column, board_id=0, can_edit=Fals
                 if can_edit:
                     html.append(
                         f'<form action="{escape(url_for("delete_card", card_id=card.id))}" method="POST" class="card-delete-form">'
-                        f'<button type="submit" class="card-delete-btn js-delete-card" title="{escape(tr("board.delete_task"))}" draggable="false">&times;</button>'
+                        f'<button type="submit" class="card-delete-btn js-delete-card" title="{escape(tr("board.delete_task"))}" draggable="false"><svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' width=\'13\' height=\'13\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\' aria-hidden=\'true\'><polyline points=\'3 6 5 6 21 6\'/><path d=\'M19 6l-1 14H6L5 6\'/><path d=\'M10 11v6\'/><path d=\'M14 11v6\'/><path d=\'M9 6V4h6v2\'/></svg></button>'
                         '</form>'
                     )
                 html.append('</div>')
