@@ -1,62 +1,52 @@
 # Prodify
 
-Guia para poner la pagina web en otro pc
+Aplicacion web de gestion de proyectos con tableros Kanban. Hecha con Flask, MySQL y JavaScript vanilla.
 
-## Que se necesita
+## Lo que necesitas
 
 - Python instalado
-- XAMPP instalado
-- Este proyecto descargado en tu ordenador
+- XAMPP instalado (para la base de datos)
 
-## Antes de empezar
+## Como instalarlo
 
-1. Abre XAMPP.
-2. Enciende `MySQL`.
+**1. Enciende MySQL desde XAMPP**
 
-## Instalar lo necesario
+**2. Instala las dependencias**
 
-Abre una terminal dentro de la carpeta del proyecto y ejecuta:
-
-```powershell
+```bash
 python -m pip install -r requirements.txt
 ```
 
-Si `python` no funciona, prueba con:
+**3. Importa la base de datos**
 
-```powershell
-py -m pip install -r requirements.txt
+Abre phpMyAdmin en `http://localhost/phpmyadmin` e importa el archivo `prodify database.sql`
+
+**4. Crea el archivo .env**
+
+Copia `.env.example`, renombralo a `.env` y rellena tus datos:
+
+```
+SECRET_KEY=pon_aqui_cualquier_texto_largo
+DB_USER=root
+DB_PASSWORD=
+DB_HOST=localhost
+DB_NAME=prodify_db
+PUBLIC_BASE_URL=http://127.0.0.1:5000
 ```
 
-## Preparar la base de datos
+Si quieres que funcione el envio de correos (verificacion, recuperar contraseña) rellena tambien la parte de SMTP. Si lo dejas vacio la app funciona igual pero sin correos.
 
-1. Abre `http://localhost/phpmyadmin`
-2. Importa el archivo `prodify database.sql`
+**5. Arranca la app**
 
-## Iniciar la pagina
-
-En la terminal, dentro de la carpeta del proyecto, ejecuta:
-
-```powershell
+```bash
 python app.py
 ```
 
-Si `python` no funciona:
+Y abre `http://127.0.0.1:5000/login` en el navegador.
 
-```powershell
-py app.py
-```
+## Si algo falla
 
-## Abrir en el navegador
-
-Cuando arranque, abre esta direccion:
-
-`http://127.0.0.1:5000/login`
-
-
-## Si algo no funciona
-
-- Revisa que `MySQL` este encendido en XAMPP
-- Revisa que la base de datos se llame `prodify_db`
-- Revisa que has importado el archivo `prodify database.sql`
-- Revisa que has instalado las dependencias con `requirements.txt`
-- Si borras usuarios manualmente desde phpMyAdmin, Prodify ya intenta dejar las relaciones en cascada al arrancar para que tambien se borren sus perfiles, espacios, tableros, tarjetas y actividad.
+- Que MySQL este encendido en XAMPP
+- Que hayas importado el archivo SQL
+- Que el `.env` exista y tenga `DB_NAME=prodify_db`
+- Que hayas instalado las dependencias

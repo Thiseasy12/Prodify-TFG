@@ -120,7 +120,9 @@ body {
 /* Campo de busqueda y formulario de cuenta comparten estos estilos base */
 .search-input.form-control,
 .account-form input {
+    width: 100%;
     height: 38px;
+    padding: 0 12px;
     border-radius: 10px;
     border: 1px solid color-mix(in srgb, var(--line) 90%, #2b3b5e);
     background: color-mix(in srgb, var(--surface) 75%, #0d1525);
@@ -3766,49 +3768,82 @@ body {
 .board-pending-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 /* Fila de miembro en el panel de ajustes del tablero */
 .board-member-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
     align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    border-radius: 14px;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
     border: 1px solid color-mix(in srgb, var(--line) 84%, #263d66);
     background: color-mix(in srgb, var(--surface-2) 88%, #111c31);
+    transition: background 0.15s;
 }
 
 .board-owner-row {
     border-color: color-mix(in srgb, #f0b24c 55%, var(--line));
-    background: rgba(240, 178, 76, .08);
+    background: rgba(240, 178, 76, .07);
+}
+
+.board-pending-row {
+    border-style: dashed;
+    opacity: .85;
+}
+
+/* Avatar circular con iniciales */
+.bm-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2f63ff 0%, #6d28d9 100%);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: .03em;
+}
+
+.bm-avatar--owner {
+    background: linear-gradient(135deg, #f0b24c 0%, #e07b1a 100%);
+}
+
+.bm-avatar--pending {
+    background: linear-gradient(135deg, #64748b 0%, #334155 100%);
 }
 
 .board-member-copy {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
 }
 
 .board-member-copy strong {
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .board-member-copy span {
     color: var(--muted);
-    font-size: 12px;
-    word-break: break-word;
+    font-size: 11px;
+    word-break: break-all;
 }
 
 .board-member-actions,
-.board-member-role-form,
-.board-invite-grid {
+.board-member-role-form {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
 }
 
@@ -3816,12 +3851,168 @@ body {
     margin: 0;
 }
 
-.board-invite-grid>* {
-    flex: 1 1 140px;
+/* Chips de rol con colores por nivel */
+.bm-role-chip {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    background: rgba(99, 102, 241, .15);
+    color: #818cf8;
+    border: 1px solid rgba(99, 102, 241, .25);
 }
 
-.board-invite-grid>.btn-primary {
-    flex: 0 0 auto;
+.bm-role-chip--owner {
+    background: rgba(240, 178, 76, .15);
+    color: #f0b24c;
+    border-color: rgba(240, 178, 76, .3);
+}
+
+.bm-role-chip--admin {
+    background: rgba(47, 99, 255, .15);
+    color: #60a5fa;
+    border-color: rgba(47, 99, 255, .25);
+}
+
+.bm-role-chip--editor {
+    background: rgba(16, 185, 129, .15);
+    color: #34d399;
+    border-color: rgba(16, 185, 129, .25);
+}
+
+.bm-role-chip--lector {
+    background: rgba(100, 116, 139, .15);
+    color: #94a3b8;
+    border-color: rgba(100, 116, 139, .25);
+}
+
+/* Contador de miembros en la cabecera de sección */
+.bm-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 20px;
+    background: rgba(47, 99, 255, .15);
+    color: #60a5fa;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* Boton guardar rol dentro de la fila */
+.bm-save-btn {
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(47, 99, 255, .18);
+    color: #60a5fa;
+    border: 1px solid rgba(47, 99, 255, .3);
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+}
+
+.bm-save-btn:hover {
+    background: rgba(47, 99, 255, .32);
+}
+
+/* Boton eliminar miembro (X) */
+.bm-remove-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(192, 38, 79, .12);
+    color: #f43f5e;
+    border: 1px solid rgba(192, 38, 79, .25);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+
+.bm-remove-btn:hover {
+    background: rgba(192, 38, 79, .28);
+}
+
+/* Caja de invitacion con diseño apilado */
+.bm-invite-box {
+    margin-top: 16px;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px dashed color-mix(in srgb, var(--line) 70%, #2f63ff);
+    background: rgba(47, 99, 255, .04);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bm-invite-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.bm-invite-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+}
+
+.bm-invite-input,
+.bm-invite-select {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 13px;
+}
+
+.bm-invite-btn {
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #2f63ff, #6d28d9);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.bm-invite-btn:hover:not(:disabled) {
+    opacity: .88;
+}
+
+.bm-invite-btn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+/* Cabecera de sección de invitaciones pendientes */
+.bm-pending-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
 }
 
 /* Lista de columnas dentro de los ajustes del tablero */
@@ -3920,9 +4111,25 @@ body {
 /* Tarjeta de cabecera de la pagina de miembros */
 .members-header-card {
     border: 1px solid var(--line);
-    border-radius: 18px;
-    padding: 22px;
-    background: linear-gradient(180deg, var(--surface), color-mix(in srgb, var(--surface) 92%, #0c1424));
+    border-radius: 20px;
+    padding: 24px 28px;
+    background: linear-gradient(160deg, color-mix(in srgb, var(--surface) 98%, #1a2d4f), color-mix(in srgb, var(--surface) 88%, #0c1424));
+}
+
+.members-panel {
+    border-top: 3px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+}
+
+.members-panel::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 21px;
+    background: linear-gradient(160deg, color-mix(in srgb, var(--brand) 40%, var(--line)), var(--line) 50%);
+    z-index: -1;
+    pointer-events: none;
 }
 
 .members-header-card {
@@ -3930,7 +4137,9 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 18px;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--brand);
+    padding-left: 24px;
 }
 
 .members-header-card h1,
@@ -3938,14 +4147,20 @@ body {
     margin: 0;
 }
 
+.members-header-card h1 {
+    font-size: 30px;
+    letter-spacing: -0.5px;
+}
+
 .members-panel h2 {
-    font-size: 24px;
+    font-size: 22px;
     line-height: 1.1;
 }
 
 .members-header-card p {
-    margin: 10px 0 0;
-    color: color-mix(in srgb, var(--text) 74%, #9eb8e9);
+    margin: 8px 0 0;
+    font-size: 14px;
+    color: color-mix(in srgb, var(--text) 68%, #9eb8e9);
 }
 
 /* Acciones de la cabecera de la pagina de miembros */
@@ -3960,7 +4175,9 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 14px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
 }
 
 .members-panel-owner {
@@ -3968,13 +4185,21 @@ body {
 }
 
 .members-panel-head-owner {
-    margin-bottom: 18px;
+    margin-bottom: 0;
 }
 
 /* Contador de miembros del equipo */
 .members-counter {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 11px;
+    border-radius: 99px;
+    border: 1px solid color-mix(in srgb, var(--line) 80%, #365486);
+    background: color-mix(in srgb, var(--surface) 70%, #0d1830);
     color: color-mix(in srgb, var(--text) 70%, #9fbaf0);
-    font-size: 13px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 /* Aviso informativo en la pagina de miembros */
@@ -4014,7 +4239,11 @@ body {
 }
 
 .member-add-form {
-    margin-bottom: 16px;
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid color-mix(in srgb, var(--line) 70%, #2a3d60);
+    background: color-mix(in srgb, var(--surface) 60%, #080f1e);
 }
 
 .member-add-form input,
@@ -4026,16 +4255,34 @@ body {
     background: color-mix(in srgb, var(--surface) 80%, #0d1525);
     color: var(--text);
     padding: 0 12px;
+    transition: border-color 0.18s;
+}
+
+.member-add-form input:focus,
+.member-add-form select:focus,
+.member-role-form select:focus {
+    outline: none;
+    border-color: color-mix(in srgb, var(--brand) 70%, var(--line));
+    box-shadow: 0 0 0 3px rgba(47, 99, 255, .12);
 }
 
 .member-add-form input {
-    min-width: min(100%, 320px);
+    min-width: min(100%, 280px);
+    flex: 1;
+}
+
+.member-add-form select {
+    width: auto;
+    min-width: 110px;
+    max-width: 130px;
+    padding-right: 28px;
+    flex-shrink: 0;
 }
 
 /* Lista de filas de miembros del workspace */
 .members-list {
     display: grid;
-    gap: 12px;
+    gap: 10px;
 }
 
 /* Fila de miembro con avatar, identidad y acciones */
@@ -4044,30 +4291,55 @@ body {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 14px;
-    padding: 14px;
+    padding: 14px 16px;
     border-radius: 14px;
     border: 1px solid color-mix(in srgb, var(--line) 78%, #2f4e81);
     background: color-mix(in srgb, var(--surface-2) 86%, #101b32);
+    transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+}
+
+.member-row:hover {
+    border-color: color-mix(in srgb, var(--brand) 55%, var(--line));
+    background: color-mix(in srgb, var(--surface-2) 94%, #1a2d50);
+    box-shadow: 0 4px 16px rgba(47, 99, 255, .1);
 }
 
 .owner-row {
     margin-top: 4px;
-    min-height: 76px;
     grid-template-columns: 1fr;
-    justify-items: start;
+    justify-items: center;
+    text-align: center;
+    padding: 20px 16px;
+    background: linear-gradient(160deg, color-mix(in srgb, #f0b24c 6%, var(--surface-2)), color-mix(in srgb, var(--surface-2) 92%, #1a1000));
+    border-color: color-mix(in srgb, #f0b24c 35%, var(--line));
+}
+
+.owner-row:hover {
+    border-color: color-mix(in srgb, #f0b24c 55%, var(--line));
+    box-shadow: 0 4px 20px rgba(240, 178, 76, .12);
 }
 
 /* Bloque de identidad del miembro: nombre, email, rol */
 .member-identity {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 13px;
     min-width: 0;
+}
+
+.owner-row .member-identity {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
 }
 
 .member-identity>div {
     min-width: 0;
     flex: 1;
+}
+
+.owner-row .member-identity>div {
+    text-align: center;
 }
 
 .member-identity strong,
@@ -4079,6 +4351,10 @@ body {
 .member-identity strong {
     font-size: 15px;
     line-height: 1.15;
+}
+
+.owner-row .member-identity strong {
+    font-size: 16px;
 }
 
 .member-identity span,
@@ -4109,7 +4385,27 @@ body {
     text-transform: uppercase;
     background: linear-gradient(135deg, #2f63ff, #59a7ff);
     color: #f8fbff;
-    box-shadow: 0 10px 26px rgba(47, 99, 255, .28);
+    box-shadow: 0 8px 22px rgba(47, 99, 255, .32);
+    transition: box-shadow 0.18s, transform 0.18s;
+}
+
+.member-row:hover .member-avatar {
+    box-shadow: 0 10px 28px rgba(47, 99, 255, .42);
+    transform: scale(1.05);
+}
+
+.owner-row .member-avatar {
+    width: 58px;
+    height: 58px;
+    font-size: 26px;
+    flex: 0 0 58px;
+    box-shadow: 0 10px 30px rgba(240, 178, 76, .3);
+    background: linear-gradient(135deg, #e8960c, #f5c842);
+}
+
+.owner-row:hover .member-avatar {
+    box-shadow: 0 12px 36px rgba(240, 178, 76, .45);
+    transform: scale(1.05);
 }
 
 .member-avatar.avatar-image {
@@ -4152,12 +4448,16 @@ body {
 }
 
 .owner-row .member-role-owner {
-    margin-left: 54px;
+    margin-left: 0;
+    margin-top: 2px;
 }
 
 .members-empty,
 .members-readonly-note {
-    padding: 14px 2px 4px;
+    padding: 36px 16px;
+    text-align: center;
+    font-size: 14px;
+    opacity: 0.75;
 }
 
 /* Responsivo: pantallas medianas, el grid de miembros pasa a una sola columna */
@@ -4174,6 +4474,11 @@ body {
     .member-row {
         grid-template-columns: 1fr;
         align-items: flex-start;
+    }
+
+    .owner-row {
+        grid-template-columns: 1fr;
+        justify-items: center;
     }
 }
 
@@ -4830,6 +5135,17 @@ body {
 /* Overrides de tema claro para multiples componentes compartidos */
 .theme-light .board-settings-metric,
 .theme-light .board-settings-column-row,
+.theme-light .bm-invite-box {
+    background: rgba(47, 99, 255, .03);
+}
+
+.theme-light .bm-invite-input,
+.theme-light .bm-invite-select {
+    background: #ffffff;
+    border-color: var(--border-light);
+    color: #14305f;
+}
+
 .theme-light .board-member-row,
 .theme-light .members-panel,
 .theme-light .members-header-card,
@@ -6354,6 +6670,30 @@ body {
     background: #ffffff;
     border-color: var(--border-light);
     color: var(--text);
+}
+
+.theme-light .member-add-form {
+    background: rgba(241, 245, 249, 0.8);
+    border-color: var(--border-light);
+}
+
+.theme-light .members-panel::before {
+    background: linear-gradient(160deg, rgba(29, 78, 216, .3), var(--border-light) 50%);
+}
+
+.theme-light .members-counter {
+    background: #f0f4ff;
+    border-color: #c7d7f9;
+    color: #3b5cc7;
+}
+
+.theme-light .owner-row {
+    background: linear-gradient(160deg, rgba(217, 119, 6, .06), rgba(255, 255, 255, 0));
+    border-color: rgba(217, 119, 6, .3);
+}
+
+.theme-light .owner-row .member-avatar {
+    box-shadow: 0 8px 24px rgba(217, 119, 6, .25);
 }
 
 .theme-light .board-settings-column-index {

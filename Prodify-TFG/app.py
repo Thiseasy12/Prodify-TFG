@@ -1,37 +1,44 @@
-from datetime import datetime, timedelta
-from html import escape as html_escape
-import json
-import os
-import re
-import secrets
-import smtplib
-import ssl
-import time
-from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
-from urllib.parse import quote_plus
-from email.message import EmailMessage
+# --- Imports de la libreria estandar de Python ---
+from datetime import datetime, timedelta, timezone   # Para fechas, duraciones de sesion y zonas horarias
+from html import escape as html_escape     # Para escapar HTML en los emails
+import json                                # Para leer los archivos de configuracion JSON
+import os                                  # Para rutas de archivo y variables de entorno
+import re                                  # Para validar emails y limpiar textos
+import secrets                             # Para generar tokens CSRF y nombres de archivo seguros
+import smtplib                             # Para enviar emails por SMTP (Brevo)
+import ssl                                 # Para conexiones TLS seguras en SMTP
+import time                                # Para el sistema de rate limiting en memoria
+from urllib.parse import quote_plus            # Para codificar la contrasena de la BD en la URL de conexion
+from email.message import EmailMessage         # Para construir el mensaje de correo al usar SMTP
 
+# --- Imports de Flask y sus extensiones ---
 from flask import Flask, redirect, render_template, request, session, url_for, send_from_directory
-from flask_sqlalchemy import SQLAlchemy
-from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
-from markupsafe import Markup, escape
-from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
+from flask_sqlalchemy import SQLAlchemy         # ORM que mapea las clases Python a tablas MySQL
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer  # Tokens firmados para recuperar contrasena
+from markupsafe import Markup, escape           # Escape seguro de HTML en las plantillas
+from werkzeug.security import generate_password_hash, check_password_hash  # Hash seguro de contrasenas
+from werkzeug.utils import secure_filename      # Limpia nombres de archivo subidos por el usuario
 
+
+# CARGA DE VARIABLES DE ENTORNO
+# Leemos el archivo .env del proyecto para no tener credenciales en el codigo.
+# Si el archivo no existe (por ejemplo en produccion), las variables llegan
+# directamente como variables de entorno del sistema operativo.
 
 def load_dotenv_file():
     """Carga variables desde un archivo .env local si existe."""
     env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
     if not os.path.exists(env_path):
-        return
+        return  # En produccion las variables vienen del sistema, no del archivo
 
     with open(env_path, 'r', encoding='utf-8') as env_file:
         for raw_line in env_file:
             line = raw_line.strip()
+            # Ignoramos lineas en blanco y comentarios
             if not line or line.startswith('#') or '=' not in line:
                 continue
 
+            # Separamos solo por el primer '=' para admitir valores que contengan '='
             key, value = line.split('=', 1)
             key = key.strip()
             value = value.strip()
@@ -39,56 +46,91 @@ def load_dotenv_file():
             if not key:
                 continue
 
+            # Quitamos las comillas opcionales que envuelven el valor
             if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
                 value = value[1:-1]
 
+            # setdefault garantiza que no sobreescribimos variables ya definidas en el sistema
             os.environ.setdefault(key, value)
 
 
+# Cargamos el .env nada mas importar el modulo, antes de configurar Flask
 load_dotenv_file()
 
+# CONFIGURACION DE FLASK Y LA BASE DE DATOS
+
 # Creamos la aplicacion Flask y le indicamos donde estan las vistas y los estilos.
+# template_folder apunta a la carpeta 'html' donde guardo los archivos .html.
+# static_folder apunta a 'estilos' donde tengo el CSS, JS e imagenes estaticas.
 app = Flask(__name__, template_folder='html', static_folder='estilos', static_url_path='/estilos')
 
-# Esta clave permite a Flask mantener la sesion iniciada del usuario.
+# Esta clave secreta permite a Flask firmar las cookies de sesion del usuario.
+# En produccion hay que cambiarla por una clave larga y aleatoria en el .env.
 app.secret_key = os.getenv('SECRET_KEY', 'prodify_super_secret_key')
 
-# Configuracion de MySQL. Por defecto esta pensada para XAMPP en local.
+# --- Conexion a la base de datos MySQL ---
+# Los valores por defecto estan pensados para XAMPP en local (sin contrasena).
+# En produccion se sobreescriben con variables de entorno en el servidor.
 db_user = os.getenv('DB_USER', 'root')
-db_password = quote_plus(os.getenv('DB_PASSWORD', ''))
+db_password = quote_plus(os.getenv('DB_PASSWORD', ''))  # quote_plus escapa caracteres especiales en la URL
 db_host = os.getenv('DB_HOST', 'localhost')
 db_name = os.getenv('DB_NAME', 'prodify_db')
 public_base_url = os.getenv('PUBLIC_BASE_URL', 'http://127.0.0.1:5000').strip().rstrip('/')
 
+# Cadena de conexion para SQLAlchemy usando el driver pymysql
 app.config['SQLALCHEMY_DATABASE_URI'] = (
     f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}?charset=utf8mb4"
 )
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_SECURE'] = public_base_url.startswith('https://')
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=12)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Desactivo avisos innecesarios de SQLAlchemy
 
-# SQLAlchemy es el puente entre Python y la base de datos.
+# Limite de tamano para archivos subidos (avatares e imagenes de tablero): 1 MB
+app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
+
+# --- Configuracion de seguridad de las cookies de sesion ---
+app.config['SESSION_COOKIE_HTTPONLY'] = True            # JavaScript no puede leer la cookie
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'          # Protege contra CSRF basico
+app.config['SESSION_COOKIE_SECURE'] = public_base_url.startswith('https://')  # Solo HTTPS en produccion
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=12)  # La sesion dura 12 horas
+
+# SQLAlchemy es el ORM que conecta los modelos Python con las tablas de MySQL.
 db = SQLAlchemy(app)
 
-resend_api_key = os.getenv('RESEND_API_KEY', '').strip()
-resend_from = os.getenv('RESEND_FROM', 'Prodify <onboarding@resend.dev>').strip()
-password_reset_max_age = int(os.getenv('PASSWORD_RESET_MAX_AGE', '3600'))
+# --- Configuracion del servicio de correo (Brevo via SMTP) ---
+# Las credenciales SMTP de Brevo se configuran en el archivo .env.
+password_reset_max_age = int(os.getenv('PASSWORD_RESET_MAX_AGE', '3600'))  # Tiempo de vida del enlace de reset (1h por defecto)
 smtp_host = os.getenv('SMTP_HOST', '').strip()
 smtp_port = int(os.getenv('SMTP_PORT', '587'))
 smtp_user = os.getenv('SMTP_USER', '').strip()
 smtp_password = os.getenv('SMTP_PASSWORD', '').strip()
 smtp_from = os.getenv('SMTP_FROM', smtp_user or 'no-reply@prodify.local').strip()
-smtp_use_tls = os.getenv('SMTP_USE_TLS', '1').strip().lower() not in ('0', 'false', 'no')
+smtp_use_tls = os.getenv('SMTP_USE_TLS', '1').strip().lower() not in ('0', 'false', 'no')  # TLS activado por defecto
+
+# Diccionario en memoria para controlar el numero de peticiones por IP (rate limiting).
+# Guarda listas de timestamps para cada clave accion:ip:scope.
 rate_limit_store = {}
+
+# Lista global de timestamps de envios de correo reales.
+# Limito a 3 emails por minuto en total para proteger el servidor SMTP
+# de rafagas de peticiones simultaneas (ataques, bucles, etc.).
+email_send_timestamps = []
+EMAIL_GLOBAL_LIMIT = 3       # maximo de correos permitidos en la ventana
+EMAIL_GLOBAL_WINDOW = 60     # ventana de tiempo en segundos
+
+# Expresion regular para validar emails: formato basico sin dependencias externas
 email_regex = re.compile(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+
+# Extensiones permitidas para subir la foto de perfil del usuario
 ALLOWED_AVATAR_EXTENSIONS = {'jpg', 'jpeg', 'png', 'svg', 'webp'}
 avatar_upload_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'images', 'avatars')
+
+# Extensiones permitidas para la imagen de portada de un tablero
 ALLOWED_BOARD_COVER_EXTENSIONS = {'jpg', 'jpeg', 'png', 'svg', 'webp'}
 board_cover_upload_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'images', 'board_covers')
 
+
+# CARGA DE CATALOGOS EXTERNOS (JSON)
+# Estos archivos JSON definen datos que no quiero hardcodear en el codigo:
+# plantillas de tablero, idiomas disponibles, traducciones y paises.
 
 def load_board_templates():
     """Carga el catalogo de plantillas desde un JSON local."""
@@ -197,61 +239,74 @@ def load_countries_catalog():
     return data
 
 
+# MODELOS DE LA BASE DE DATOS (ORM con SQLAlchemy)
+# Cada clase representa una tabla en MySQL. SQLAlchemy se encarga de
+# traducir las operaciones Python a consultas SQL automaticamente.
+# Las relaciones entre tablas usan ON DELETE CASCADE para que al borrar
+# un usuario o espacio, se eliminen todos sus datos dependientes.
+
 # Modelo de usuario: guarda los datos de acceso.
 class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(255), nullable=False)
-    email_verified = db.Column(db.Boolean, nullable=False, default=False, server_default=db.text('0'))
-    verified_at = db.Column(db.DateTime, nullable=True)
-    has_seen_inicio = db.Column(db.Boolean, nullable=False, default=False, server_default=db.text('0'))
-    preferred_language = db.Column(db.String(10), nullable=False, default='es', server_default='es')
+    email = db.Column(db.String(100), unique=True, nullable=False)       # Email unico, sirve como nombre de usuario
+    password = db.Column(db.String(255), nullable=False)                 # Almacenada como hash Werkzeug (pbkdf2/scrypt)
+    email_verified = db.Column(db.Boolean, nullable=False, default=False, server_default=db.text('0'))  # True cuando confirma el correo
+    verified_at = db.Column(db.DateTime, nullable=True)                  # Fecha en que verifico el correo
+    has_seen_inicio = db.Column(db.Boolean, nullable=False, default=False, server_default=db.text('0'))  # Controla si ya ha visto la pantalla de bienvenida
+    preferred_language = db.Column(db.String(10), nullable=False, default='es', server_default='es')    # Codigo de idioma preferido (es, en, fr...)
 
 # Perfil basico del usuario para mostrar su nombre en la interfaz.
+# Lo separo de User para mantener la tabla de autenticacion lo mas limpia posible.
 class UserProfile(db.Model):
     __tablename__ = 'user_profiles'
 
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), primary_key=True)
-    display_name = db.Column(db.String(80), nullable=False)
-    avatar_url = db.Column(db.String(300), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), primary_key=True)  # Clave primaria y foranea a users
+    display_name = db.Column(db.String(80), nullable=False)    # Nombre visible en la interfaz
+    avatar_url = db.Column(db.String(300), nullable=True)      # Ruta relativa a la imagen de perfil subida
 
 # Espacio de trabajo que agrupa varios tableros.
+# Cada usuario puede crear varios espacios y ser miembro de los de otros.
 class Workspace(db.Model):
     __tablename__ = 'workspaces'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)  # Propietario del espacio
     name = db.Column(db.String(120), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 # Miembros que participan en un espacio con un rol concreto.
+# Los roles posibles son: admin, editor, lector.
+# El propietario (owner) se determina comparando user_id con Workspace.user_id.
 class WorkspaceMember(db.Model):
     __tablename__ = 'workspace_members'
 
     id = db.Column(db.Integer, primary_key=True)
     workspace_id = db.Column(db.Integer, db.ForeignKey('workspaces.id', ondelete='CASCADE'), nullable=False, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
-    role = db.Column(db.String(20), nullable=False, default='lector')
+    role = db.Column(db.String(20), nullable=False, default='lector')   # Rol del miembro en este espacio
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     __table_args__ = (
+        # Un usuario solo puede aparecer una vez en el mismo espacio
         db.UniqueConstraint('workspace_id', 'user_id', name='uq_workspace_member_user'),
     )
 
-# Tablero individual dentro de un espacio.
+# Tablero individual dentro de un espacio (tipo Kanban).
 class Board(db.Model):
     __tablename__ = 'boards'
 
     id = db.Column(db.Integer, primary_key=True)
     workspace_id = db.Column(db.Integer, db.ForeignKey('workspaces.id', ondelete='CASCADE'), nullable=False, index=True)
     name = db.Column(db.String(120), nullable=False)
-    background_color = db.Column(db.String(20), nullable=True)
-    cover_url = db.Column(db.String(300), nullable=True)
+    background_color = db.Column(db.String(20), nullable=True)   # Color de fondo en hex (ej. #1d4ed8)
+    cover_url = db.Column(db.String(300), nullable=True)          # URL de imagen de portada subida por el usuario
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 
+# Miembros con acceso directo a un tablero concreto.
+# El acceso efectivo se calcula combinando este rol con el del espacio.
 class BoardMember(db.Model):
     __tablename__ = 'board_members'
 
@@ -266,47 +321,51 @@ class BoardMember(db.Model):
     )
 
 
+# Invitaciones pendientes enviadas por email para unirse a un tablero.
+# Cuando el invitado hace clic en el enlace, accepted_at se rellena y se crea el BoardMember.
 class BoardInvitation(db.Model):
     __tablename__ = 'board_invitations'
 
     id = db.Column(db.Integer, primary_key=True)
     board_id = db.Column(db.Integer, db.ForeignKey('boards.id', ondelete='CASCADE'), nullable=False, index=True)
-    email = db.Column(db.String(100), nullable=False, index=True)
-    role = db.Column(db.String(20), nullable=False, default='lector')
-    token = db.Column(db.String(120), nullable=False, unique=True, index=True)
+    email = db.Column(db.String(100), nullable=False, index=True)         # Correo al que se envio la invitacion
+    role = db.Column(db.String(20), nullable=False, default='lector')     # Rol que tendra cuando acepte
+    token = db.Column(db.String(120), nullable=False, unique=True, index=True)  # Token unico del enlace de invitacion
     invited_by_user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
-    accepted_at = db.Column(db.DateTime, nullable=True)
+    accepted_at = db.Column(db.DateTime, nullable=True)                   # NULL = pendiente, fecha = aceptada
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-# Columna dentro de un tablero.
+# Columna dentro de un tablero (ej: "Pendiente", "En progreso", "Hecho").
 class BoardColumn(db.Model):
     __tablename__ = 'board_columns'
 
     id = db.Column(db.Integer, primary_key=True)
     board_id = db.Column(db.Integer, db.ForeignKey('boards.id', ondelete='CASCADE'), nullable=False, index=True)
     title = db.Column(db.String(120), nullable=False)
-    position = db.Column(db.Integer, nullable=False, default=0)
+    position = db.Column(db.Integer, nullable=False, default=0)  # Orden de la columna de izquierda a derecha
 
 # Tarjeta o tarea dentro de una columna.
+# Es la unidad minima de trabajo en el tablero Kanban.
 class Card(db.Model):
     __tablename__ = 'cards'
 
     id = db.Column(db.Integer, primary_key=True)
     column_id = db.Column(db.Integer, db.ForeignKey('board_columns.id', ondelete='CASCADE'), nullable=False, index=True)
-    title = db.Column(db.String(200), nullable=False)
+    title = db.Column(db.String(200), nullable=False)  # Texto de la tarea
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-# Historial de acciones del usuario.
+# Historial de acciones del usuario para mostrar en la pagina "Actividad".
 class ActivityLog(db.Model):
     __tablename__ = 'activity_logs'
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
-    action = db.Column(db.String(120), nullable=False)
-    detail = db.Column(db.String(255), nullable=False)
+    action = db.Column(db.String(120), nullable=False)   # Clave de la accion (ej. 'activity.login')
+    detail = db.Column(db.String(255), nullable=False)   # Descripcion legible de lo que ocurrio
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 
+# --- Etiquetas legibles de los roles para mostrar en la interfaz ---
 WORKSPACE_ROLE_LABELS = {
     'owner': 'Propietario',
     'admin': 'Admin',
@@ -314,9 +373,13 @@ WORKSPACE_ROLE_LABELS = {
     'lector': 'Lector',
 }
 
+# Roles que se pueden asignar a otros miembros (el owner no se asigna, es automatico)
 MEMBER_ROLES = ('admin', 'editor', 'lector')
 WORKSPACE_MEMBER_ROLES = MEMBER_ROLES
 BOARD_MEMBER_ROLES = MEMBER_ROLES
+
+# Tabla de prioridad para resolver que rol gana cuando un usuario tiene acceso
+# tanto por el espacio como por el tablero directamente
 ROLE_PRIORITY = {
     'owner': 4,
     'admin': 3,
@@ -324,6 +387,8 @@ ROLE_PRIORITY = {
     'lector': 1,
 }
 
+
+# FUNCIONES AUXILIARES DE SESION Y USUARIO
 
 def get_user_or_redirect():
     """Devuelve el usuario actual; si no hay sesion, manda al login."""
@@ -350,6 +415,8 @@ def get_profile(user):
     return profile
 
 
+# FUNCIONES DE SEGURIDAD: CONTRASENAS, TOKENS, CSRF Y RATE LIMITING
+
 def is_password_hashed(value):
     """Detecta si una contrasena ya esta guardada como hash seguro."""
     if not value:
@@ -359,17 +426,22 @@ def is_password_hashed(value):
 
 def validate_password_strength(password):
     """Comprueba que la contraseña cumpla unas reglas mínimas de seguridad."""
+    # Minimo 8 caracteres para dificultar ataques por fuerza bruta
     if len(password) < 8:
         return 'La contraseña debe tener al menos 8 caracteres.'
+    # Al menos una mayuscula para aumentar el espacio de combinaciones
     if not re.search(r'[A-Z]', password):
         return 'La contraseña debe incluir al menos una letra mayúscula.'
+    # Al menos una minuscula
     if not re.search(r'[a-z]', password):
         return 'La contraseña debe incluir al menos una letra minúscula.'
+    # Al menos un numero
     if not re.search(r'\d', password):
         return 'La contraseña debe incluir al menos un número.'
+    # Al menos un caracter especial (cualquier cosa que no sea letra o numero)
     if not re.search(r'[^A-Za-z0-9]', password):
         return 'La contraseña debe incluir al menos un carácter especial.'
-    return None
+    return None  # None significa que la contrasena es valida
 
 
 def build_rate_limit_message(retry_after):
@@ -443,12 +515,24 @@ def is_allowed_board_cover_filename(filename):
     return extension in ALLOWED_BOARD_COVER_EXTENSIONS
 
 
-BOARD_TEMPLATES = load_board_templates() or []
-LANGUAGE_CATALOG = load_language_catalog()
-TRANSLATIONS_CATALOG = load_translations_catalog()
-COUNTRIES_CATALOG = load_countries_catalog()
-DEFAULT_LANGUAGE = 'es'
+
+# SISTEMA DE IDIOMAS Y TRADUCCIONES
+# La interfaz de Prodify es multiidioma. Los textos estan en translations.json
+# y se cargan al arrancar. Cada usuario puede elegir su idioma preferido
+# y se guarda en su registro de la BD.
+
+# Cargamos todos los catalogos en memoria al arrancar para no leer disco en cada peticion
+BOARD_TEMPLATES = load_board_templates() or []       # Plantillas de tablero disponibles
+LANGUAGE_CATALOG = load_language_catalog()           # Lista de idiomas soportados
+TRANSLATIONS_CATALOG = load_translations_catalog()  # Diccionario de traducciones por idioma
+COUNTRIES_CATALOG = load_countries_catalog()         # Paises con sus banderas
+
+DEFAULT_LANGUAGE = 'es'  # Idioma por defecto si no se puede determinar el del usuario
+
+# Diccionario codigo_idioma -> nombre del idioma (ej. 'es' -> 'Español')
 LANGUAGE_LABELS = {item['code']: item['label'] for item in LANGUAGE_CATALOG}
+
+# Diccionario codigo_pais -> URL de la bandera (ej. 'ES' -> 'banderas del mundo/es.svg')
 COUNTRY_FLAG_URLS = {
     str(item.get('code') or '').upper(): str(item.get('flag') or '').strip()
     for item in COUNTRIES_CATALOG
@@ -456,6 +540,8 @@ COUNTRY_FLAG_URLS = {
 }
 
 
+# Alias para variantes regionales de idiomas que no tengo diferenciadas
+# (ej. 'en-US' y 'en-GB' los trato igual como 'en')
 LANGUAGE_ALIASES = {
     'es-es': 'es',
     'en-us': 'en',
@@ -868,50 +954,61 @@ def is_csrf_valid():
 def check_rate_limit(action, limit, window_seconds, extra_scope=''):
     """Aplica un rate limit simple en memoria por IP y ambito adicional."""
     now = time.time()
+    # La clave identifica la combinacion de accion + IP + scope (ej. email concreto)
     key = f'{action}:{get_client_ip()}:{extra_scope}'
     entries = rate_limit_store.get(key, [])
+    # Descartamos los timestamps que ya han caducado (fuera de la ventana de tiempo)
     entries = [stamp for stamp in entries if now - stamp < window_seconds]
     if len(entries) >= limit:
+        # Calculamos cuantos segundos faltan para que expire el intento mas antiguo
         retry_after = max(1, int(window_seconds - (now - entries[0])))
         rate_limit_store[key] = entries
-        return False, retry_after
+        return False, retry_after  # False = bloqueado
     entries.append(now)
     rate_limit_store[key] = entries
-    return True, 0
+    return True, 0  # True = permitido
 
 
+# El context_processor inyecta variables automaticamente en TODAS las plantillas.
+# Asi no necesito pasarlas manualmente en cada render_template().
 @app.context_processor
 def inject_security_helpers():
     """Hace disponible el token CSRF en todas las plantillas."""
     current_language = get_current_language()
     return {
-        'csrf_token': get_csrf_token,
-        'current_language': current_language,
-        'language_catalog': LANGUAGE_CATALOG,
-        'language_switcher_html': build_topbar_language_html(current_language),
-        'js_translations': build_client_translations(current_language),
-        't': lambda key, **kwargs: translate_text(key, current_language, **kwargs),
+        'csrf_token': get_csrf_token,              # Funcion para generar/obtener el token CSRF
+        'current_language': current_language,       # Idioma activo del usuario
+        'language_catalog': LANGUAGE_CATALOG,       # Lista de todos los idiomas disponibles
+        'language_switcher_html': build_topbar_language_html(current_language),  # HTML del selector de idioma
+        'js_translations': build_client_translations(current_language),          # Textos para el JavaScript del frontend
+        't': lambda key, **kwargs: translate_text(key, current_language, **kwargs),  # Funcion de traduccion rapida en plantillas
     }
 
 
+# Se ejecuta antes de cada peticion HTTP.
+# Marco la sesion como permanente y compruebo el token CSRF en los POST.
 @app.before_request
 def apply_basic_request_protection():
     """Aplica medidas basicas de sesion y CSRF antes de atender la peticion."""
+    # Hace que la sesion dure PERMANENT_SESSION_LIFETIME (12 horas)
     session.permanent = True
 
+    # Validamos el token CSRF en todos los POST excepto en los archivos estaticos
     if request.method == 'POST' and request.endpoint not in ('static', 'js_static'):
         if not is_csrf_valid():
-            return 'Solicitud no valida.', 400
+            return 'Solicitud no valida.', 400  # Rechazo la peticion si el token no cuadra
 
 
+# Se ejecuta despues de cada respuesta.
+# Añado cabeceras de seguridad para proteger contra ataques comunes del navegador.
 @app.after_request
 def add_security_headers(response):
     """Endurece las respuestas con cabeceras de seguridad razonables."""
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['X-Frame-Options'] = 'DENY'
-    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
-    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+    response.headers['X-Content-Type-Options'] = 'nosniff'          # Evita MIME sniffing
+    response.headers['X-Frame-Options'] = 'DENY'                    # Evita que la pagina se cargue en un iframe (clickjacking)
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'  # Controla el header Referer
+    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'  # Deshabilito APIs del navegador que no uso
+    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'  # Aislamiento entre pestañas
     return response
 
 
@@ -931,6 +1028,8 @@ def verify_email_verification_token(token):
     return user, None
 
 
+# REGISTRO DE ACTIVIDAD
+
 def log_activity(user_id, action, detail):
     """Guarda una accion para mostrarla despues en la pagina de actividad."""
     if not user_id:
@@ -938,6 +1037,12 @@ def log_activity(user_id, action, detail):
     db.session.add(ActivityLog(user_id=user_id, action=action[:120], detail=detail[:255]))
     db.session.commit()
 
+
+# SISTEMA DE EMAILS
+# Prodify envia correos a traves de SMTP usando Brevo como proveedor.
+# Las credenciales se configuran en el .env con SMTP_HOST, SMTP_USER y SMTP_PASSWORD.
+# Si no hay SMTP configurado, los enlaces se imprimen en la terminal
+# para poder usarlos en desarrollo local sin configurar nada de correo.
 
 def build_email_shell(
     title,
@@ -958,7 +1063,7 @@ def build_email_shell(
     safe_cta_url = html_escape(cta_url or '')
     safe_outro = html_escape(outro or '').replace('\n', '<br>')
     safe_detail_lines = [html_escape(line) for line in (detail_lines or []) if line]
-    year = datetime.utcnow().year
+    year = datetime.now(timezone.utc).year
     login_url = f'{public_base_url}/login'
 
     details_html = ''
@@ -1064,43 +1169,18 @@ def build_email_shell(
 
 
 def send_email_message(to_email, subject, text_content, html_content=None):
-    """Envia un email por Resend o SMTP si alguno de los dos esta configurado."""
-    if resend_api_key:
-        print(f'[Prodify] Intentando enviar email por Resend a {to_email} con asunto "{subject}"', flush=True)
-        payload = {
-            'from': resend_from,
-            'to': [to_email],
-            'subject': subject,
-            'text': text_content,
-        }
-        if html_content:
-            payload['html'] = html_content
-        request = Request(
-            'https://api.resend.com/emails',
-            data=json.dumps(payload).encode('utf-8'),
-            headers={
-                'Authorization': f'Bearer {resend_api_key}',
-                'Content-Type': 'application/json',
-                'User-Agent': 'Prodify/1.0',
-            },
-            method='POST',
+    """Envia un email por SMTP (Brevo) si esta configurado."""
+    global email_send_timestamps
+    now = time.time()
+    # Descartamos los timestamps que ya quedaron fuera de la ventana de tiempo
+    email_send_timestamps = [ts for ts in email_send_timestamps if now - ts < EMAIL_GLOBAL_WINDOW]
+    if len(email_send_timestamps) >= EMAIL_GLOBAL_LIMIT:
+        print(
+            f'[Prodify] Envio de email bloqueado (limite global de {EMAIL_GLOBAL_LIMIT} '
+            f'correos/{EMAIL_GLOBAL_WINDOW}s alcanzado). Destinatario: {to_email}',
+            flush=True
         )
-        try:
-            with urlopen(request, timeout=15) as response:
-                response.read()
-            print(f'[Prodify] Email enviado por Resend a {to_email}', flush=True)
-            return True, None
-        except HTTPError as exc:
-            error_body = exc.read().decode('utf-8', errors='replace')
-            print(f'[Prodify] Fallo Resend para {to_email}: HTTP {exc.code}: {error_body}', flush=True)
-            return False, f'Resend HTTP {exc.code}: {error_body}'
-        except URLError as exc:
-            print(f'[Prodify] Fallo Resend para {to_email}: {exc.reason}', flush=True)
-            return False, f'Resend error de red: {exc.reason}'
-        except Exception as exc:
-            print(f'[Prodify] Fallo Resend para {to_email}: {exc}', flush=True)
-            return False, f'Resend error inesperado: {exc}'
-
+        return False, 'Demasiadas solicitudes de correo. Espera un momento e intentalo de nuevo.'
     if smtp_host and smtp_user and smtp_password:
         print(
             f'[Prodify] Intentando enviar email por SMTP a {to_email} usando {smtp_host}:{smtp_port} '
@@ -1124,13 +1204,15 @@ def send_email_message(to_email, subject, text_content, html_content=None):
                 server.login(smtp_user, smtp_password)
                 server.send_message(message)
             print(f'[Prodify] Email enviado por SMTP a {to_email}', flush=True)
+            # Registramos el timestamp del envio exitoso para el contador global
+            email_send_timestamps.append(time.time())
             return True, None
         except Exception as exc:
             print(f'[Prodify] Fallo SMTP para {to_email}: {exc}', flush=True)
             return False, f'SMTP error: {exc}'
 
     print('[Prodify] No hay proveedor de correo configurado para enviar emails.', flush=True)
-    return False, 'No hay servicio de correo configurado. Configura RESEND_API_KEY o SMTP_HOST/SMTP_USER/SMTP_PASSWORD.'
+    return False, 'No hay servicio de correo configurado. Configura SMTP_HOST, SMTP_USER y SMTP_PASSWORD en el .env.'
 
 
 def send_password_reset_email(user):
@@ -1139,7 +1221,7 @@ def send_password_reset_email(user):
     reset_url = f'{public_base_url}/reset-password/{token}'
     print(f'[Prodify] Preparando recuperacion para {user.email}', flush=True)
 
-    if not (resend_api_key or (smtp_host and smtp_user and smtp_password)):
+    if not (smtp_host and smtp_user and smtp_password):
         print(f'[Prodify] Enlace de recuperacion para {user.email}: {reset_url}')
         return False, reset_url
 
@@ -1177,7 +1259,7 @@ def send_verification_email(user):
     verify_url = url_for('verify_email', token=token, _external=True)
     print(f'[Prodify] Preparando verificacion para {user.email}', flush=True)
 
-    if not (resend_api_key or (smtp_host and smtp_user and smtp_password)):
+    if not (smtp_host and smtp_user and smtp_password):
         print(f'[Prodify] Enlace de verificacion para {user.email}: {verify_url}')
         return False, verify_url
 
@@ -1212,8 +1294,8 @@ def send_verified_confirmation_email(user):
     """Envia un correo confirmando que la cuenta ya ha quedado activada."""
     print(f'[Prodify] Preparando confirmacion de cuenta verificada para {user.email}', flush=True)
 
-    if not (resend_api_key or (smtp_host and smtp_user and smtp_password)):
-        print(f'[Prodify] No hay proveedor configurado para confirmar la verificacion de {user.email}', flush=True)
+    if not (smtp_host and smtp_user and smtp_password):
+        print(f'[Prodify] No hay SMTP configurado para confirmar la verificacion de {user.email}', flush=True)
         return False
 
     sent, error_detail = send_email_message(
@@ -1246,8 +1328,8 @@ def send_registration_welcome_email(user):
     """Envia un correo bonito confirmando que el registro en Prodify se ha completado."""
     print(f'[Prodify] Preparando correo de bienvenida para {user.email}', flush=True)
 
-    if not (resend_api_key or (smtp_host and smtp_user and smtp_password)):
-        print(f'[Prodify] No hay proveedor configurado para enviar bienvenida a {user.email}', flush=True)
+    if not (smtp_host and smtp_user and smtp_password):
+        print(f'[Prodify] No hay SMTP configurado para enviar bienvenida a {user.email}', flush=True)
         return False
 
     sent, error_detail = send_email_message(
@@ -1328,6 +1410,12 @@ def get_user_display_data(user, profile):
     }
 
 
+# FUNCIONES DE CONTROL DE ACCESO Y PERMISOS
+# El sistema de roles funciona en dos niveles:
+#   - Nivel espacio: owner > admin > editor > lector
+#   - Nivel tablero: mismo orden, pero aplicado solo a ese tablero
+# El rol efectivo de un usuario en un tablero es el mayor de los dos.
+
 def get_accessible_workspaces(user_id):
     """Devuelve los espacios accesibles por el usuario y el rol que tiene en cada uno."""
     owned_workspaces = Workspace.query.filter_by(user_id=user_id).order_by(Workspace.created_at.asc()).all()
@@ -1354,7 +1442,7 @@ def get_accessible_workspaces(user_id):
             workspaces_by_id[workspace.id] = workspace
 
     workspaces = list(workspaces_by_id.values())
-    workspaces.sort(key=lambda item: item.created_at or datetime.utcnow())
+    workspaces.sort(key=lambda item: item.created_at or datetime.now(timezone.utc))
     return workspaces, roles_by_workspace
 
 
@@ -1371,14 +1459,17 @@ def get_workspace_role(workspace, user_id):
     return None
 
 
+# Cualquier rol valido puede ver el espacio
 def can_view_workspace(role):
     return role in ('owner', 'admin', 'editor', 'lector')
 
 
+# Solo owner y admin pueden renombrar el espacio o gestionar sus miembros
 def can_manage_workspace(role):
     return role in ('owner', 'admin')
 
 
+# Solo owner y admin pueden crear/borrar tableros
 def can_manage_board(role):
     return role in ('owner', 'admin')
 
@@ -1387,9 +1478,11 @@ def can_edit_board_content(role):
     """Permite editar contenido del tablero si tienes rol suficiente. True por defecto para debug."""
     if role is None:
         return True  # Debug: Si no hay rol, permite editar
+    # Editor, admin y owner pueden crear/mover/borrar columnas y tarjetas
     return role in ('owner', 'admin', 'editor')
 
 
+# El lector solo puede ver el tablero, no modificar nada
 def can_view_board(role):
     return role in ('owner', 'admin', 'editor', 'lector')
 
@@ -1535,6 +1628,12 @@ def get_text_initial(text):
         return ''
     return text[0].upper()
 
+
+# FUNCIONES CONSTRUCTORAS DE HTML
+# Genero fragmentos de HTML en Python en lugar de usar macros Jinja2 para
+# tener mayor control sobre el escape seguro de los datos y poder reutilizar
+# la logica en varios endpoints sin duplicar codigo de plantilla.
+# Todas estas funciones devuelven objetos Markup.
 
 def build_side_nav_html(active_page, language_code=None):
     """Genera el menu lateral principal."""
@@ -1880,56 +1979,69 @@ def build_board_settings_panel_html(board, columns, cards_by_column, workspace_r
         '</form>',
         '</section>',
         '<section class="board-settings-section">',
-        f'<div class="board-settings-section-head"><div><strong>{escape(tr("board.settings_permissions"))}</strong><span>{escape(tr("board.settings_permissions_help"))}</span></div></div>',
+        f'<div class="board-settings-section-head"><div><strong>{escape(tr("board.settings_permissions"))}</strong><span>{escape(tr("board.settings_permissions_help"))}</span></div><span class="bm-count-badge">{len(board_members) + 1}</span></div>',
         '<div class="board-permissions-list">',
+    ])
+    # Fila del propietario del workspace
+    owner_initials = (owner_display["user_name"][:2] if owner_display["user_name"] else "??").upper()
+    html.extend([
         '<div class="board-member-row board-owner-row">',
+        f'<div class="bm-avatar bm-avatar--owner">{escape(owner_initials)}</div>',
         f'<div class="board-member-copy"><strong>{escape(owner_display["user_name"])}</strong><span>{escape(owner.email if owner else "")}</span></div>',
-        f'<span class="workspace-role-label member-role-owner">{escape(get_role_label("owner"))}</span>',
+        f'<span class="bm-role-chip bm-role-chip--owner">{escape(get_role_label("owner"))}</span>',
         '</div>',
     ])
     for membership in board_members:
         member_user = db.session.get(User, membership.user_id)
         if not member_user:
             continue
+        username = member_user.email.split('@')[0]
+        initials = username[:2].upper()
         html.append('<div class="board-member-row">')
-        html.append(f'<div class="board-member-copy"><strong>{escape(member_user.email.split("@")[0])}</strong><span>{escape(member_user.email)}</span></div>')
+        html.append(f'<div class="bm-avatar">{escape(initials)}</div>')
+        html.append(f'<div class="board-member-copy"><strong>{escape(username)}</strong><span>{escape(member_user.email)}</span></div>')
         html.append('<div class="board-member-actions">')
         if can_manage:
             html.append(f'<form action="{escape(url_for("update_board_member_role", board_id=board.id, member_id=membership.id))}" method="POST" class="board-member-role-form"><select name="role" class="board-settings-select">')
             for role in BOARD_MEMBER_ROLES:
                 selected = ' selected' if role == membership.role else ''
                 html.append(f'<option value="{escape(role)}"{selected}>{escape(get_role_label(role))}</option>')
-            html.append(f'</select><button type="submit" class="settings-action-btn compact">{escape(tr("workspace.save"))}</button></form>')
-            html.append(f'<form action="{escape(url_for("remove_board_member", board_id=board.id, member_id=membership.id))}" method="POST" class="inline-form"><button type="submit" class="workspace-delete-btn btn btn-sm">{escape(tr("common.delete"))}</button></form>')
+            html.append(f'</select><button type="submit" class="bm-save-btn">{escape(tr("workspace.save"))}</button></form>')
+            html.append(f'<form action="{escape(url_for("remove_board_member", board_id=board.id, member_id=membership.id))}" method="POST" class="inline-form"><button type="submit" class="bm-remove-btn" title="{escape(tr("common.delete"))}">✕</button></form>')
         else:
-            html.append(f'<span class="workspace-role-label">{escape(get_role_label(membership.role))}</span>')
+            role_cls = f'bm-role-chip--{membership.role}' if membership.role in BOARD_MEMBER_ROLES else ''
+            html.append(f'<span class="bm-role-chip {escape(role_cls)}">{escape(get_role_label(membership.role))}</span>')
         html.append('</div></div>')
     html.extend([
         '</div>',
-        f'<form class="board-settings-form board-invite-form" action="{escape(url_for("invite_board_member", board_id=board.id))}" method="POST">',
-        '<div class="board-invite-grid">',
-        f'<input type="email" name="member_email" class="board-settings-input" placeholder="{escape(tr("board.invite_email_placeholder"))}" required>',
-        '<select name="role" class="board-settings-select">',
+        # Formulario de invitación con diseño apilado
+        f'<div class="bm-invite-box">',
+        f'<strong class="bm-invite-title">&#x2709; {escape(tr("board.invite_title"))}</strong>',
+        f'<form class="bm-invite-form" action="{escape(url_for("invite_board_member", board_id=board.id))}" method="POST">',
+        f'<input type="email" name="member_email" class="bm-invite-input" placeholder="{escape(tr("board.invite_email_placeholder"))}" {"disabled" if not can_manage else ""} required>',
+        f'<select name="role" class="bm-invite-select" {"disabled" if not can_manage else ""}>',
     ])
     for role in BOARD_MEMBER_ROLES:
         html.append(f'<option value="{escape(role)}">{escape(get_role_label(role))}</option>')
     html.extend([
         '</select>',
-        f'<button type="submit" class="btn-primary" {"disabled" if not can_manage else ""}>{escape(tr("board.invite_btn"))}</button>',
-        '</div>',
+        f'<button type="submit" class="bm-invite-btn" {"disabled" if not can_manage else ""}>{escape(tr("board.invite_btn"))}</button>',
         '</form>',
+        '</div>',
     ])
     if pending_invitations:
         html.extend([
-            f'<div class="board-settings-section-head"><div><strong>{escape(tr("board.pending_invitations"))}</strong><span>{escape(tr("board.pending_invitations_help"))}</span></div></div>',
+            f'<div class="bm-pending-header"><span>&#x23F3; {escape(tr("board.pending_invitations"))}</span><span class="bm-count-badge">{len(pending_invitations)}</span></div>',
             '<div class="board-pending-list">',
         ])
         for invitation in pending_invitations:
-            html.append('<div class="board-member-row">')
-            html.append(f'<div class="board-member-copy"><strong>{escape(invitation.email)}</strong><span>{escape(get_role_label(invitation.role))}</span></div>')
+            inv_initials = invitation.email[:2].upper()
+            html.append('<div class="board-member-row board-pending-row">')
+            html.append(f'<div class="bm-avatar bm-avatar--pending">{escape(inv_initials)}</div>')
+            html.append(f'<div class="board-member-copy"><strong>{escape(invitation.email)}</strong><span class="bm-role-chip bm-role-chip--{escape(invitation.role)}">{escape(get_role_label(invitation.role))}</span></div>')
             html.append('<div class="board-member-actions">')
             if can_manage:
-                html.append(f'<form action="{escape(url_for("delete_board_invitation", board_id=board.id, invitation_id=invitation.id))}" method="POST" class="inline-form"><button type="submit" class="workspace-delete-btn btn btn-sm">{escape(tr("common.delete"))}</button></form>')
+                html.append(f'<form action="{escape(url_for("delete_board_invitation", board_id=board.id, invitation_id=invitation.id))}" method="POST" class="inline-form"><button type="submit" class="bm-remove-btn" title="{escape(tr("common.delete"))}">✕</button></form>')
             html.append('</div></div>')
         html.append('</div>')
     html.extend([
@@ -2023,6 +2135,12 @@ def build_auth_message_html(message, tone='error'):
 
 
 
+# GESTION DEL ESQUEMA EN TIEMPO DE EJECUCION
+# En lugar de usar migraciones externas (como Alembic), gestioné yo mismo
+# la evolucion del esquema de la BD. Estas funciones añaden columnas que
+# faltan y corrigen foreign keys para garantizar el borrado en cascada.
+# Se ejecutan una sola vez al arrancar la aplicacion.
+
 def ensure_auth_schema():
     """Asegura que la tabla de usuarios tenga las columnas nuevas de verificacion."""
     inspector = db.inspect(db.engine)
@@ -2112,12 +2230,17 @@ def ensure_runtime_schema():
     """Prepara el esquema al cargar la app, tambien fuera de __main__."""
     global _schema_ready
     if _schema_ready:
-        return
+        return  # Ya se ejecuto antes, no lo repetimos
 
     with app.app_context():
+        # Creamos la carpeta de avatares si no existe
         os.makedirs(avatar_upload_dir, exist_ok=True)
+        # create_all crea las tablas que no existan todavia (no borra las existentes)
         db.create_all()
+        # Añadimos columnas nuevas que falten en bases de datos antiguas
         ensure_auth_schema()
+        # Garantizamos que todas las relaciones usen ON DELETE CASCADE
+        # para que al borrar un usuario se borren automaticamente todos sus datos
         ensure_cascade_delete('user_profiles', 'user_id', 'users', 'fk_user_profiles_user_id')
         ensure_cascade_delete('workspaces', 'user_id', 'users', 'fk_workspaces_user_id')
         ensure_cascade_delete('workspace_members', 'workspace_id', 'workspaces', 'fk_workspace_members_workspace_id')
@@ -2129,6 +2252,8 @@ def ensure_runtime_schema():
         _schema_ready = True
 
 
+# Ejecutamos la preparacion del esquema al importar el modulo (no solo al arrancar con python app.py)
+# Esto es necesario para que funcione correctamente con servidores WSGI como Gunicorn
 ensure_runtime_schema()
 
 
@@ -2196,7 +2321,7 @@ def build_account_content_html(page_key, page_title, page_description, user_name
         timeline_html = []
         activity_pagination = activity_pagination or {}
         recent_total = len(activities)
-        week_cutoff = datetime.utcnow() - timedelta(days=7)
+        week_cutoff = datetime.now(timezone.utc) - timedelta(days=7)
         weekly_total = 0
         board_flow_total = 0
         account_total = 0
@@ -2214,7 +2339,7 @@ def build_account_content_html(page_key, page_title, page_description, user_name
 
         if activities:
             for item in activities:
-                created_at = item.created_at or datetime.utcnow()
+                created_at = item.created_at or datetime.now(timezone.utc)
                 created_label = created_at.strftime("%d/%m %H:%M")
                 active_days.add(created_at.date())
                 if created_at >= week_cutoff:
@@ -2396,6 +2521,13 @@ def build_account_content_html(page_key, page_title, page_description, user_name
     hero.append('</div>')
     return Markup(''.join(hero))
 
+
+# RUTAS DE LA APLICACION (ENDPOINTS)
+# Cada funcion con @app.route es un endpoint que responde a una URL concreta.
+# La mayoria requieren sesion iniciada: si no hay user_id en la sesion,
+# get_user_or_redirect() devuelve una redireccion al login.
+# Los endpoints POST suelen modificar datos en la BD y luego redirigen
+# (patron POST-Redirect-GET para evitar reenvios al refrescar).
 
 @app.route('/')
 def home():
@@ -2723,6 +2855,8 @@ def templates_page():
     )
 
 
+# Metadatos de cada subpagina de cuenta: clave de titulo y descripcion traducibles.
+# Reutilizo una sola funcion render_account_page() para todas estas vistas.
 ACCOUNT_PAGE_META = {
     'account': ('page.account.title', 'page.account.description'),
     'profile': ('page.profile.title', 'page.profile.description'),
@@ -2740,6 +2874,7 @@ def render_account_page(page_key):
         return redirect_response
 
     current_language = get_current_language(user)
+    # Obtenemos el titulo y descripcion de la pagina a partir del diccionario de metadatos
     title_key, description_key = ACCOUNT_PAGE_META.get(page_key, ACCOUNT_PAGE_META['account'])
     title = translate_text(title_key, current_language)
     description = translate_text(description_key, current_language)
@@ -2752,19 +2887,20 @@ def render_account_page(page_key):
     activity_pagination = {}
     notice = sanitize_text(request.args.get('notice') or '', 160)
     notice_tone = sanitize_text(request.args.get('tone') or 'info', 20)
-    # Solo se cargan actividades cuando estamos en la pagina correspondiente.
+    # Solo cargamos el historial cuando estamos en la pagina de actividad (no en las demas)
     if page_key == 'activity':
         per_page = 10
         page = request.args.get('page', 1, type=int) or 1
         page = max(page, 1)
         base_query = ActivityLog.query.filter_by(user_id=user.id)
         total_items = base_query.count()
+        # Calculamos el total de paginas con division entera redondeada hacia arriba
         total_pages = max((total_items + per_page - 1) // per_page, 1)
         page = min(page, total_pages)
         offset = (page - 1) * per_page
         activities = (
             base_query
-            .order_by(ActivityLog.created_at.desc())
+            .order_by(ActivityLog.created_at.desc())  # Las mas recientes primero
             .offset(offset)
             .limit(per_page)
             .all()
@@ -2812,6 +2948,10 @@ def render_account_page(page_key):
         ),
     )
 
+
+# --- PAGINAS DE CUENTA ---
+# Todas estas rutas reutilizan render_account_page() con una clave distinta
+# para diferenciar que contenido mostrar dentro de la misma plantilla.
 
 @app.route('/cuenta')
 def account_page():
@@ -3172,25 +3312,30 @@ def invite_board_member(board_id):
     if not is_valid_email_address(email):
         return redirect(url_for('board_view', board_id=board.id))
 
+    # Si el usuario ya existe en la plataforma, le añadimos directamente al tablero
     existing_user = User.query.filter(db.func.lower(User.email) == email).first()
     if existing_user:
         membership = BoardMember.query.filter_by(board_id=board.id, user_id=existing_user.id).first()
         if membership:
+            # Si ya era miembro, actualizamos su rol
             membership.role = role
         else:
             db.session.add(BoardMember(board_id=board.id, user_id=existing_user.id, role=role))
 
+    # En cualquier caso creamos (o renovamos) la invitacion por email
+    # para que el usuario reciba el enlace con el que puede acceder directamente
     invitation = BoardInvitation.query.filter_by(board_id=board.id, email=email, accepted_at=None).first()
     if not invitation:
         invitation = BoardInvitation(
             board_id=board.id,
             email=email,
             role=role,
-            token=secrets.token_urlsafe(32),
+            token=secrets.token_urlsafe(32),  # Token unico e impredecible para el enlace
             invited_by_user_id=user.id,
         )
         db.session.add(invitation)
     else:
+        # Si ya habia una invitacion pendiente, renovamos el token y el rol
         invitation.role = role
         invitation.token = secrets.token_urlsafe(32)
         invitation.invited_by_user_id = user.id
@@ -3208,23 +3353,29 @@ def accept_board_invitation(token):
     if not invitation:
         return redirect(url_for('home'))
 
+    # Guardamos la URL de destino para poder redirigir despues del login/registro
     target_url = url_for('accept_board_invitation', token=token)
     logged_user = db.session.get(User, session.get('user_id')) if session.get('user_id') else None
     if not logged_user:
+        # Si no hay sesion, comprobamos si el invitado ya tiene cuenta
         target_user = User.query.filter(db.func.lower(User.email) == invitation.email.lower()).first()
         if target_user:
+            # Si ya existe, le mandamos al login con el email prefiltrado y la URL de aceptacion como next
             return redirect(url_for('login', next=target_url, email=invitation.email))
+        # Si no existe, le mandamos a registrarse con el email prefiltrado
         return redirect(url_for('register', next=target_url, email=invitation.email))
 
+    # Si hay sesion con un email diferente al de la invitacion, pedimos que use la cuenta correcta
     if logged_user.email.lower() != invitation.email.lower():
         return redirect(url_for('login', next=target_url, email=invitation.email))
 
+    # Todo correcto: creamos o actualizamos la membresia y marcamos la invitacion como aceptada
     membership = BoardMember.query.filter_by(board_id=invitation.board_id, user_id=logged_user.id).first()
     if membership:
         membership.role = invitation.role
     else:
         db.session.add(BoardMember(board_id=invitation.board_id, user_id=logged_user.id, role=invitation.role))
-    invitation.accepted_at = datetime.utcnow()
+    invitation.accepted_at = datetime.now(timezone.utc)
     db.session.commit()
     return redirect(url_for('board_view', board_id=invitation.board_id))
 
@@ -3385,6 +3536,7 @@ def reorder_columns(board_id):
     if not can_edit_board_content(workspace_role):
         return ('', 403)
 
+    # El frontend envia los IDs de las columnas separados por comas en el nuevo orden
     raw_order = request.form.get('column_order') or ''
     ordered_ids = []
     for value in raw_order.split(','):
@@ -3395,9 +3547,11 @@ def reorder_columns(board_id):
 
     columns = BoardColumn.query.filter_by(board_id=board.id).order_by(BoardColumn.position.asc(), BoardColumn.id.asc()).all()
     current_ids = [column.id for column in columns]
+    # Verificamos que el orden recibido contiene exactamente los mismos IDs que hay en la BD
     if not ordered_ids or sorted(ordered_ids) != sorted(current_ids):
         return ('', 400)
 
+    # Asignamos la nueva posicion a cada columna segun el orden recibido
     for position, column_id in enumerate(ordered_ids):
         for column in columns:
             if column.id == column_id:
@@ -3406,7 +3560,7 @@ def reorder_columns(board_id):
 
     db.session.commit()
     log_activity(user.id, 'activity.columns_reordered', f'Se reorganizaron las columnas en "{board.name}"')
-    return ('', 204)
+    return ('', 204)  # 204 No Content: exito sin cuerpo de respuesta
 
 
 @app.route('/columns/<int:column_id>/cards/create', methods=['POST'])
@@ -3449,6 +3603,8 @@ def delete_column(column_id):
 
     column_title = column.title
     board_id = column.board_id
+    # Borramos todas las tarjetas de la columna antes de borrar la columna
+    # (aunque la FK tiene CASCADE, lo hago explicitamente para mayor claridad)
     Card.query.filter_by(column_id=column.id).delete(synchronize_session=False)
     db.session.delete(column)
     db.session.commit()
@@ -3483,11 +3639,12 @@ def move_card(card_id):
         return ('', 403)
 
     card_title = card.title
+    # Actualizamos el column_id de la tarjeta para moverla a la nueva columna
     card.column_id = target_column_id
     db.session.commit()
     if target_board:
         log_activity(user.id, 'activity.card_moved', f'"{card_title}" a "{target_column.title}" en "{target_board.name}"')
-    return ('', 204)
+    return ('', 204)  # El frontend maneja visualmente el movimiento; solo confirmamos con 204
 
 
 @app.route('/cards/<int:card_id>/delete', methods=['POST'])
@@ -3516,14 +3673,18 @@ def delete_card(card_id):
         return redirect(url_for('board_view', board_id=board_id))
     return redirect(url_for('home'))
 
+# --- AUTENTICACION ---
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Muestra el login y valida las credenciales enviadas por el formulario."""
+    # next_url permite redirigir al usuario a la pagina que intentaba abrir antes del login
     next_url = sanitize_text(request.values.get('next') or '', 240)
     prefilled_email = sanitize_text((request.values.get('email') or '').lower(), 100)
     if request.method == 'POST':
         email = sanitize_text((request.form.get('email') or '').lower(), 100)
         password = request.form.get('password') or ''
+        # Maximo 8 intentos en 10 minutos por IP + email para frenar ataques de fuerza bruta
         allowed, retry_after = check_rate_limit('login', 8, 600, email)
         if not allowed:
             return render_template(
@@ -3599,6 +3760,7 @@ def register():
     next_url = sanitize_text(request.values.get('next') or '', 240)
     prefilled_email = sanitize_text((request.values.get('email') or '').lower(), 100)
 
+    # Funcion interna para no repetir la llamada a render_template en cada validacion
     def render_register_error(message, email_val='', lang='es'):
         return render_template(
             'register.html',
@@ -3614,6 +3776,7 @@ def register():
         confirm_password = request.form.get('confirm_password') or ''
         display_name = sanitize_text(request.form.get('display_name') or '', 80)
         preferred_language = normalize_language_code(request.form.get('preferred_language') or 'es')
+        # Maximo 5 registros por hora desde la misma IP + email (evita spam de cuentas)
         allowed, retry_after = check_rate_limit('register', 5, 3600, email)
         if not allowed:
             return render_register_error(build_rate_limit_message(retry_after), email, preferred_language)
@@ -3623,36 +3786,44 @@ def register():
             return render_register_error('Introduce un correo electronico valido.', email, preferred_language)
         if password != confirm_password:
             return render_register_error('Las contraseñas no coinciden.', email, preferred_language)
+        # Comprobamos las reglas de seguridad de la contrasena (mayuscula, numero, especial...)
         password_error = validate_password_strength(password)
         if password_error:
             return render_register_error(password_error, email, preferred_language)
+        # Verificamos que el email no este ya en uso antes de crear la cuenta
         if User.query.filter_by(email=email).first():
             return render_register_error('Ese correo ya esta registrado.', email, preferred_language)
 
+        # Creamos el usuario con la contrasena ya hasheada (nunca la guardamos en plano)
         user = User(
             email=email,
             password=generate_password_hash(password),
             email_verified=True,
-            verified_at=datetime.utcnow(),
+            verified_at=datetime.now(timezone.utc),
             has_seen_inicio=False,
             preferred_language=preferred_language,
         )
         db.session.add(user)
+        # flush() sin commit() para obtener el user.id antes de crear el perfil
         db.session.flush()
 
+        # Si el usuario no puso nombre, generamos uno a partir del email (parte antes de '@')
         final_name = display_name[:80] if display_name else email.split('@')[0].replace('.', ' ').strip().title()
         if not final_name:
             final_name = 'Usuario'
         db.session.add(UserProfile(user_id=user.id, display_name=final_name))
         db.session.commit()
+        # Enviamos el correo de bienvenida (si falla no bloqueamos el registro)
         sent = send_registration_welcome_email(user)
         log_activity(user.id, 'activity.registered', 'Cuenta creada correctamente')
         if not sent:
             print(f'[Prodify] No se pudo enviar el correo de bienvenida a {user.email}')
+        # Si habia un next_url valido, iniciamos sesion directamente
         if next_url.startswith('/'):
             session['user_id'] = user.id
             session['preferred_language'] = normalize_language_code(user.preferred_language)
             return redirect(next_url)
+        # Si no, redirigimos al login con un mensaje de exito
         return redirect(url_for('login', registered=1))
 
     return render_template(
@@ -3748,10 +3919,11 @@ def reset_password(token):
                 message_html=build_auth_message_html(message),
             )
 
+        # Guardamos la nueva contrasena hasheada y redirigimos al login con mensaje de exito
         user.password = generate_password_hash(password)
         db.session.commit()
         log_activity(user.id, 'activity.password_updated', 'La contrasena se ha cambiado desde recuperacion')
-        return redirect(url_for('login', reset=1))
+        return redirect(url_for('login', reset=1))  # El parametro reset=1 muestra un aviso en el login
 
     return render_template(
         'reset_password.html',
@@ -3774,7 +3946,7 @@ def verify_email(token):
 
     if not user.email_verified:
         user.email_verified = True
-        user.verified_at = datetime.utcnow()
+        user.verified_at = datetime.now(timezone.utc)
         db.session.commit()
         log_activity(user.id, 'activity.email_verified', 'La cuenta se ha activado correctamente')
         send_verified_confirmation_email(user)
@@ -3832,6 +4004,7 @@ def resend_verification():
 @app.route('/logout', methods=['POST', 'GET'])
 def logout():
     """Cierra la sesion actual del usuario."""
+    # Elimino las claves de la sesion para invalidarla
     session.pop('user_id', None)
     session.pop('preferred_language', None)
     return redirect(url_for('login'))
@@ -3850,6 +4023,7 @@ def create_workspace():
         return redirect(url_for('home'))
     background_color, cover_url = resolve_board_cover_inputs()
 
+    # Creamos el espacio y hacemos flush para obtener workspace.id antes del commit
     workspace = Workspace(user_id=user.id, name=name[:120])
     db.session.add(workspace)
     db.session.flush()
@@ -3863,7 +4037,7 @@ def create_workspace():
     db.session.add(board)
     db.session.flush()
 
-    # Estas son las columnas iniciales del tablero principal.
+    # Creamos tres columnas por defecto para que el tablero sea funcional desde el principio
     titles = ["Pendiente", "En progreso", "Listo"]
     for i in range(len(titles)):
         db.session.add(BoardColumn(board_id=board.id, title=titles[i], position=i))
@@ -3871,6 +4045,7 @@ def create_workspace():
     db.session.commit()
     log_activity(user.id, 'activity.workspace_created', f'"{workspace.name}" con tablero principal')
     redirect_url = url_for('board_view', board_id=board.id)
+    # Si la peticion viene del JavaScript del frontend (fetch), devolvemos JSON en lugar de redirigir
     if request.headers.get('X-Requested-With') == 'fetch':
         return {'redirect_url': redirect_url}
     return redirect(redirect_url)
@@ -4017,12 +4192,14 @@ def update_account():
     avatar_file = request.files.get('avatar_file')
     if avatar_file and avatar_file.filename:
         if is_allowed_avatar_filename(avatar_file.filename):
+            # Limpiamos el nombre original y generamos uno unico con un token para evitar colisiones
             safe_name = secure_filename(avatar_file.filename)
             extension = safe_name.rsplit('.', 1)[1].lower()
             stored_name = f'user_{user.id}_{secrets.token_hex(8)}.{extension}'
             os.makedirs(avatar_upload_dir, exist_ok=True)
             avatar_file.save(os.path.join(avatar_upload_dir, stored_name))
 
+            # Borramos el avatar anterior del disco para no acumular archivos huerfanos
             if profile.avatar_url:
                 previous_name = profile.avatar_url.rsplit('/', 1)[-1]
                 previous_path = os.path.join(avatar_upload_dir, previous_name)
@@ -4030,8 +4207,9 @@ def update_account():
                     try:
                         os.remove(previous_path)
                     except OSError:
-                        pass
+                        pass  # Si no se puede borrar, no es un error critico
 
+            # Guardamos la URL relativa que Flask puede resolver con url_for()
             profile.avatar_url = url_for('uploaded_avatar', filename=stored_name)
 
     db.session.commit()
@@ -4039,7 +4217,9 @@ def update_account():
     return redirect(url_for('profile_page'))
 
 
+# ARRANQUE DEL SERVIDOR DE DESARROLLO
+# Este bloque solo se ejecuta cuando lanzamos el archivo directamente con py app.py
 if __name__ == '__main__':
     ensure_runtime_schema()
-    # Arranca el servidor local de desarrollo.
+    # Modo debug=True recarga el servidor automaticamente al guardar cambios.
     app.run(host='127.0.0.1', port=5000, debug=True)

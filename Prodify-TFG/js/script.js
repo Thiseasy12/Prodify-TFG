@@ -1,13 +1,27 @@
-﻿var i18n = (function () {
-    var el = document.getElementById('i18nData');
+/*
+ * SISTEMA DE TRADUCCIONES (i18n)
+ * Flask inyecta un <script id="i18nData"> con un JSON de textos traducidos
+ * al idioma del usuario. Lo leemos aqui para usarlo en los dialogos JS.
+ */
+
+const i18n = (function () {
+    const el = document.getElementById('i18nData');
     if (!el) return {};
     try { return JSON.parse(el.textContent); } catch (_) { return {}; }
 }());
 
+/*
+ * Funcion de traduccion rapida: busca la clave en el diccionario i18n,
+ * si no la encuentra devuelve el texto de fallback directamente.
+ */
 function t(key, fallback) {
     return i18n[key] !== undefined ? i18n[key] : fallback;
 }
 
+/*
+ * Devuelve los colores del tema actual para que SweetAlert2 se adapte
+ * al modo claro u oscuro de la interfaz.
+ */
 function getSwalTheme() {
     const isLight = document.body.classList.contains('theme-light');
     return {
@@ -17,19 +31,33 @@ function getSwalTheme() {
     };
 }
 
+/*
+ * Todo el codigo que necesita el DOM lo envuelvo en DOMContentLoaded
+ * para asegurarme de que los elementos ya existen cuando los busco.
+ */
 document.addEventListener('DOMContentLoaded', function () {
-    /*
-     * Cojo los elementos principales cuando ya se ha cargado el DOM.
-     */
+
+    /* Referencias a elementos globales que se usan en varios bloques */
     const body = document.body;
     const themeButton = document.getElementById('themeToggle');
     const savedTheme = window.localStorage.getItem('prodify-theme');
+
+    /* Leemos el token CSRF del meta tag que Flask inyecta en cada pagina */
     const csrfMeta = document.querySelector('meta[name="csrf-token"]');
     const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+
+    /* =============================================================================
+     * INYECCION DE TOKEN CSRF EN FORMULARIOS
+     * Flask rechaza los POST sin el token CSRF. Lo añado automaticamente
+     * a todos los formularios POST de la pagina para no tener que ponerlo
+     * a mano en cada plantilla HTML.
+     * ============================================================================= */
 
     if (csrfToken) {
         const postForms = document.querySelectorAll('form[method="POST"], form[method="post"]');
         for (let f = 0; f < postForms.length; f += 1) {
+            /* Si el formulario ya tiene el campo (lo puso la plantilla), lo saltamos */
             if (postForms[f].querySelector('input[name="csrf_token"]')) continue;
             const tokenInput = document.createElement('input');
             tokenInput.type = 'hidden';
@@ -38,6 +66,14 @@ document.addEventListener('DOMContentLoaded', function () {
             postForms[f].appendChild(tokenInput);
         }
     }
+
+
+    /* =============================================================================
+     * SELECTOR DE IDIOMA DE LA BARRA SUPERIOR
+     * El selector es un dropdown personalizado (no un <select> nativo) para
+     * poder mostrar banderas. Al elegir un idioma envia el formulario oculto
+     * que llama a Flask para guardar la preferencia del usuario.
+     * ============================================================================= */
 
     const languageForms = document.querySelectorAll('.js-language-form');
     for (let lf = 0; lf < languageForms.length; lf += 1) {
@@ -50,38 +86,42 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!dropdown || !trigger || !menu || !hiddenInput || !options.length) continue;
 
+        /* Al hacer clic en el boton, cierro todos los menus abiertos y abro este */
         trigger.addEventListener('click', function () {
             const isOpen = !menu.hasAttribute('hidden');
+            /* Primero cierro todos los selectores de idioma que puedan estar abiertos */
             const allMenus = document.querySelectorAll('.topbar-language-menu');
             const allTriggers = document.querySelectorAll('.js-language-trigger');
-
             for (let index = 0; index < allMenus.length; index += 1) {
                 allMenus[index].setAttribute('hidden', 'hidden');
             }
             for (let index = 0; index < allTriggers.length; index += 1) {
                 allTriggers[index].setAttribute('aria-expanded', 'false');
             }
-
+            /* Luego abro este si estaba cerrado */
             if (!isOpen) {
                 menu.removeAttribute('hidden');
                 trigger.setAttribute('aria-expanded', 'true');
             }
         });
 
+        /* Al elegir una opcion, actualizo el campo oculto y envio el formulario */
         for (let optionIndex = 0; optionIndex < options.length; optionIndex += 1) {
             options[optionIndex].addEventListener('click', function () {
                 const selectedValue = this.getAttribute('data-language-value') || '';
+                /* Si ya esta seleccionado ese idioma, solo cierro el menu */
                 if (!selectedValue || selectedValue === hiddenInput.value) {
                     menu.setAttribute('hidden', 'hidden');
                     trigger.setAttribute('aria-expanded', 'false');
                     return;
                 }
                 hiddenInput.value = selectedValue;
-                form.submit();
+                form.submit(); /* El POST llama a /cuenta/language en Flask */
             });
         }
     }
 
+    /* Cierre del selector de idioma al hacer clic fuera de el */
     document.addEventListener('click', function (event) {
         for (let lf = 0; lf < languageForms.length; lf += 1) {
             const form = languageForms[lf];
@@ -96,16 +136,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    /*
-     * Si el usuario habia guardado el tema claro, lo aplico al entrar.
-     */
+
+    /* =============================================================================
+     * TEMA CLARO / OSCURO
+     * El tema se guarda en localStorage para que persista entre sesiones sin
+     * necesidad de guardarlo en la base de datos.
+     * ============================================================================= */
+
+    /* Aplicamos el tema guardado antes de que el usuario interactue */
     if (savedTheme === 'light') {
         body.classList.add('theme-light');
     }
 
-    /*
-     * Cambio el icono del boton segun el tema activo.
-     */
+    /* Textos del boton de cambio de tema en cada idioma soportado */
     const themeToggleLabels = {
         es: { dark: 'Activar modo oscuro', light: 'Activar modo claro' },
         en: { dark: 'Turn on dark mode', light: 'Turn on light mode' },
@@ -114,11 +157,13 @@ document.addEventListener('DOMContentLoaded', function () {
         it: { dark: 'Attiva la modalita scura', light: 'Attiva la modalita chiara' }
     };
 
+    /* Leemos el idioma del atributo lang del <html> para elegir las etiquetas */
     function getThemeLabels() {
         const htmlLang = (document.documentElement.getAttribute('lang') || 'es').trim();
         return themeToggleLabels[htmlLang] || themeToggleLabels[htmlLang.split('-')[0]] || themeToggleLabels.es;
     }
 
+    /* Actualiza el icono y aria-label del boton segun el tema activo */
     function updateThemeText() {
         if (!themeButton) return;
         const labels = getThemeLabels();
@@ -132,11 +177,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (themeButton) {
-        updateThemeText();
+        updateThemeText(); /* Estado inicial al cargar la pagina */
         themeButton.addEventListener('click', function () {
-            /*
-             * Alterno el tema y lo guardo para futuras visitas.
-             */
+            /* Alterno la clase CSS y guardo la preferencia en localStorage */
             body.classList.toggle('theme-light');
             if (body.classList.contains('theme-light')) {
                 window.localStorage.setItem('prodify-theme', 'light');
@@ -147,9 +190,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    /*
-     * Si hay un mensaje pendiente, lo muestro con SweetAlert.
-     */
+
+    /* =============================================================================
+     * NOTIFICACIONES TOAST
+     * Para mostrar un mensaje de exito tras un POST que redirige, guardo el texto
+     * en sessionStorage antes del redirect y lo leo aqui al cargar la nueva pagina.
+     * ============================================================================= */
+
     const pendingToast = window.sessionStorage.getItem('prodify-toast');
     if (pendingToast && window.Swal) {
         window.sessionStorage.removeItem('prodify-toast');
@@ -164,9 +211,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    /*
-     * Esto controla el menu desplegable de la cuenta.
-     */
+
+    /* =============================================================================
+     * MENU DESPLEGABLE DE CUENTA
+     * Boton en la cabecera que abre un menu con accesos rapidos al perfil,
+     * configuracion, actividad y logout.
+     * ============================================================================= */
+
     const accountButton = document.getElementById('accountToggle');
     const accountMenu = document.getElementById('accountMenu');
     if (accountButton && accountMenu) {
@@ -178,25 +229,32 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        /* Cierre al hacer clic fuera del menu */
         document.addEventListener('click', function (event) {
-            /*
-             * Si el click es fuera, cierro el menu.
-             */
             if (!accountMenu.contains(event.target) && !accountButton.contains(event.target)) {
                 accountMenu.setAttribute('hidden', 'hidden');
             }
         });
     }
 
+
+    /* =============================================================================
+     * SUBIDA DE AVATAR
+     * El input de archivo esta oculto; un boton visible actua como proxy
+     * para abrirlo. Al seleccionar un archivo mostramos el nombre elegido.
+     * ============================================================================= */
+
     const avatarFileInput = document.getElementById('avatarFileInput');
     const avatarPickerButton = document.querySelector('.js-avatar-picker');
     const avatarFileName = document.getElementById('avatarFileName');
 
     if (avatarFileInput && avatarPickerButton) {
+        /* El boton visible dispara el click del input real oculto */
         avatarPickerButton.addEventListener('click', function () {
             avatarFileInput.click();
         });
 
+        /* Mostramos el nombre del archivo seleccionado al usuario */
         avatarFileInput.addEventListener('change', function () {
             if (!avatarFileName) return;
             const file = this.files && this.files[0] ? this.files[0].name : '';
@@ -204,6 +262,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+
+    /* =============================================================================
+     * UTILIDADES COMPARTIDAS
+     * ============================================================================= */
+
+    /*
+     * Lee un bloque <script type="application/json"> del DOM y lo parsea.
+     * Lo uso para pasar datos de Python a JS sin exponer variables globales.
+     */
     function parseJsonScript(id) {
         const element = document.getElementById(id);
         if (!element || !element.textContent) return [];
@@ -214,6 +281,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    /* Escapa caracteres HTML peligrosos para insertar texto en innerHTML de forma segura */
     function escapeHtml(text) {
         return String(text || '')
             .replace(/&/g, '&amp;')
@@ -222,6 +290,18 @@ document.addEventListener('DOMContentLoaded', function () {
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
     }
+
+
+    /* =============================================================================
+     * MODAL DE CREACION DE TABLEROS
+     * Este es el bloque mas complejo del archivo. Gestiona el modal que aparece
+     * al crear un tablero, con dos modos:
+     *   - "normal": tablero en blanco con color de fondo o imagen de portada
+     *   - "template": tablero creado a partir de una plantilla predefinida
+     *
+     * Los datos de espacios y plantillas disponibles los lee Flask desde el HTML
+     * como bloques JSON incrustados en la pagina.
+     * ============================================================================= */
 
     const createWorkspaceButton = document.querySelector('.js-create-workspace');
     const createDropdown = document.getElementById('createDropdown');
@@ -239,16 +319,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const templateWorkspaceIdInput = document.getElementById('templateWorkspaceIdInput');
     const templateBoardInput = document.getElementById('templateBoardInput');
     const templateIdInput = document.getElementById('templateIdInput');
+
+    /* Espacios y plantillas que Flask inyecto en la pagina como JSON */
     const creationWorkspaces = parseJsonScript('boardCreationWorkspaces');
     const creationTemplates = parseJsonScript('boardCreationTemplates');
 
+    /* Busca una plantilla por su id en el array de plantillas disponibles */
     function getTemplateById(templateId) {
         for (let i = 0; i < creationTemplates.length; i += 1) {
             if (creationTemplates[i].id === templateId) return creationTemplates[i];
         }
-        return creationTemplates[0] || null;
+        return creationTemplates[0] || null; /* Si no encuentra, devuelve la primera */
     }
 
+    /* Construye el HTML del <select> de espacios del modal */
     function buildWorkspaceOptions(selectedWorkspaceId) {
         const options = ['<option value="">' + t('js.select_workspace', 'Selecciona un espacio') + '</option>'];
         for (let i = 0; i < creationWorkspaces.length; i += 1) {
@@ -256,16 +340,19 @@ document.addEventListener('DOMContentLoaded', function () {
             const selected = String(selectedWorkspaceId || '') === String(workspace.id) ? ' selected' : '';
             options.push('<option value="' + escapeHtml(workspace.id) + '"' + selected + '>' + escapeHtml(workspace.name) + '</option>');
         }
+        /* Opcion especial para crear un espacio nuevo en el mismo modal */
         options.push('<option value="__new__">' + t('js.create_new_workspace', 'Crear espacio nuevo') + '</option>');
         return options.join('');
     }
 
+    /* Construye el grid de tarjetas de plantilla para elegir dentro del modal */
     function buildTemplatePicker(selectedTemplateId) {
         if (!creationTemplates.length) {
             return '<div class="board-creator-empty">' + t('js.no_templates', 'No hay plantillas disponibles todav\u00eda.') + '</div>';
         }
 
         const cards = [];
+        /* Mostramos maximo 6 plantillas para no saturar el modal */
         for (let i = 0; i < Math.min(6, creationTemplates.length); i += 1) {
             const template = creationTemplates[i];
             const active = template.id === selectedTemplateId ? ' is-active' : '';
@@ -279,7 +366,9 @@ document.addEventListener('DOMContentLoaded', function () {
         return cards.join('');
     }
 
+    /* Genera la vista previa de las columnas del tablero dentro del modal */
     function buildPreviewColumns(template) {
+        /* Si hay plantilla, usamos sus columnas; si no, columnas genericas por defecto */
         const columns = template && template.columns ? template.columns.slice(0, 3) : [t('js.col_pending', 'Pendiente'), t('js.col_in_progress', 'En curso'), t('js.col_done', 'Listo')];
         const items = [];
         for (let i = 0; i < columns.length; i += 1) {
@@ -293,10 +382,12 @@ document.addEventListener('DOMContentLoaded', function () {
         return items.join('');
     }
 
+    /* Aplica el color o imagen de fondo seleccionados a la vista previa del modal */
     function applyPreviewBackground(previewShell, colorValue, fileInput) {
         if (!previewShell) return;
         const selectedFile = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
         if (selectedFile) {
+            /* Si hay archivo, creamos una URL temporal del objeto para mostrarlo como fondo */
             const objectUrl = URL.createObjectURL(selectedFile);
             previewShell.style.backgroundImage = 'linear-gradient(rgba(6, 10, 18, .18), rgba(6, 10, 18, .28)), url("' + objectUrl + '")';
             previewShell.style.backgroundSize = 'cover';
@@ -307,6 +398,7 @@ document.addEventListener('DOMContentLoaded', function () {
         previewShell.style.background = colorValue || '';
     }
 
+    /* Actualiza toda la seccion de vista previa del modal al cambiar modo, plantilla o color */
     function updateBoardCreationPreview(popup, mode, selectedTemplateId) {
         const preview = popup.querySelector('[data-board-preview]');
         const summary = popup.querySelector('[data-template-summary]');
@@ -319,26 +411,35 @@ document.addEventListener('DOMContentLoaded', function () {
         const fileInput = popup.querySelector('#swal-board-cover');
         const previewShell = popup.querySelector('.board-creator-preview-shell');
 
+        /* Actualizamos las columnas de la vista previa */
         if (preview) {
             preview.innerHTML = buildPreviewColumns(mode === 'template' ? template : null);
         }
+        /* Descripcion de la plantilla o texto generico para tablero en blanco */
         if (summary) {
             summary.textContent = mode === 'template' && template
                 ? template.summary
                 : t('js.empty_board_summary', 'Crea un tablero vacio con la estructura base y personalizalo despues.');
         }
+        /* Mostramos u ocultamos el selector de plantillas segun el modo */
         if (pickerWrap) {
             pickerWrap.hidden = mode !== 'template';
         }
+        /* Mostramos u ocultamos las opciones de apariencia segun el modo */
         if (appearanceWrap) {
             appearanceWrap.hidden = mode !== 'normal';
         }
+        /* Cambiamos el texto del boton de confirmacion segun el modo activo */
         if (confirmButton) {
             confirmButton.textContent = mode === 'template' ? t('js.create_board_with_template', 'Crear tablero con plantilla') : t('js.create_board', 'Crear tablero');
         }
         applyPreviewBackground(previewShell, mode === 'normal' ? colorValue : '', mode === 'normal' ? fileInput : null);
     }
 
+    /*
+     * Muestra u oculta el campo de nombre de espacio nuevo
+     * segun si el usuario eligio "Crear espacio nuevo" en el select
+     */
     function updateWorkspaceField(popup) {
         const workspaceSelect = popup.querySelector('#swal-board-workspace');
         const newWorkspaceField = popup.querySelector('[data-new-workspace-field]');
@@ -346,13 +447,14 @@ document.addEventListener('DOMContentLoaded', function () {
         newWorkspaceField.hidden = workspaceSelect.value !== '__new__';
     }
 
+    /* Abre el modal completo de creacion de tablero con el modo y configuracion indicados */
     function openBoardCreationModal(config) {
         if (!window.Swal || !workspaceForm || !workspaceNameInput || !workspaceBoardNameInput || !boardForm || !boardNameInput || !templateForm || !templateWorkspaceInput || !templateWorkspaceIdInput || !templateBoardInput || !templateIdInput) {
             return;
         }
 
         const initialMode = config.mode === 'template' ? 'template' : 'normal';
-        const lockMode = !!config.lockMode;
+        const lockMode = !!config.lockMode; /* Si es true, el usuario no puede cambiar de modo */
         const initialWorkspaceId = config.workspaceId ? String(config.workspaceId) : '';
         const initialWorkspaceName = config.workspaceName || '';
         const initialBoardName = config.boardName || '';
@@ -372,8 +474,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 confirmButton: 'board-creator-confirm',
                 cancelButton: 'board-creator-cancel',
             },
+            /* Construimos el HTML del modal completo como string */
             html:
                 '<div class="board-creator-body">' +
+                    /* Los botones de modo solo aparecen si lockMode es false */
                     (lockMode ? '' :
                         '<div class="board-creator-mode">' +
                             '<button type="button" class="board-mode-btn' + (initialMode === 'normal' ? ' is-active' : '') + '" data-mode="normal">' + t('js.create_normal', 'Crear normal') + '</button>' +
@@ -418,6 +522,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         '<div class="board-template-grid">' + buildTemplatePicker(initialTemplateId) + '</div>' +
                     '</div>' +
                 '</div>',
+
+            /* didOpen se ejecuta cuando el modal ya esta en el DOM y podemos añadir eventos */
             didOpen: function (popup) {
                 let currentMode = initialMode;
                 let currentTemplateId = initialTemplateId;
@@ -431,6 +537,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 updateWorkspaceField(popup);
                 updateBoardCreationPreview(popup, currentMode, currentTemplateId);
 
+                /* Botones de cambio de modo (normal / plantilla) */
                 if (!lockMode) {
                     for (let i = 0; i < modeButtons.length; i += 1) {
                         modeButtons[i].addEventListener('click', function () {
@@ -443,12 +550,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 }
 
+                /* Cuando cambia el espacio, actualizamos el campo de nuevo espacio */
                 if (workspaceSelect) {
                     workspaceSelect.addEventListener('change', function () {
                         updateWorkspaceField(popup);
                     });
                 }
 
+                /* Seleccion de plantilla en el grid */
                 for (let i = 0; i < modalTemplateButtons.length; i += 1) {
                     modalTemplateButtons[i].addEventListener('click', function () {
                         currentTemplateId = this.getAttribute('data-template-option') || '';
@@ -459,6 +568,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                 }
 
+                /* Selector de color de fondo */
                 for (let i = 0; i < colorButtons.length; i += 1) {
                     colorButtons[i].addEventListener('click', function () {
                         for (let j = 0; j < colorButtons.length; j += 1) {
@@ -468,6 +578,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                 }
 
+                /* Actualizamos la vista previa al seleccionar una imagen de portada */
                 if (coverInput) {
                     coverInput.addEventListener('change', function () {
                         if (coverName) {
@@ -477,6 +588,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                 }
             },
+
+            /* preConfirm valida los campos antes de cerrar el modal */
             preConfirm: function () {
                 const popup = Swal.getPopup();
                 const boardTitle = popup.querySelector('#swal-board-title').value.trim();
@@ -491,6 +604,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const backgroundColor = activeColorButton ? activeColorButton.getAttribute('data-color-value') : '#1d4ed8';
                 const coverFile = coverInput && coverInput.files && coverInput.files[0] ? coverInput.files[0] : null;
 
+                /* Validaciones: titulo, espacio, nombre de nuevo espacio y plantilla */
                 if (!boardTitle) {
                     Swal.showValidationMessage(t('js.board_title_required', 'Es necesario indicar el titulo del tablero'));
                     return false;
@@ -523,6 +637,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const value = result.value;
 
             if (value.mode === 'template') {
+                /* Modo plantilla: rellenamos el formulario oculto y lo enviamos */
                 templateBoardInput.value = value.boardTitle;
                 templateIdInput.value = value.templateId || '';
                 if (value.workspaceValue === '__new__') {
@@ -537,6 +652,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            /* Modo normal: enviamos con fetch para poder adjuntar el archivo de imagen */
             const formData = new FormData();
             formData.append('csrf_token', csrfToken);
             formData.append('board_name', value.boardTitle);
@@ -545,6 +661,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 formData.append('board_cover_file', value.coverFile);
             }
 
+            /* El endpoint cambia segun si creamos espacio nuevo o usamos uno existente */
             let endpoint = '';
             let successToast = t('js.board_created', 'Tablero creado correctamente');
             if (value.workspaceValue === '__new__') {
@@ -555,12 +672,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 endpoint = '/workspaces/' + value.workspaceValue + '/boards/create';
             }
 
+            /*
+             * Usamos fetch en lugar de un submit normal para poder enviar el archivo
+             * y recibir la URL de redireccion como JSON
+             */
             fetch(endpoint, {
                 method: 'POST',
                 body: formData,
                 headers: {
                     'X-CSRF-Token': csrfToken,
-                    'X-Requested-With': 'fetch',
+                    'X-Requested-With': 'fetch', /* Flask detecta esto y responde con JSON */
                 },
             }).then(function (response) {
                 if (!response.ok) throw new Error(t('js.create_board_failed_title', 'No se pudo crear el tablero'));
@@ -584,12 +705,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    /* Cierra el desplegable de creacion rapida de la cabecera */
     function closeCreateDropdown() {
         if (!createDropdown || !createWorkspaceButton) return;
         createDropdown.setAttribute('hidden', 'hidden');
         createWorkspaceButton.setAttribute('aria-expanded', 'false');
     }
 
+    /* Boton "+" de la cabecera: abre el menu de opciones de creacion */
     if (createWorkspaceButton && createDropdown) {
         createWorkspaceButton.addEventListener('click', function () {
             if (createDropdown.hasAttribute('hidden')) {
@@ -600,6 +723,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        /* Cierre al hacer clic fuera */
         document.addEventListener('click', function (event) {
             if (!createDropdown.contains(event.target) && !createWorkspaceButton.contains(event.target)) {
                 closeCreateDropdown();
@@ -607,6 +731,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    /* Opcion "Crear tablero" del menu desplegable: abre el modal en modo normal */
     if (createBoardOption) {
         createBoardOption.addEventListener('click', function () {
             closeCreateDropdown();
@@ -614,6 +739,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    /* Opcion "Usar plantilla" del menu desplegable: abre el modal en modo plantilla */
     if (createTemplateOption) {
         createTemplateOption.addEventListener('click', function () {
             closeCreateDropdown();
@@ -621,6 +747,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    /*
+     * Tarjetas de "Crear tablero" dentro de cada espacio en el panel principal.
+     * Pasan el id y nombre del espacio para preseleccionarlo en el modal.
+     */
     if (createBoardCards.length) {
         for (let i = 0; i < createBoardCards.length; i += 1) {
             createBoardCards[i].addEventListener('click', function () {
@@ -632,6 +762,12 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     }
+
+
+    /* =============================================================================
+     * CONFIGURACION DEL ESPACIO (renombrar)
+     * Boton de ajustes de cada espacio: abre un modal sencillo para cambiarlo de nombre.
+     * ============================================================================= */
 
     const workspaceUpdateForm = document.getElementById('workspaceUpdateForm');
     const workspaceUpdateNameInput = document.getElementById('workspaceUpdateNameInput');
@@ -662,6 +798,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     },
                 }).then(function (result) {
                     if (!result.isConfirmed) return;
+                    /* Actualizamos la action del formulario con el id del espacio correcto */
                     workspaceUpdateForm.action = '/workspaces/' + workspaceId + '/update';
                     workspaceUpdateNameInput.value = result.value.trim();
                     window.sessionStorage.setItem('prodify-toast', t('js.workspace_updated', 'Espacio actualizado correctamente'));
@@ -671,10 +808,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    /* Botones "Usar esta plantilla" de la pagina de catalogo de plantillas */
     if (templateButtons.length) {
-        /*
-         * Esto sirve para crear un tablero a partir de una plantilla.
-         */
         for (let t = 0; t < templateButtons.length; t += 1) {
             templateButtons[t].addEventListener('click', function () {
                 const templateName = this.getAttribute('data-template-name') || 'Nuevo tablero';
@@ -687,6 +822,12 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     }
+
+
+    /* =============================================================================
+     * ACTUALIZACION DE EMAIL DE LA CUENTA
+     * Modal para cambiar el correo del usuario desde la pagina de configuracion.
+     * ============================================================================= */
 
     const accountUpdateEmailButton = document.querySelector('.js-account-update-email');
     const accountEmailForm = document.getElementById('accountEmailForm');
@@ -722,9 +863,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    /*
-     * Formulario para crear columnas.
-     */
+
+    /* =============================================================================
+     * COLUMNAS DEL TABLERO (crear y editar)
+     * ============================================================================= */
+
     const addColumnButton = document.querySelector('.js-add-column');
     const columnForm = document.getElementById('columnCreateForm');
     const columnTitleInput = document.getElementById('columnTitleInput');
@@ -732,6 +875,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const columnUpdateTitleInput = document.getElementById('columnUpdateTitleInput');
     const editColumnButtons = document.querySelectorAll('.js-edit-column');
 
+    /* Boton "Añadir columna": pide el nombre y envía el formulario de creacion */
     if (addColumnButton && columnForm && columnTitleInput) {
         addColumnButton.addEventListener('click', function () {
             if (!window.Swal) return;
@@ -756,6 +900,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    /* Botones de edicion de nombre en el titulo de cada columna */
     if (editColumnButtons.length && columnUpdateForm && columnUpdateTitleInput) {
         for (let columnIndex = 0; columnIndex < editColumnButtons.length; columnIndex += 1) {
             editColumnButtons[columnIndex].addEventListener('click', function () {
@@ -779,6 +924,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     },
                 }).then(function (result) {
                     if (!result.isConfirmed) return;
+                    /* Actualizamos la action del formulario con el id de la columna a editar */
                     columnUpdateForm.action = '/columns/' + columnId + '/update';
                     columnUpdateTitleInput.value = result.value.trim();
                     window.sessionStorage.setItem('prodify-toast', t('js.column_updated', 'Columna actualizada'));
@@ -788,9 +934,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    /*
-     * Botones para crear tareas dentro de cada columna.
-     */
+
+    /* =============================================================================
+     * TARJETAS (crear)
+     * Cada columna tiene un boton "+ Tarea". Al hacer clic pide el nombre
+     * y envia el formulario con la columna correcta como destino.
+     * ============================================================================= */
+
     const addCardButtons = document.querySelectorAll('.js-add-card');
     const cardForm = document.getElementById('cardCreateForm');
     const cardTitleInput = document.getElementById('cardTitleInput');
@@ -817,6 +967,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     },
                 }).then(function (result) {
                     if (!result.isConfirmed) return;
+                    /* Apuntamos el formulario a la columna correcta antes de enviarlo */
                     cardForm.action = '/columns/' + columnId + '/cards/create';
                     cardTitleInput.value = result.value.trim();
                     cardForm.submit();
@@ -825,14 +976,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    /*
-     * Antes de borrar, pido confirmacion al usuario.
-     */
+
+    /* =============================================================================
+     * CONFIRMACIONES DE BORRADO
+     * Intercepto el submit de los formularios de borrado para pedir confirmacion
+     * antes de enviarlos. Si el usuario cancela, no pasa nada.
+     * ============================================================================= */
+
+    /* Borrar columna (y todas sus tarjetas) */
     const deleteColumnButtons = document.querySelectorAll('.js-delete-column');
     if (deleteColumnButtons.length) {
         for (let d = 0; d < deleteColumnButtons.length; d += 1) {
             deleteColumnButtons[d].addEventListener('click', function (event) {
-                event.preventDefault();
+                event.preventDefault(); /* Evito que el boton envie el formulario inmediatamente */
                 const form = this.closest('form');
                 if (!form || !window.Swal) return;
 
@@ -854,15 +1010,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    /*
-     * Lo mismo para borrar tareas sueltas.
-     */
+    /* Borrar tarjeta individual */
     const deleteCardButtons = document.querySelectorAll('.js-delete-card');
     if (deleteCardButtons.length) {
         for (let dc = 0; dc < deleteCardButtons.length; dc += 1) {
             deleteCardButtons[dc].addEventListener('click', function (event) {
                 event.preventDefault();
-                event.stopPropagation();
+                event.stopPropagation(); /* Evito que el clic se propague al drag de la tarjeta */
                 const form = this.closest('form');
                 if (!form || !window.Swal) return;
 
@@ -884,26 +1038,33 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    /*
-     * ── Drag & drop de columnas ───────────────────────────────────────────────
-     */
+
+    /* =============================================================================
+     * DRAG & DROP DE COLUMNAS
+     * Permite reordenar las columnas del tablero arrastrando por su cabecera.
+     * El nuevo orden se envia al servidor con fetch para persistirlo en la BD.
+     * Uso la Drag and Drop API nativa del navegador.
+     * ============================================================================= */
+
     (function () {
-        var columnHandles = document.querySelectorAll('.js-column-drag-handle[data-column-id]');
+        const columnHandles = document.querySelectorAll('.js-column-drag-handle[data-column-id]');
         if (!columnHandles.length || !window.PRODIFY_BOARD_ID) return;
 
-        var draggedColumn = null;
-        var colPlaceholder = null;
+        let draggedColumn = null;   /* Columna que se esta arrastrando */
+        let colPlaceholder = null;  /* Elemento visual que ocupa el hueco mientras se arrastra */
 
+        /* Obtiene el contenedor padre donde estan todas las columnas */
         function getGrid() {
-            var c = document.querySelector('.kanban-column[data-column-id]');
+            const c = document.querySelector('.kanban-column[data-column-id]');
             return c ? c.parentElement : null;
         }
 
+        /* Envia el nuevo orden de columnas al servidor via fetch (POST) */
         function syncColumnOrder() {
-            var cols = document.querySelectorAll('.kanban-column[data-column-id]');
-            var ids = [];
-            for (var i = 0; i < cols.length; i++) {
-                var id = cols[i].getAttribute('data-column-id');
+            const cols = document.querySelectorAll('.kanban-column[data-column-id]');
+            const ids = [];
+            for (let i = 0; i < cols.length; i++) {
+                const id = cols[i].getAttribute('data-column-id');
                 if (id) ids.push(id);
             }
             if (!ids.length) return;
@@ -911,30 +1072,34 @@ document.addEventListener('DOMContentLoaded', function () {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-Token': csrfToken },
                 body: 'column_order=' + encodeURIComponent(ids.join(',')),
-            }).catch(function () { window.location.reload(); });
+            }).catch(function () { window.location.reload(); }); /* Si falla, recargamos para sincronizar */
         }
 
+        /* Crea el elemento visual placeholder (linea punteada) que indica donde se soltara */
         function makePlaceholder(w, h) {
-            var ph = document.createElement('div');
+            const ph = document.createElement('div');
             ph.className = 'column-drag-placeholder';
             ph.style.cssText = 'width:' + w + 'px;min-width:' + w + 'px;height:' + h + 'px;' +
                 'border:2px dashed rgba(99,102,241,.6);border-radius:12px;background:rgba(99,102,241,.06);flex-shrink:0;pointer-events:none;';
             return ph;
         }
 
+        /* Elimina el placeholder del DOM */
         function removePlaceholder() {
             if (colPlaceholder && colPlaceholder.parentElement) colPlaceholder.parentElement.removeChild(colPlaceholder);
             colPlaceholder = null;
         }
 
-        for (var hi = 0; hi < columnHandles.length; hi++) {
+        /* Eventos de drag en cada cabecera de columna */
+        for (let hi = 0; hi < columnHandles.length; hi++) {
             columnHandles[hi].addEventListener('dragstart', function (e) {
                 draggedColumn = this.closest('.kanban-column');
                 if (!draggedColumn) return;
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('text/plain', draggedColumn.getAttribute('data-column-id') || '');
-                var rect = draggedColumn.getBoundingClientRect();
-                var col = draggedColumn;
+                const rect = draggedColumn.getBoundingClientRect();
+                const col = draggedColumn;
+                /* Usamos setTimeout para que el navegador capture el snapshot antes de ocultar */
                 setTimeout(function () {
                     col.classList.add('dragging-column');
                     colPlaceholder = makePlaceholder(rect.width, rect.height);
@@ -949,19 +1114,21 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        var grid = getGrid();
+        const grid = getGrid();
         if (grid) {
+            /* Mientras arrastramos sobre el grid, movemos el placeholder a la posicion correcta */
             grid.addEventListener('dragover', function (e) {
                 if (!draggedColumn) return;
                 e.preventDefault();
                 e.dataTransfer.dropEffect = 'move';
-                var cols = Array.prototype.filter.call(
+                /* Calculamos si insertar antes de la columna mas cercana al cursor */
+                const cols = Array.prototype.filter.call(
                     document.querySelectorAll('.kanban-column[data-column-id]'),
                     function (c) { return c !== draggedColumn; }
                 );
-                var insertBefore = null;
-                for (var i = 0; i < cols.length; i++) {
-                    var r = cols[i].getBoundingClientRect();
+                let insertBefore = null;
+                for (let i = 0; i < cols.length; i++) {
+                    const r = cols[i].getBoundingClientRect();
                     if (e.clientX < r.left + r.width / 2) { insertBefore = cols[i]; break; }
                 }
                 if (colPlaceholder) {
@@ -970,6 +1137,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
 
+            /* Al soltar, colocamos la columna en la posicion del placeholder y enviamos al servidor */
             grid.addEventListener('drop', function (e) {
                 if (!draggedColumn) return;
                 e.preventDefault();
@@ -979,25 +1147,31 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 draggedColumn.classList.remove('dragging-column');
                 draggedColumn = null;
-                syncColumnOrder();
+                syncColumnOrder(); /* Persistimos el nuevo orden en la BD */
             });
         }
     }());
 
-    /*
-     * ── Drag & drop de tarjetas ───────────────────────────────────────────────
-     */
+
+    /* =============================================================================
+     * DRAG & DROP DE TARJETAS
+     * Permite mover tarjetas entre columnas o reordenarlas dentro de la misma.
+     * El movimiento se envia al servidor con fetch para actualizar el column_id
+     * de la tarjeta en la base de datos.
+     * ============================================================================= */
+
     (function () {
-        var kanbanCards = document.querySelectorAll('.kanban-card[draggable="true"]');
-        var kanbanColumns = document.querySelectorAll('.kanban-cards[data-column-id]');
+        const kanbanCards = document.querySelectorAll('.kanban-card[draggable="true"]');
+        const kanbanColumns = document.querySelectorAll('.kanban-cards[data-column-id]');
         if (!kanbanCards.length || !kanbanColumns.length) return;
 
-        var draggedCard = null;
-        var sourceColumnId = null;
-        var cardPlaceholder = null;
+        let draggedCard = null;       /* Tarjeta que se esta moviendo */
+        let sourceColumnId = null;    /* Columna de origen (para actualizar el ghost si queda vacia) */
+        let cardPlaceholder = null;   /* Placeholder visual dentro de las columnas */
 
+        /* Crea el placeholder (espacio punteado) con la misma altura que la tarjeta */
         function makeCardPlaceholder(h) {
-            var ph = document.createElement('div');
+            const ph = document.createElement('div');
             ph.className = 'kanban-card card-drag-placeholder';
             ph.style.cssText = 'height:' + h + 'px;border:2px dashed rgba(99,102,241,.6);' +
                 'background:rgba(99,102,241,.06);border-radius:8px;pointer-events:none;flex-shrink:0;';
@@ -1009,27 +1183,29 @@ document.addEventListener('DOMContentLoaded', function () {
             cardPlaceholder = null;
         }
 
+        /* Calcula la tarjeta ante la cual insertar el placeholder segun la posicion del cursor */
         function getInsertionPoint(col, clientY) {
-            var cards = Array.prototype.filter.call(
+            const cards = Array.prototype.filter.call(
                 col.querySelectorAll('.kanban-card[draggable="true"]'),
                 function (c) { return c !== draggedCard; }
             );
-            for (var i = 0; i < cards.length; i++) {
-                var r = cards[i].getBoundingClientRect();
+            for (let i = 0; i < cards.length; i++) {
+                const r = cards[i].getBoundingClientRect();
                 if (clientY < r.top + r.height / 2) return cards[i];
             }
-            return null;
+            return null; /* Si el cursor esta por debajo de todas, insertamos al final */
         }
 
-        for (var k = 0; k < kanbanCards.length; k++) {
+        /* Eventos de drag en cada tarjeta */
+        for (let k = 0; k < kanbanCards.length; k++) {
             kanbanCards[k].addEventListener('dragstart', function (e) {
                 draggedCard = this;
-                var srcCol = this.closest('.kanban-cards');
+                const srcCol = this.closest('.kanban-cards');
                 sourceColumnId = srcCol ? srcCol.getAttribute('data-column-id') : null;
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('text/plain', this.getAttribute('data-card-id') || '');
-                var rect = this.getBoundingClientRect();
-                var card = this;
+                const rect = this.getBoundingClientRect();
+                const card = this;
                 setTimeout(function () {
                     card.classList.add('dragging');
                     cardPlaceholder = makeCardPlaceholder(rect.height);
@@ -1041,19 +1217,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 this.classList.remove('dragging');
                 removeCardPlaceholder();
                 draggedCard = null;
-                for (var j = 0; j < kanbanColumns.length; j++) kanbanColumns[j].classList.remove('drag-over');
+                /* Quitamos el highlight de todas las columnas */
+                for (let j = 0; j < kanbanColumns.length; j++) kanbanColumns[j].classList.remove('drag-over');
             });
         }
 
-        for (var m = 0; m < kanbanColumns.length; m++) {
+        /* Eventos de drop en cada columna */
+        for (let m = 0; m < kanbanColumns.length; m++) {
             kanbanColumns[m].addEventListener('dragover', function (e) {
                 if (!draggedCard) return;
                 e.preventDefault();
                 e.dataTransfer.dropEffect = 'move';
-                this.classList.add('drag-over');
+                this.classList.add('drag-over'); /* Resaltamos la columna sobre la que estamos */
                 if (!cardPlaceholder) return;
-                var before = getInsertionPoint(this, e.clientY);
-                var ghost = this.querySelector('.kanban-card.ghost:not(.card-drag-placeholder)');
+                const before = getInsertionPoint(this, e.clientY);
+                const ghost = this.querySelector('.kanban-card.ghost:not(.card-drag-placeholder)');
                 if (before) {
                     this.insertBefore(cardPlaceholder, before);
                 } else {
@@ -1062,6 +1240,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             kanbanColumns[m].addEventListener('dragleave', function (e) {
+                /* Solo quitamos el highlight si el cursor realmente sale de la columna */
                 if (e.relatedTarget && this.contains(e.relatedTarget)) return;
                 this.classList.remove('drag-over');
             });
@@ -1070,44 +1249,50 @@ document.addEventListener('DOMContentLoaded', function () {
                 e.preventDefault();
                 this.classList.remove('drag-over');
                 if (!draggedCard) return;
-                var cardId = e.dataTransfer.getData('text/plain');
+                const cardId = e.dataTransfer.getData('text/plain');
                 if (!cardId) return;
-                var targetColumnId = this.getAttribute('data-column-id');
+                const targetColumnId = this.getAttribute('data-column-id');
                 if (!targetColumnId) return;
 
+                /* Insertamos la tarjeta en la posicion del placeholder visualmente */
                 if (cardPlaceholder && cardPlaceholder.parentElement === this) {
                     this.insertBefore(draggedCard, cardPlaceholder);
                     removeCardPlaceholder();
                 } else {
-                    var ghost = this.querySelector('.kanban-card.ghost:not(.card-drag-placeholder)');
+                    const ghost = this.querySelector('.kanban-card.ghost:not(.card-drag-placeholder)');
                     this.insertBefore(draggedCard, ghost || null);
                 }
                 draggedCard.classList.remove('dragging');
 
+                /* Si la columna de origen quedo vacia, mostramos el mensaje "Sin tareas aun" */
                 if (sourceColumnId) {
-                    var prevCol = document.querySelector('.kanban-cards[data-column-id="' + sourceColumnId + '"]');
+                    const prevCol = document.querySelector('.kanban-cards[data-column-id="' + sourceColumnId + '"]');
                     if (prevCol && prevCol !== this && !prevCol.querySelector('.kanban-card[draggable="true"]')) {
-                        var emptyCard = document.createElement('div');
+                        const emptyCard = document.createElement('div');
                         emptyCard.className = 'kanban-card ghost';
                         emptyCard.textContent = t('js.empty_column', 'Sin tareas aun');
                         prevCol.appendChild(emptyCard);
                     }
                 }
-                var targetGhost = this.querySelector('.kanban-card.ghost:not(.card-drag-placeholder)');
+                /* Si la columna destino tenia el mensaje "Sin tareas aun", lo quitamos */
+                const targetGhost = this.querySelector('.kanban-card.ghost:not(.card-drag-placeholder)');
                 if (targetGhost && this.querySelector('.kanban-card[draggable="true"]')) targetGhost.remove();
 
+                /* Enviamos el movimiento al servidor para persistirlo en la BD */
                 fetch('/cards/' + cardId + '/move', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-Token': csrfToken },
                     body: 'column_id=' + encodeURIComponent(targetColumnId),
-                }).catch(function () { window.location.reload(); });
+                }).catch(function () { window.location.reload(); }); /* Si falla, sincronizamos recargando */
             });
         }
     }());
 
-    /*
-     * Confirmacion para borrar un tablero entero.
-     */
+
+    /* =============================================================================
+     * CONFIRMACION DE BORRADO DE TABLERO
+     * ============================================================================= */
+
     const deleteBoardButtons = document.querySelectorAll('.js-delete-board');
     if (deleteBoardButtons.length) {
         for (let b = 0; b < deleteBoardButtons.length; b += 1) {
@@ -1134,20 +1319,26 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    /*
-     * Confirmacion para borrar un espacio con todo lo que tiene dentro.
-     */
+
+    /* =============================================================================
+     * SELECTOR DE IDIOMA DEL FORMULARIO DE REGISTRO
+     * A diferencia del selector de la barra superior, este no envia un POST
+     * al cambiar el idioma: simplemente actualiza el campo hidden del formulario
+     * de registro y cambia la bandera visible. El idioma se guarda al registrarse.
+     * ============================================================================= */
+
     const regLangDropdowns = document.querySelectorAll('.js-reg-lang-dropdown');
     for (let rli = 0; rli < regLangDropdowns.length; rli += 1) {
         (function (dropdown) {
             const trigger = dropdown.querySelector('.js-reg-lang-trigger');
             const menu = dropdown.querySelector('.topbar-language-menu');
             const hiddenInput = dropdown.querySelector('input[name="preferred_language"]');
-            const flagEl = dropdown.querySelector('.js-reg-lang-flag');
-            const labelEl = dropdown.querySelector('.js-reg-lang-label');
+            const flagEl = dropdown.querySelector('.js-reg-lang-flag');      /* Elemento de la bandera visible */
+            const labelEl = dropdown.querySelector('.js-reg-lang-label');    /* Texto del idioma visible */
             const options = dropdown.querySelectorAll('.js-reg-lang-option');
             if (!trigger || !menu || !hiddenInput) return;
 
+            /* Abrir/cerrar el dropdown del registro */
             trigger.addEventListener('click', function () {
                 const isOpen = !menu.hasAttribute('hidden');
                 if (isOpen) {
@@ -1163,11 +1354,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 options[oi].addEventListener('click', function () {
                     const value = this.getAttribute('data-language-value') || '';
                     if (!value) return;
+                    /* Actualizamos el campo oculto del formulario de registro */
                     hiddenInput.value = value;
+                    /* Copiamos la bandera y el texto de la opcion al boton visible */
                     const optFlag = this.querySelector('.topbar-language-option-flag');
                     const optLabel = this.querySelector('.topbar-language-option-label');
                     if (flagEl && optFlag) flagEl.innerHTML = optFlag.innerHTML;
                     if (labelEl && optLabel) labelEl.textContent = optLabel.textContent;
+                    /* Marcamos la opcion seleccionada con aria-pressed */
                     for (let k = 0; k < options.length; k += 1) {
                         options[k].setAttribute('aria-pressed', options[k] === this ? 'true' : 'false');
                     }
@@ -1176,6 +1370,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             }
 
+            /* Cierre al hacer clic fuera del dropdown */
             document.addEventListener('click', function (evt) {
                 if (!dropdown.contains(evt.target)) {
                     menu.setAttribute('hidden', 'hidden');
@@ -1184,6 +1379,12 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }(regLangDropdowns[rli]));
     }
+
+
+    /* =============================================================================
+     * CONFIRMACION DE BORRADO DE ESPACIO DE TRABAJO
+     * Avisa de que se borraran todos los tableros del espacio antes de confirmar.
+     * ============================================================================= */
 
     const deleteWorkspaceButtons = document.querySelectorAll('.js-delete-workspace');
     if (deleteWorkspaceButtons.length) {
@@ -1210,4 +1411,5 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     }
+
 });
